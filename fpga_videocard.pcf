@@ -1,0 +1,85 @@
+set_io pixelClock 52
+#set_io clock1024 55
+set_io RESET 1
+set_io HSYNC 16
+set_io VSYNC 15
+
+#set_io D1 99
+#set_io D2 98
+#set_io D3 97
+#set_io D4 96
+#set_io D5 95
+
+set_io Red[0] 21    #VD11
+set_io Red[1] 128    #the one that's wrong. consider remapping to unused 0,1,2 or whatever. 128 for unused. 20 for red 1
+set_io Red[2] 19
+set_io Red[3] 18
+set_io Red[4] 17    #VD15
+
+set_io Green[0] 28    #VD05
+set_io Green[1] 26
+set_io Green[2] 25
+set_io Green[3] 24
+set_io Green[4] 23
+set_io Green[5] 22    #VD10
+
+set_io Blue[0] 34    #VD00
+set_io Blue[1] 33
+set_io Blue[2] 32
+set_io Blue[3] 31
+set_io Blue[4] 29    #VD04
+
+#vram address bus. have fucking fun with that bullshit you stupid dumbass
+set_io AV[0] 107
+set_io AV[1] 106
+set_io AV[2] 105
+set_io AV[3] 104
+set_io AV[4] 102
+set_io AV[5] 101
+set_io AV[6] 99
+set_io AV[7] 98
+set_io AV[8] 97
+set_io AV[9] 96
+set_io AV[10] 95
+set_io AV[11] 91
+set_io AV[12] 90
+set_io AV[13] 88
+set_io AV[14] 87
+set_io AV[15] 85
+set_io AV[16] 84
+set_io AV[17] 83
+set_io AV[18] 82
+set_io AV[19] 81
+
+#16 bit vram data bus
+set_io DS[0] 144
+set_io DS[1] 143
+set_io DS[2] 142
+set_io DS[3] 141
+set_io DS[4] 139
+set_io DS[5] 138
+set_io DS[6] 137
+set_io DS[7] 136
+set_io DS[8] 135
+set_io DS[9] 134
+set_io DS[10] 130
+set_io DS[11] 125
+set_io DS[12] 124
+set_io DS[13] 122
+set_io DS[14] 121
+set_io DS[15] 120
+
+#sram chip control signals
+set_io read_cmd 41
+set_io write_cmd 39
+set_io VRAM_low_en 37
+set_io VRAM_high_en 38
+
+set_io VGASCK 63
+set_io VGAMOSI 60
+set_io VGAMISO 56
+set_io VGACS0 49
+set_io DEBUG0 93
+set_io DEBUG1 110
+set_io MCLK0 4
+set_io MCLK1 7
