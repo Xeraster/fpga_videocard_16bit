@@ -34,7 +34,7 @@ module SPI_Slave
 
    // SPI Interface
    input      i_SPI_Clk,
-   output o_SPI_MISO,//50% chance this needs to be "output reg o_SPI_MISO" vs what it currently is based on which way the wind is blowing while compiling pretty much
+   output o_SPI_MISO,
    input      i_SPI_MOSI,
    input      i_SPI_CS_n        // active low
    );
