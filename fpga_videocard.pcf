@@ -4,14 +4,9 @@ set_io RESET 1
 set_io HSYNC 16
 set_io VSYNC 15
 
-#set_io D1 99
-#set_io D2 98
-#set_io D3 97
-#set_io D4 96
-#set_io D5 95
-
+#vga output bits
 set_io Red[0] 21    #VD11
-set_io Red[1] 128    #the one that's wrong. consider remapping to unused 0,1,2 or whatever. 128 for unused. 20 for red 1
+set_io Red[1] 128    #use this pin instead because of a routing mistake
 set_io Red[2] 19
 set_io Red[3] 18
 set_io Red[4] 17    #VD15
@@ -29,7 +24,7 @@ set_io Blue[2] 32
 set_io Blue[3] 31
 set_io Blue[4] 29    #VD04
 
-#vram address bus. have fucking fun with that bullshit you stupid dumbass
+#vram address bus
 set_io AV[0] 107
 set_io AV[1] 106
 set_io AV[2] 105
@@ -79,6 +74,8 @@ set_io VGASCK 63
 set_io VGAMOSI 60
 set_io VGAMISO 56
 set_io VGACS0 49
+
+#just test ports, nothing special
 set_io DEBUG0 93
 set_io DEBUG1 110
 set_io MCLK0 4

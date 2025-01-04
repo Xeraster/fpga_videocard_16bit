@@ -77,7 +77,6 @@ module decoder_3to8 (a, b, c, o0, o1, o2, o3, o4, o5, o6, o7);
 
 	//uuh, the 2 working examples i have of modules contain @always, so throw that in there
 	always@(a, b, c)
-	//as dumb as it is, this is smaller than all the other ways i found of doing this by a huge margin
 	begin
 		o0 = (~a & ~b & ~c); //000
 		o1 = (~a & ~b & c);	//001
@@ -114,7 +113,6 @@ module d3_latch(d0, d1, d2, q0, q1, q2, G);
     input d0, d1, d2, G;
     output q0, q1, q2;
 
-    //hopefully it will be smart enough to define out this stuff
     wire dummy0, dummy1, dummy2;
 
     //a d4 latch is can be made up of 4 d_latch modules
@@ -128,7 +126,6 @@ module d4_latch(d0, d1, d2, d3, q0, q1, q2, q3, G);
     input d0, d1, d2, d3, G;
     output q0, q1, q2, q3;
 
-    //hopefully it will be smart enough to define out this stuff
     wire dummy0, dummy1, dummy2, dummy3;
 
     //a d4 latch is can be made up of 4 d_latch modules
