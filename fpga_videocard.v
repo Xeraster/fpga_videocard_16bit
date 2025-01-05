@@ -617,7 +617,7 @@ module managedByteToVramCopy(
     output done,                  //1 if finished. 0 if busy
     input bus_free                //0 if the bus is not being used by the framebuffer. 1 if the bus is being used
 );
-    assign dataBusOutput = dataToCopy; 
+    //assign dataBusOutput = dataToCopy; //this doesn't work, it doesn't circumvent whatever messes with the tristate buffer and makes it not work correctly for some reason
     //assign dataBusOutput = 65535;//doing this doesn't make it not disable read cycles
     reg[4:0] waitctr;//try experimenting with waitstates. update: that didnt solve any problems but im leaving it in anyway just so I can deassert writeSignal a little before chipEnable
     reg donestatus;
@@ -630,6 +630,7 @@ module managedByteToVramCopy(
             chipEnable <= 0;
             donestatus <= 0;//dont terminate the write cycle until the counter has had a chance to count down
             waitctr <= 10; //10 for testing purposes.
+            dataBusOutput <= dataToCopy;
         end
         else if (waitctr > 4)
         begin
@@ -637,6 +638,7 @@ module managedByteToVramCopy(
             chipEnable <= 0;
             donestatus <= 0;//dont terminate the write cycle until the counter has had a chance to count down
             waitctr <= waitctr - 1;
+            dataBusOutput <= dataToCopy;
         end
         else if (waitctr > 0)
         begin
@@ -644,12 +646,14 @@ module managedByteToVramCopy(
             chipEnable <= 0;
             donestatus <= 0;//dont terminate the write cycle until the counter has had a chance to count down
             waitctr <= waitctr - 1;
+            dataBusOutput <= dataToCopy;
         end
         else/* if (doCopy)*/
         begin
             writeSignal <= 1;
             chipEnable <= 1;
-            donestatus <= 1;    //done. set to 1 to tristate the data bus (not working) and make also deassert the chip write and select signals
+            donestatus <= 1;    //done. set to 1 to tristate the data bus and also deassert the chip write and select signals
+            dataBusOutput <= 0; //IMPORTANT: for some reason you have to set this to zero when not in use or else it causes problems
         end
     end
 
