@@ -1,0 +1,256 @@
+
+(rules PCB fpga_videocard
+  (snap_angle 
+    fortyfive_degree
+  )
+  (autoroute_settings
+    (fanout off)
+    (autoroute on)
+    (postroute on)
+    (vias on)
+    (via_costs 50)
+    (plane_via_costs 5)
+    (start_ripup_costs 100)
+    (start_pass_no 71)
+    (layer_rule F.Cu
+      (active on)
+      (preferred_direction horizontal)
+      (preferred_direction_trace_costs 1.0)
+      (against_preferred_direction_trace_costs 2.9)
+    )
+    (layer_rule B.Cu
+      (active on)
+      (preferred_direction vertical)
+      (preferred_direction_trace_costs 1.0)
+      (against_preferred_direction_trace_costs 1.5)
+    )
+  )
+  (rule
+    (width 200.0)
+    (clearance 150.0)
+    (clearance 100.0 (type smd_to_turn_gap))
+    (clearance 37.6 (type smd))
+    (clearance 150.0 (type "kicad_default"))
+    (clearance 150.0 (type 1.2v))
+    (clearance 200.0 (type 3.3v))
+    (clearance 250.0 (type 5v))
+    (clearance 200.0 (type ground))
+    (clearance 200.0 (type "isa_bus_signals"))
+    (clearance 250.0 (type "isa_control_signals"))
+    (clearance 200.0 (type "normal_thicker"))
+    (clearance 270.0 (type "sensitive_clocks"))
+  )
+  (padstack "Via[0-1]_800:400_um"
+    (shape
+      (circle F.Cu 800.0 0.0 0.0)
+    )
+    (shape
+      (circle B.Cu 800.0 0.0 0.0)
+    )
+    (attach off)
+  )
+  (via 
+    "Via[0-1]_800:400_um" "Via[0-1]_800:400_um" default
+  )
+  (via 
+    "Via[0-1]_800:400_um-kicad_default" "Via[0-1]_800:400_um" "kicad_default"
+  )
+  (via 
+    "Via[0-1]_800:400_um-1.2v" "Via[0-1]_800:400_um" 1.2v
+  )
+  (via 
+    "Via[0-1]_800:400_um-3.3v" "Via[0-1]_800:400_um" 3.3v
+  )
+  (via 
+    "Via[0-1]_800:400_um-5v" "Via[0-1]_800:400_um" 5v
+  )
+  (via 
+    "Via[0-1]_800:400_um-ground" "Via[0-1]_800:400_um" ground
+  )
+  (via 
+    "Via[0-1]_800:400_um-isa_bus_signals" "Via[0-1]_800:400_um" "isa_bus_signals"
+  )
+  (via 
+    "Via[0-1]_800:400_um-isa_control_signals" "Via[0-1]_800:400_um" "isa_control_signals"
+  )
+  (via 
+    "Via[0-1]_800:400_um-normal_thicker" "Via[0-1]_800:400_um" "normal_thicker"
+  )
+  (via 
+    "Via[0-1]_800:400_um-sensitive_clocks" "Via[0-1]_800:400_um" "sensitive_clocks"
+  )
+  (via_rule
+    default "Via[0-1]_800:400_um"
+  )
+  (via_rule
+    "kicad_default" "Via[0-1]_800:400_um-kicad_default"
+  )
+  (via_rule
+    1.2v "Via[0-1]_800:400_um-1.2v"
+  )
+  (via_rule
+    3.3v "Via[0-1]_800:400_um-3.3v"
+  )
+  (via_rule
+    5v "Via[0-1]_800:400_um-5v"
+  )
+  (via_rule
+    ground "Via[0-1]_800:400_um-ground"
+  )
+  (via_rule
+    "isa_bus_signals" "Via[0-1]_800:400_um-isa_bus_signals"
+  )
+  (via_rule
+    "isa_control_signals" "Via[0-1]_800:400_um-isa_control_signals"
+  )
+  (via_rule
+    "normal_thicker" "Via[0-1]_800:400_um-normal_thicker"
+  )
+  (via_rule
+    "sensitive_clocks" "Via[0-1]_800:400_um-sensitive_clocks"
+  )
+  (class default
+    (clearance_class default)
+    (via_rule default)
+    (rule
+      (width 200.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+  (class "kicad_default"
+    "Net-(U1E-VCCPLL0)" "Net-(U1E-GNDPLL0)" "Net-(D1-K)" "Net-(D2-K)" "CDONE_PROG" "Net-(J2-Pin_2)" "unconnected-(J2-Pin_3-Pad3)" "unconnected-(J3-Pin_4-Pad4)"
+    "SPI_SCK" "SPI_SDO" CRESET "SPI_SDI" "SPI_SS" "unconnected-(J3-Pin_3-Pad3)" "Net-(J4-Pin_1)" "Net-(J4-Pin_3)"
+    "FPGA_RESET" "unconnected-(J6-IRQ4-Pad24)" "unconnected-(J6-IRQ14-Pad69)" "unconnected-(J6-IRQ2-Pad4)" "unconnected-(J6-~{DACK6}-Pad74)" "unconnected-(J6-IRQ11-Pad66)" LA21 "unconnected-(J6-AEN-Pad42)"
+    "unconnected-(J6-OSC-Pad30)" "unconnected-(J6-~{DACK2}-Pad26)" "unconnected-(J6-IRQ10-Pad65)" "unconnected-(J6-IRQ6-Pad22)" "unconnected-(J6-IRQ15-Pad68)" "unconnected-(J6-~{DACK3}-Pad15)" "unconnected-(J6-MASTER-Pad79)" "unconnected-(J6-IRQ5-Pad23)"
+    "unconnected-(J6-DRQ2-Pad6)" "unconnected-(J6-~{DACK5}-Pad72)" "unconnected-(J6-~{DACK7}-Pad76)" "unconnected-(J6-IRQ12-Pad67)" "unconnected-(J6-TC-Pad27)" "unconnected-(J6-DRQ3-Pad16)" "unconnected-(J6-DRQ7-Pad77)" LA19
+    "unconnected-(J6--12V-Pad7)" "unconnected-(J6-DRQ0-Pad71)" "unconnected-(J6-DRQ5-Pad73)" LA17 "unconnected-(J6-IRQ7-Pad21)" LA23 LA18 "unconnected-(J6-~{DACK0}-Pad70)"
+    "unconnected-(J6-DRQ6-Pad75)" "unconnected-(J6-~{REFRESH}-Pad19)" LA22 "CHRDY_FPGA" LA20 "unconnected-(J6-~{DACK1}-Pad17)" "unconnected-(J6-DRQ1-Pad18)" "unconnected-(J6-IRQ3-Pad25)"
+    "unconnected-(J6--5V-Pad5)" "unconnected-(J8-Pad9)" "unconnected-(J8-Pad12)" "unconnected-(J8-Pad4)" "unconnected-(J8-Pad15)" "unconnected-(J8-Pad11)" "Net-(U2-EN)" "Net-(U9-A->B)"
+    "Net-(U9-CE)" "Net-(U8-A->B)" "Net-(U10-A->B)" "Net-(U10-CE)" "Net-(U12-EN)" "Net-(X3-EN)" "Net-(X2-Tri-State)" "unconnected-(RN3D-R4.2-Pad5)"
+    "unconnected-(U1E-NC-Pad77)" "IOR_FPGA" AV03 "write_cmd" DS12 "read_cmd" TE2 "unconnected-(U1E-VPP_FAST-Pad109)"
+    "unconnected-(U1D-IOL_8B-Pad12)" TE3 "FPGA_CLOCK" "unconnected-(U1D-IOL_5A-Pad9)" AV04 "unconnected-(U1C-IOB_104_CBSEL1-Pad64)" DS05 AV19
+    AV09 "MEMW_FPGA" "ADS_LATCH" "unconnected-(U1E-NC-Pad36)" "unconnected-(U1E-NC-Pad51)" TE1 "VGA_LATCH_RESET" AV01
+    "MEMCS16_FPGA" DS04 "unconnected-(U1D-IOL_5B-Pad10)" DS15 "IOW_FPGA" "Net-(U5-ADJ)" "unconnected-(U1E-NC-Pad133)" DS13
+    AV15 "VRAM_high_en" "BALE_FPGA" "FPGA_RDY" "IOCS16_FPGA" "FPGA_WR" DS10 "unconnected-(U1E-NC-Pad50)"
+    DS11 TE0 "unconnected-(U1E-NC-Pad58)" "ADS_OE" AV02 AV18 AV12 "NOWS_FPGA"
+    DS00 AV05 DS07 "VRAM_low_en" AV13 AV07 "1024_CLOCK" AV08
+    DS06 AV11 AV00 "MEMR_FPGA" DS01 DS08 "unconnected-(U1D-IOL_8A-Pad11)" "FPGA_IO_EN"
+    "ISA_CLOCK_FPGA" AV17 AV14 "SMEMW_FPGA" "SMEMR_FPGA" "unconnected-(U1E-NC-Pad35)" DS09 DS14
+    AV16 DS02 AV10 DS03 AV06 "SBHE_FPGA" "unconnected-(U3-~{WP}{slash}IO2-Pad3)" "unconnected-(U3-~{HOLD}{slash}IO3-Pad7)"
+    "unconnected-(U6-NC-Pad22)" "unconnected-(U6-NC-Pad23)" "unconnected-(U6-NC-Pad24)" "unconnected-(U6-NC-Pad43)" "unconnected-(U6-NC-Pad21)" "HOST_RESET_FPGA" "unconnected-(U12-NC-Pad4)" "unconnected-(U6-NC-Pad42)"
+    "unconnected-(U6-NC-Pad2)" "unconnected-(U6-NC-Pad44)" "unconnected-(U6-NC-Pad1)" "unconnected-(U6-NC-Pad25)" "unconnected-(U7-NC-Pad21)" "unconnected-(U7-NC-Pad24)" "unconnected-(U7-NC-Pad1)" "unconnected-(U7-NC-Pad23)"
+    "unconnected-(U7-NC-Pad2)" "unconnected-(U7-NC-Pad25)" "unconnected-(U7-NC-Pad42)" "unconnected-(U7-NC-Pad22)" "unconnected-(U7-NC-Pad43)" "unconnected-(U7-NC-Pad44)" "unconnected-(U8-B7-Pad11)" "unconnected-(U8-A7-Pad9)"
+    "unconnected-(U8-B5-Pad13)" "unconnected-(U8-A6-Pad8)" "unconnected-(U8-B6-Pad12)" "unconnected-(U8-A5-Pad7)" "unconnected-(U9-B2-Pad16)" "unconnected-(U9-A3-Pad5)" "unconnected-(U9-A2-Pad4)" "unconnected-(U9-B3-Pad15)"
+    "unconnected-(U10-B5-Pad13)" "unconnected-(U10-B7-Pad11)" "unconnected-(U10-B6-Pad12)" MSCL "unconnected-(U10-A5-Pad7)" MSDA "unconnected-(U10-A6-Pad8)" "unconnected-(U10-A4-Pad6)"
+    "unconnected-(U10-B4-Pad14)" "unconnected-(U10-A7-Pad9)" "unconnected-(U15-O5-Pad15)" "unconnected-(U15-D6-Pad17)" "unconnected-(U15-D7-Pad18)" "unconnected-(U15-O6-Pad16)" "unconnected-(U15-O4-Pad12)" "unconnected-(U15-D5-Pad14)"
+    "unconnected-(U15-O7-Pad19)" "unconnected-(U15-D4-Pad13)" "unconnected-(U2-NC-Pad4)" "Net-(U11C--)" "Net-(U11D--)" "Net-(U11B--)" "Net-(R13-Pad2)" "Net-(U11A-~{PD1})"
+    "Net-(U11A-~{PD2})" "Net-(U11A-~{PD3})"
+    (clearance_class "kicad_default")
+    (via_rule "kicad_default")
+    (rule
+      (width 200.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+  (class 1.2v
+    +1V2
+    (clearance_class 1.2v)
+    (via_rule 1.2v)
+    (rule
+      (width 250.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+  (class 3.3v
+    +3.3V "Net-(RN3A-R1.1)" VSYNC HSYNC "Net-(RN1A-R1.1)" "Net-(RN2C-R3.1)" "Net-(RN1C-R3.1)" "Net-(RN1B-R2.1)"
+    "Net-(RN1D-R4.1)" "Net-(RN2D-R4.1)" "Net-(RN2A-R1.1)" "Net-(RN2B-R2.1)" "Net-(RN3B-R2.1)" "Net-(RN3D-R4.1)" "Net-(RN3C-R3.1)" "Net-(RN4D-R4.2)"
+    "Net-(RN4A-R1.2)" "Net-(RN4C-R3.2)" "Net-(RN4B-R2.2)" VD08 VD01 VD05 VD15 VD12
+    VD02 VD11 VD04 VD09 VD03 VD13 VD10 VD06
+    VD00 VD14 VD07 "Net-(J8-Pad1)" "Net-(J8-Pad3)" "Net-(J8-Pad2)"
+    (clearance_class 3.3v)
+    (via_rule 3.3v)
+    (rule
+      (width 250.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+  (class 5v
+    +5V +12V
+    (clearance_class 5v)
+    (via_rule 5v)
+    (rule
+      (width 200.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+  (class ground
+    GND
+    (clearance_class ground)
+    (via_rule ground)
+    (rule
+      (width 250.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+  (class "isa_bus_signals"
+    DB06 AB03 AB08 AB10 DB07 DB00 DB03 AB13
+    DB12 DB09 AB16 AB09 AB15 DB04 DB13 DB05
+    AB04 DB08 DB01 AB06 AB05 AB19 AB17 AB01
+    AB07 AB12 AB00 DB10 DB14 AB11 AB18 DB11
+    DB15 AB02 DB02 AB14
+    (clearance_class "isa_bus_signals")
+    (via_rule "isa_bus_signals")
+    (rule
+      (width 200.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+  (class "isa_control_signals"
+    "HOST_RESET" IOR "IO_RDY" SMEMW NOWS BALE MEMW IOCS16
+    IOW SBHE CHRDY MEMR MEMCS16 SMEMR
+    (clearance_class "isa_control_signals")
+    (via_rule "isa_control_signals")
+    (rule
+      (width 250.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+  (class "normal_thicker"
+    UNUSED6 UNUSED5 UNUSED2 UNUSED0 UNUSED3 UNUSED4 UNUSED1
+    (clearance_class "normal_thicker")
+    (via_rule "normal_thicker")
+    (rule
+      (width 250.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+  (class "sensitive_clocks"
+    "ISA_CLK" "PIXEL_CLOCK" "VGA_LATCH_CLK" MCLK2 MCLK1 MCLK0
+    (clearance_class "sensitive_clocks")
+    (via_rule "sensitive_clocks")
+    (rule
+      (width 200.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+)

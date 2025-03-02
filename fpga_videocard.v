@@ -11,6 +11,13 @@ this is the version that gets put on the video card with the 16 bit vga, don't p
 
 //spi
 `include "SPI_Slave.v"
+//`include "fifo_bram_new.v"
+//`include "managedByteToVramCopyFifo.v"
+//`include "managedVramDataBuffer.v"
+`include "managedVramDataBufferCompositeBankSwap.v"
+//`include "isa_slave_controller.v"
+`include "isa_slave_controller_new.v"
+`include "writeBufferVram_different.v"
 
 //tested working
 module manageReset(input FPGA_RESET, output reg SYSTEM_RESET, input CPU_CLK);
@@ -75,7 +82,7 @@ module decoder_3to8 (a, b, c, o0, o1, o2, o3, o4, o5, o6, o7);
 	input a, b, c;
 	output reg o0, o1, o2, o3, o4, o5, o6, o7;
 
-	//uuh, the 2 working examples i have of modules contain @always, so throw that in there
+	//tested working on both testbench and hardware
 	always@(a, b, c)
 	begin
 		o0 = (~a & ~b & ~c); //000
@@ -142,9 +149,9 @@ endmodule
 // Top level Verilog code for clock divider on FPGA
 module clockDivider(clock_in,clock_out);
 input clock_in; // input clock on FPGA
-output reg clock_out; // output clock after dividing the input clock by divisor
+output clock_out; // output clock after dividing the input clock by divisor
 reg[27:0] counter=28'd0;
-parameter DIVISOR = 28'd4;
+parameter DIVISOR = 28'd3;
 // The frequency of the output clk_out
 //  = The frequency of the input clk_in divided by DIVISOR
 // For example: Fclk_in = 50Mhz, if you want to get 1Hz signal to blink LEDs
@@ -161,7 +168,7 @@ begin
 end
 endmodule
 
-//generate a 640x480 vga sync signal
+//generate a 640x480 vga sync signal. don't use this anymore, this was only for the icestick experiment
 module generateSync(
     input clock,
     output reg HSYNC,
@@ -213,7 +220,7 @@ module generateSync(
                 verticalCount <= verticalCount + 1;
                 horizontalCount <= 0;
                 HSYNC <= 1;
-                VALID_H <= 1;
+                VALID_H <= 0;//was 1 for some reason
             end
         else
             begin
@@ -264,7 +271,7 @@ module generateSync(
 
 endmodule
 
-//this module doesn't get used anymore
+//this module doesn't get used anymore, it was only used for the icestick test
 module basicTestPattern(
     input [19:0] vramAddress,
     output reg R,
@@ -497,7 +504,7 @@ module advancedTestPattern(
 
 endmodule
 
-//display the contents of vram based on what is being inputted on vramAddress
+//display the contents of vram based on what is being inputted on vramAddress. this module doesn't get used anymore
 module displayVRAM(
     input [19:0] vramAddress,
     output reg[4:0] R,  //0-31.
@@ -606,7 +613,7 @@ module displayVRAM(
 
 endmodule
 
-//copies abyte to vram. 
+//copies abyte to vram. not used anymore 
 module managedByteToVramCopy(
     input[15:0] dataToCopy,       //the 16 bit word to copy into vram
     output[15:0] dataBusOutput,     //the 16 bit data bus to output to
@@ -661,13 +668,13 @@ endmodule
 
 module top(
     input pixelClock,
-    input RESET,
-    output reg[4:0] Red,
-    output reg[5:0] Green,
-    output reg[4:0] Blue,
+    input HOST_RESET,
+    output[4:0] Red,
+    output[5:0] Green,
+    output[4:0] Blue,
     output HSYNC,
     output VSYNC,
-    output[19:0] AV,
+    inout[19:0] AV,    //use inout. It works well with the yosys tristate primitive
     inout[15:0] DS,
     input VGASCK,       //U6 pin
     input VGAMOSI,      //U5 pin      
@@ -680,7 +687,31 @@ module top(
     output read_cmd,
     output write_cmd,
     output MCLK0,
-    output MCLK1
+    output MCLK1,
+    //the start of the isa specific signals
+    input SBHE,
+    input BALE,
+    output IOCS16,
+    output MEMCS16,
+    output IOERR,
+    output IO_RDY,
+    output NOWS,
+    output ADS_OE,
+    output ADS_LATCH,
+    input MEMR,
+    input MEMW,
+    input SMEMR,
+    input SMEMW,
+    input IOR,
+    input IOW,
+    input ISACLK,
+    input FASTCLK,  //i'm not using this for anything right now, but the idea is to use it for 1024x768
+    output TE0,
+    output TE1,
+    output TE2,
+    output TE3,
+    output FPGA_WR,
+    output isa_ctrl_out_en
 );
     //wire HSYNC, VSYNC, R, G, B;
     reg [19:0] VramCounter;
@@ -700,86 +731,356 @@ module top(
     reg[4:0] Ri;
     reg[5:0] Gi;
     reg[4:0] Bi;
+
+    wire[15:0] vgaDataPixel;//convert this into Ri, Gi, Bi
     wire bus_free;
     reg bus_free_forreal;
     reg[19:0] av_relay; //if I do this i can assign AV with an assign statement, which is a thing i haven't tried yet. update: didn't make a difference.
     wire[15:0] DS_RX;
     wire[15:0] DS_TX;
+    wire[19:0] AV_RX;
+    wire empty, full, fifovalid;//fifo status bits
+    wire fifo_read; //signals when to read from the fifo module
+    wire[15:0] fifo_data_out;
+    wire vblank;//0 if there is supposed to be a vblank (no new pixels being copied to screen). 1 if there is supposed to be pixel data sent to the screen. needs to be asserted exactly 2 pixelClock cycles before color data is supposed to be on the bus
+    reg ivblank;
+    assign vblank = ivblank;
 
-    generateSync gs(pixelClock, HSYNC, VSYNC, VramCounter, RESET, VALID_PIXELS, horizontalCount, verticalCount);//this module is bit depth independent
-    advancedTestPattern atp(VramCounter, Rt, Gt, Bt, HSYNC, VSYNC, pixelClock, VALID_PIXELS, horizontalCount, verticalCount);
-    displayVRAM vrambullshit(VramCounter, Ri, Gi, Bi, HSYNC, VSYNC, pixelClock, VRAM_VALID, horizontalCount, verticalCount, RESET, OE, CE, DS_RX, VALID_PIXELS);
-    managedByteToVramCopy mbtc(inputPixel, DS_TX, WE, CEW, pixelClock, byteToCopy, byteCopied, bus_free);
+    generateSync gs(spixelClock, HSYNC, VSYNC, VramCounter, RESET, VALID_PIXELS, horizontalCount, verticalCount);    //generate the sync signals for use in other stuff
+    advancedTestPattern atp(VramCounter, Rt, Gt, Bt, HSYNC, VSYNC, spixelClock, VALID_PIXELS, horizontalCount, verticalCount);   //generate the values for test pattern (when bit 4 of settings register 0x423 is 0)
+    //displayVRAM vrambullshit(VramCounter, Ri, Gi, Bi, HSYNC, VSYNC, pixelClock, VRAM_VALID, horizontalCount, verticalCount, RESET, OE, CE, DS_RX, VALID_PIXELS);
+    //managedByteToVramCopy mbtc(inputPixel, DS_TX, WE, CEW, pixelClock, byteToCopy, byteCopied, bus_free);
+    //wire init;
+    //psuedofiforam pfr(inputPixel, fifo_wr_en, fifo_read, pixelClock, pixelClock, fifo_data_out, RESET, full, empty, fifovalid);
+    //managedByteToVramCopyFifo mbtc(fifo_data_out, DS_TX, WE, CEW, pixelClock, byteCopied, bus_free, empty, fifovalid, fifo_read);
 
-    //since not using assign is frowned upon, i tried this to see if it would make the "tristate not working bug" go away. it didn't
+    wire write_en, read_en;
+    wire[19:0] maxVramAddress;
+    wire [19:0] bufferRequestedAddress;
+    reg [19:0] lastAdsRequest;
+    assign maxVramAddress = 20'h96000;
+    wire frameEnd;
+    wire almostFull;
+    wire evenOrOdd;
+    wire alreadyDidHsyncReset;
+    
+    //this stuff was for testing, block swapping is superior in performance to fifo (since it can fill an entire horizontal line) and doesn't cause any new bugs.
+    //doing it the block swapping way will greatly reduce the vram bandwidth required for 320x240 and 320x200
+    //psuedofiforam_new testfifo(DS_RX, write_en, read_en, ~FASTCLK, pixelClock, fifo_data_out, (RESET & ~frameEnd), full, empty, fifovalid, almostFull);
+    //managedVramDataBuffer testramthingy(DS_RX, Ri, Gi, Bi, OE, CE, FASTCLK, done, FPGA_IO_EN/*probably best this way, since cross clock domain*/, VALID_PIXELS/*vblank*/, empty, full, fifovalid, write_en, read_en, bufferRequestedAddress, maxVramAddress, RESET, pixelClock, fifo_data_out, frameEnd, almostFull);
+    
+                                                                                //use ADS_OE for bus free? it's either doing an isa transfer for a fpga <=> vram transfer basically
+
+    managedVramDataBufferCompositeBankSwap testramthingy(DS_RX, Ri, Gi, Bi, OE, CE, pllClk/*FASTCLK*/, actualBusCycle | undecidedIsaCycle, 
+    /*VALID_PIXELS*/ivblank, empty, full, fifovalid, write_en, read_en, bufferRequestedAddress, maxVramAddress, RESET, spixelClock, 
+    frameEnd, HSYNC, VSYNC, vsyncctr/*verticalCount[0]*/, alreadyDidHsyncReset, VALID_PIXELS);
+
+    //wire xpixelClock;
+    //clockDivider cdd(pllClk, xpixelClock);
+    //since not using assign is frowned upon, i tried this to see if it would make the "tristate not working bug" go away. it didn't. update to this comment: using SB_IO instead of tristate ternary is way better and avoids wierd bugs
     reg busstatus;
     assign bus_free = busstatus;
+    
+    wire DATA_OUTPUT_ENABLE;
+    //assign DATA_OUTPUT_ENABLE = (FPGA_IO_EN & FPGA_WR & isadebugport0/* & ~write_en*/);//isa_slave_controller_new needs this instead\
+    assign DATA_OUTPUT_ENABLE = (FPGA_IO_EN & FPGA_WR) | WRITEBUF_IO_EN;//the version that's compatible with write buffering
+    //assign AV = av_relay;
+    //assign isa_ctrl_out_en = ~(~ADS_OE & AV_RX >= 20'h420 & AV_RX <= 20'h430 & (~IOR | ~IOW));
+    //assign isa_ctrl_out_en = ~(~ADS_OE & AV_RX >= 20'h420 & AV_RX <= 20'h430 & (~IOR | ~IOW));
 
-    assign AV = av_relay;
+    //control the ISA output 74lvc245 tranciever
+    assign isa_ctrl_out_en = ~(/*(FPGA_IO_EN | undecidedIsaCycle)*/lastAdsRequest >= 20'h420 & lastAdsRequest <= 20'h430 & (~IOR | ~IOW | FPGA_IO_EN) & ~BALE);//isa_slave_controller_new needs this instead
+    //assign isa_ctrl_out_en = ~(/*FPGA_IO_EN & */AV_RX >= 20'h420 & AV_RX <= 20'h430 & (~IOR | ~IOW) & ~BALE);
+    //assign isa_ctrl_out_en = 1;//disable
+    //assign AV = ~FPGA_IO_EN ? 20'bZ : av_relay;
+    
+    //assign AV = ADS_OE ? 20'bZ : bufferRequestedAddress;
+    //assign AV_RX = AV;
+    //this works better than the above.
+    SB_IO #(
+    .PIN_TYPE(20'b 1010_01),
+    ) raspi_io [19:0] (
+    .PACKAGE_PIN(AV),
+    .OUTPUT_ENABLE(ADS_OE),
+    .D_OUT_0(/*bufferRequestedAddress*/addressBusOut),
+    .D_IN_0(AV_RX)
+    );
 
-    always@(*)
+    wire pllClk;
+    //pll experiment. results: solves *almost* every clock domain related bug
+    SB_PLL40_CORE #(
+        .FEEDBACK_PATH("SIMPLE"),   // Don't use fine delay adjust
+        .PLLOUT_SELECT("GENCLK"),   // No phase shift on output
+        .DIVR(4'b0000),             // Reference clock divider . 0 + 1 = 1
+        .DIVF(7'b0000010),          // Feedback clock divider. 22 + 1 = 23
+        .DIVQ(3'b000),              // VCO clock divider. 3
+        .FILTER_RANGE(3'b001)       // Filter range
+    ) pll (
+        .REFERENCECLK(pixelClock),     // Input clock
+        .PLLOUTCORE(pllClk),           // Output clock
+        //.PLLOUTGLOBAL(globalPixelClock),     //global pixelClock to avoid skew
+        .LOCK(),                    // Locked signal
+        .RESETB(1'b1),              // Active low reset
+        .BYPASS(1'b0)               // No bypass, use PLL signal as output
+    );
+
+    assign spixelClock = ispixelClock;
+    reg ispixelClock;
+    always@(pllClk) begin
+        ispixelClock <= pixelClock;
+    end
+
+    wire spixelClock;
+    //clockDivider cd(pllClk, spixelClock);
+
+    /*SB_PLL40_2F_CORE #(
+                //.FEEDBACK_PATH("DELAY"),
+                 .FEEDBACK_PATH("SIMPLE"),
+                // .FEEDBACK_PATH("PHASE_AND_DELAY"),
+                // .FEEDBACK_PATH("EXTERNAL"),
+
+                .DELAY_ADJUSTMENT_MODE_FEEDBACK("FIXED"),
+                // .DELAY_ADJUSTMENT_MODE_FEEDBACK("DYNAMIC"),
+
+                .DELAY_ADJUSTMENT_MODE_RELATIVE("FIXED"),
+                // .DELAY_ADJUSTMENT_MODE_RELATIVE("DYNAMIC"),
+
+                .PLLOUT_SELECT_PORTA("GENCLK"),
+                // .PLLOUT_SELECT_PORTA("GENCLK_HALF"),
+                // .PLLOUT_SELECT_PORTA("SHIFTREG_90deg"),
+                // .PLLOUT_SELECT_PORTA("SHIFTREG_0deg"),
+
+                .PLLOUT_SELECT_PORTB("GENCLK"),
+                // .PLLOUT_SELECT_PORTB("GENCLK_HALF"),
+                // .PLLOUT_SELECT_PORTB("SHIFTREG_90deg"),
+                // .PLLOUT_SELECT_PORTB("SHIFTREG_0deg"),
+
+                //.SHIFTREG_DIV_MODE(1'b0),//used when FEEDBACK_PATH is PHASE_AND_DELAY
+                .FDA_FEEDBACK(4'b1111),//probably doesn't matter as long as these are the same
+                .FDA_RELATIVE(4'b1111),//probably doesn't matter as long as these are the same
+                .DIVR(4'b0000),
+                .DIVF(7'b0000000),
+                .DIVQ(3'b001),
+                .FILTER_RANGE(3'b000),
+                .ENABLE_ICEGATE_PORTA(1'b0),
+                .ENABLE_ICEGATE_PORTB(1'b0),
+                .TEST_MODE(1'b0)
+        ) uut (
+                .REFERENCECLK   (REFERENCECLK   ),
+                .PLLOUTCOREA    (PLLOUTCORE  [0]),
+                .PLLOUTGLOBALA  (PLLOUTGLOBAL[0]),
+                .PLLOUTCOREB    (PLLOUTCORE  [1]),
+                .PLLOUTGLOBALB  (PLLOUTGLOBAL[1]),
+                .EXTFEEDBACK    (EXTFEEDBACK    ),
+                .DYNAMICDELAY   (DYNAMICDELAY   ),
+                .LOCK           (LOCK           ),
+                .BYPASS         (BYPASS         ),
+                .RESETB         (RESETB         ),
+                .LATCHINPUTVALUE(LATCHINPUTVALUE),
+                .SDO            (SDO            ),
+                .SDI            (SDI            ),
+                .SCLK           (SCLK           )
+        );*/
+
+    /*av_relay HAS to be assigned 0 when not in use EVEN if the enable signal (~ADS_OE) is 0
+    idk if its a yosys bug, an ice40 chip bug or a feature but that's just how it is. 
+    Troubleshooting and finding this limitation was really hard. The testbench simulator does NOT reflect this behavior.
+    see DS_tX and DS_RX for another example of how this problem was delt with
+    */
+
+    wire shutUp;
+    wire sTE0, sTE1, sTE2, sTE3, dummyFPGAIO, dummyactualbuscycle, dummyADSlatch;
+    wire ISADONE, actualBusCycle, undecidedIsaCycle;
+    reg FPGA_IO_EN;//goes high anytime an isa bus cycle is happening that is addressing this card
+    isaSlaveBusController isathing(AV_RX, FPGA_IO_EN, SBHE, BALE, IOCS16, MEMCS16, IOERR, IO_RDY, NOWS, ADS_OE, ADS_LATCH, 
+    MEMR, MEMW, SMEMR, SMEMW, IOR, IOW, ISACLK, ISADONE, 
+    TE0, TE1, TE2, TE3, FPGA_WR, pllClk/*FASTCLK*/, actualBusCycle, RESET, 1'h0, undecidedIsaCycle);
+
+    //this only controls FPGA_WR with all other controls being linked to dummy signals. THE SNOW BUG GOES AWAY COMPLETELY WHEN ISA IS DISABLED. so I just comment these lines in or out depending on what im testing
+    //isaSlaveBusController isathing(AV_RX, dummyFPGAIO, SBHE, BALE, IOCS16, MEMCS16, IOERR, IO_RDY, NOWS, shutUp, dummyADSlatch, 
+    //MEMR, MEMW, SMEMR, SMEMW, IOR, IOW, ISACLK, ISADONE, 
+    //TE0, TE1, TE2, TE3, FPGA_WR, pllClk/*FASTCLK*/, actualBusCycle, RESET, 1'h0);
+
+    //temporarily disable and watch the magic bug go away
+    //assign FPGA_IO_EN = 0;
+    //assign actualBusCycle = 0;
+    //assign TE0 = 1;
+    //assign TE1 = 1;
+    //assign TE2 = 1;
+    //assign TE3 = 1;
+    //assign ADS_OE = 1;
+    //assign ADS_LATCH = 0;
+    //assign vblank = ivblank;
+
+
+    //temporary placeholder values since vram is disabled for the isa interface test
+    //assign VRAM_low_en = 1;
+    //assign VRAM_high_en = 1;
+    //assign read_cmd = 1;
+    //assign write_cmd = 1;
+    reg[7:0] control_register;
+
+    //assign Red = !settingsRegister[4] ? Rt : 4'h15;
+    //assign Green = !settingsRegister[4] ? Gt : 5'h0;
+    //assign Blue = !settingsRegister[4] ? Bt : 4'h15;
+    //assign Red = Ri;
+    //assign Green = Gi;
+    //assign Blue = Bi;
+
+    /*reg[4:0] iRed;
+    reg[5:0] iGreen;
+    reg[4:0] iBlue;
+    assign Red = iRed;
+    assign Green = iGreen;
+    assign Blue = iBlue;
+
+    reg RESET;*/
+    /*always@(posedge pllClk)
     begin
+        RESET <= ~HOST_RESET;       //isa reset is inverted from what I assumed it to be, so do this to fix it
+
+        //weirdly enough, doing this stuff on the rising edge of pllClk and not pixelClock makes all the flickering and wobbling go away.
+        if (!settingsRegister[4])   //if bit 5 of settings register 0x423 is 0, do the test pattern instead of displaying vram
+        begin
+            iRed <= Rt;
+            iGreen <= Gt;
+            iBlue <= Bt;
+        end else begin
+            iRed <= Ri;
+            iGreen <= Gi;
+            iBlue <= Bi;
+        end
+    end*/
+
+    reg[4:0] iRed;
+    reg[5:0] iGreen;
+    reg[4:0] iBlue;
+    assign Red = iRed;
+    assign Green = iGreen;
+    assign Blue = iBlue;
+
+    reg RESET;
+
+    reg iVRAM_low_en, iVRAM_high_en, iwrite_cmd, iread_cmd;
+    assign VRAM_low_en = iVRAM_low_en;
+    assign VRAM_high_en = iVRAM_high_en;
+    assign write_cmd = iwrite_cmd;
+    assign read_cmd = iread_cmd;
+
+    reg [10:0] shorizontalCount;
+    reg [9:0] sverticalCount;
+
+    //only process write buffer data if the block swapping buffer
+    reg [19:0] addressBusOut;
+    reg [15:0] dataBusOut;
+
+    //try to modify BALE to behave better when used for things in the pllClk domain
+    reg b1_Pulse, b2_Pulse, b3_Pulse;
+    reg syncBale;
+
+    always@(posedge pllClk)
+    begin
+
+        sverticalCount <= verticalCount;
+        shorizontalCount <= horizontalCount;
+
+        RESET <= ~HOST_RESET;       //isa reset is inverted from what I assumed it to be, so do this to fix it
         //DEBUG0 <= ivalid;
         //DEBUG1 <= VGASCK;
 
         //test points on the pcb
-        MCLK1 = bus_free;      //1 pin
-        MCLK0 = internal_write_enable;    //0 pin
-        DEBUG0 = CEW;
-        DEBUG1 = WE;
+        MCLK1 <= lastAdsRequest == 20'h426;//(~ADS_OE & FPGA_WR & ~write_en);      //1 pin
+        MCLK0 <= writeBufferEmpty/*lastAdsRequest >= 20'h420 & lastAdsRequest <= 20'h430*/;    //0 pin
+        DEBUG0 <= writeBufferAlmostFull;//u2
+        //DEBUG1 = TE0 & TE1 & TE2 & TE3;//if any of the TEn signals go low, make DEBUG1 go high
+        DEBUG1 <= full & !FPGA_IO_EN & !undecidedIsaCycle;//u1
+    
+        //Red = Rt;
+        //Green = Gt;
+        //Blue = Bt;
 
-        if (!control_register[0])
-        begin
-            Red = Rt;
-            Green = Gt;
-            Blue = Bt;
-        end else begin
-            Red = Ri;
-            Green = Gi;
-            Blue = Bi;
+        b1_Pulse <= BALE;
+        b2_Pulse <= b1_Pulse;
+        b3_Pulse <= b2_Pulse;
+
+        if (~b3_Pulse & b2_Pulse) begin
+            syncBale <= 1;
+        end else if (b3_Pulse & ~b2_Pulse) begin
+            syncBale <= 0;
         end
 
-        //since bus_free is used for vram copy, deassert it just a litttle bit before the end of the blanking period. "bus_free_forreal" contains the absolute vblanking status if needed
-        if (horizontalCount > 641 & horizontalCount < 785 | verticalCount > 481 & verticalCount < 510)
+        if (!settingsRegister[4])   //if bit 5 of settings register 0x423 is 0, do the test pattern instead of displaying vram
         begin
-            busstatus = 0;
+            /*Red <= Rt;
+            Green <= Gt;
+            Blue <= Bt;*/
+            
+            iVRAM_low_en <= 1;
+            iVRAM_high_en <= 1;
+            iread_cmd <= 1;
+            iwrite_cmd <= 1;
+
+            iRed <= Rt;
+            iGreen <= Gt;
+            iBlue <= Bt;
         end else begin
-            busstatus = 1;
+            //Red = 4'h15;
+            //Green = 5'h0;
+            //Blue = 4'h15;
+            /*Red <= Ri;
+            Green <= Gi;
+            Blue <= Bi;*/
+
+            iRed <= Ri;
+            iGreen <= Gi;
+            iBlue <= Bi;
+
+            if (/*full & !FPGA_IO_EN*/WRITEBUF_IO_EN) begin
+                //if there is no more pixel buffer copying to do (and there is no relevant isa bus cycle happening), start processing write buffer data and writing it to the screen
+                iVRAM_low_en <= vbuf_CE;
+                iVRAM_high_en <= vbuf_CE;
+                iwrite_cmd <= vbuf_WE;
+                iread_cmd <= 1;
+
+                addressBusOut <= writeBufferVramAddress;
+                dataBusOut <= writeBufferVramData;
+            end else if (!FPGA_IO_EN & !undecidedIsaCycle) begin
+                //if there is no relevant isa bus cycle happening, relay the signals to the vram chips for copying stuff into the buffer
+                iVRAM_low_en <= CE;
+                iVRAM_high_en <= CE;
+                iread_cmd <= OE;
+                iwrite_cmd <= 1;
+                addressBusOut <= bufferRequestedAddress;
+                dataBusOut <= DStxresult;
+            end else begin
+                //explicitly set this stuff to 1, disabling it all in invalid states. it didn't solve any bugs or artifacts but this seems like a good thing to do
+                iVRAM_low_en <= 1;
+                iVRAM_high_en <= 1;
+                iread_cmd <= 1;
+                iwrite_cmd <= 1;
+                addressBusOut <= bufferRequestedAddress;
+                dataBusOut <= DStxresult;
+            end
         end
 
-        if (horizontalCount > 641 & horizontalCount < 799 | verticalCount > 481 & verticalCount < 524)
+        if (shorizontalCount > 641/* & horizontalCount <= 800 */| sverticalCount > 481/* & verticalCount <= 525*/)
         begin
-            //if this is happening, vram write cycles can happen if desired
-            //bus_free <= 0;
-            //DS_input <= bus_free ? DS : 16'bz;
-            //DS_output <= ~bus_free ? inputPixel : 16'bz;
-            //DS <= byteCopied ? DS_output : 16'bz;
-            //AV <= writeAddress;
-            bus_free_forreal = 0;
-            VRAM_low_en = CEW;
-            VRAM_high_en = CEW;
-            read_cmd = 1;
-            write_cmd = WE;
-            av_relay <= writeAddress;
-            //AV = writeAddress;
-            //DS <= byteCopied ? DS_output : 16'bz;
+            ivblank <= 0;
         end else begin
-            //if this i
-            //bus_free <= 1;
-            //DS_input <= DS;
-            //AV <= VramCounter;
-            bus_free_forreal = 1;
-            VRAM_low_en = CE;
-            VRAM_high_en = CE;
-            read_cmd = OE;
-            write_cmd = 1;
-            av_relay <= VramCounter;
-            //AV = VramCounter;
-            //DS_input <= bus_free ? DS : 16'bz;
-            //DS_output <= ~bus_free ? inputPixel : 16'bz;
+            ivblank <= 1;
         end
 
     end
+
+    /*always@(posedge pllClk) begin
+        if (full & !FPGA_IO_EN) begin
+            addressBusOut <= writeBufferVramAddress;
+            dataBusOut <= writeBufferVramData;
+        end else begin
+            addressBusOut <= bufferRequestedAddress;
+            dataBusOut <= DStxresult;
+        end
+    end*/
 
     //i tried all. kinds. of. stuff.
     wire internal_write_enable;
@@ -787,197 +1088,224 @@ module top(
     //assign internal_write_enable = ~byteCopied & ~bus_free_forreal & ~CEW;
     //assign internal_write_enable = ~byteCopied & ~bus_free_forreal;//this is unpredictable and doesn't work.
 
-    //somehow this doesn't work. it can only read data until the first write cycle happens, then it can never write again until power cycle. the RESET pin doesn't even do it, only a power cycle restores the ability for DS reads to work
-    assign DS = bus_free ? 16'bZ : DS_TX;
-    assign DS_RX = DS;
+    //(~ADS_OE & FPGA_WR) works well, hopefully adding that ~write_en makes it work for vram buffering cycles too without breaking everything
+    //assign DS = (~ADS_OE & FPGA_WR & ~write_en) ? 16'bZ : DStxresult;
+    //assign DS_RX = DS;
+    //this works better than the above.
+    SB_IO #(
+    .PIN_TYPE(16'b 1010_01),
+    ) databus_io [15:0] (
+    .PACKAGE_PIN(DS),
+    .OUTPUT_ENABLE(DATA_OUTPUT_ENABLE/*(~ADS_OE & FPGA_WR & ~write_en)*/),
+    .D_OUT_0(dataBusOut),
+    .D_IN_0(DS_RX)
+    );
+    //assign DS = DStxresult;
 
+    //placeholder registers for the port
+    reg[15:0] vramBankRegister; //register 0x420
+    reg[7:0] videoDisplayRegister;
+    reg[7:0] settingsRegister;  //register 0x423 settings register
+    reg[7:0] statusRegister;    //register 0x426 status register
+    //reg[7:0] addressLowReg;
+    //reg[7:0] addressMiddleReg;
+    //reg[7:0] addressHighReg;
+    reg[23:0] addressComReg;//combined address register maybe that will work
+    reg[15:0] nextThingToWrite;
+    reg alreadyIncrementedAdsPtr;
 
-    //recieve spi commands and do stuff with them
-    reg [7:0] ibuffer;  //data recieve buffer
-    reg [7:0] obuffer;  //data out buffer 
-    reg ivalid;  
-    wire ovalid;  //if in data or out data is valid respectively
-    reg ivalid_fake;//im sure the spi module works for many people but it doesnt work for me. this is part of the workaround hack
+    reg[16:0] testreg;
 
-
-    reg [7:0] rindex;//active register index
-    reg [7:0] rdata;//data to put into the register or whatever
-    reg dataorindex;    //0 if operaing on register index. 1 if operating data
-    SPI_Slave ss(RESET, pixelClock, ovalid, obuffer, ivalid_fake, ibuffer, VGASCK, VGAMISO_FAKE, VGAMOSI, VGACS0);
-    reg debugDid;
-    wire VGAMISO_FAKE;//part of the workaround hack for non-workng features of the spi module
-
-    //part of the spi workaround. It works well enough for ready vs not ready status but the bits aren't in the correct order. It's more likely that particular bug is caused by my spi program and not this
-    reg [3:0] octr;
-    always @(posedge VGASCK)
-    begin
-      if (ivalid & ~VGACS0)
-      begin
-        VGAMISO <= ibuffer[octr];
-        octr <= octr + 1;
-      end
-      else if (VGACS0)
-      begin
-        octr <= 0;
-        VGAMISO <= 0;
-      end
+    //do stuff on the edge of the fast clock
+    reg[15:0] DStxresult;
+    reg deviceBeingSelected;
+    reg syncedISACLK;
+    //assign DS_TX = DStxresult;
+    reg vsyncctr;
+    always@(negedge HSYNC) begin
+        vsyncctr <= ~vsyncctr;
     end
 
-    //variables for the registers
-    reg [7:0] inputNum;         //register 0xB0
-    reg [7:0] outputNum;        //register 0xB1
-    reg [7:0] testResult;        //register 0xB2
-    reg [7:0] control_register;     //register 0xB3
-    reg [15:0] inputPixel;          //register 0xB4. the one that requires a 16 bit write.
-    reg [7:0] status_register;      //register 0x80. the status register. if 0, ready. if anything besides 0, its not ready
-    reg [19:0] writeAddress;        //the user-assignable writeAddress
-    reg step;                       //part of the register 0xB4 state machine to allow it to recieve a 16 bit value over spi
-    reg byteToCopy;                 //when high there is a 16 bit work waiting to be copied to vram
-    reg debugByteCopy;
-    wire byteCopied;                //0 when fpga-to-vram write cycle is in progress. 1 if otherwise
+    //an attempt at syncing isa clock to get around clock domain bugs. it doesn't seem to have changed anything.
+    reg syncIOR, syncIOW;//maybe this will make there be less issues
+    reg r1_Pulse, r2_Pulse, r3_Pulse;
+    reg[15:0] synchronizedDataInput;//for isa
 
-    assign ivalid = 1;
-    //set input buffer to set the output buffer
-    always@(posedge pixelClock)
+    reg [2:0] isahighctr;
+
+    always@(posedge /*FASTCLK*/pllClk)
     begin
-        //status_register[1] <= bus_free;
+        if (!RESET) begin
+            isahighctr <= 3;
+        end
 
-        /*if (horizontalCount > 640 & horizontalCount < 800 | verticalCount > 480 & verticalCount < 525)
-        begin
-            AV <= writeAddress;
-        end else begin
-            AV <= VramCounter;
+        if (~ADS_OE) begin
+            lastAdsRequest <= AV_RX;
+        end
+
+        //r1_Pulse <= ISACLK;    //the ONLY TIME ISA_CLK EVER GETS REFERENCED
+        //r2_Pulse <= r1_Pulse;
+        //r3_Pulse <= r2_Pulse;
+
+        /*if ((~r3_Pulse & r2_Pulse)) begin
+            syncedISACLK <= 1;
+            synchronizedDataInput <= DS_RX;
+            syncIOR <= IOR | BALE;
+            syncIOW <= IOW | BALE;
+        end else if (r3_Pulse & ~r2_Pulse) begin
+            syncedISACLK <= 0;
+            synchronizedDataInput <= DS_RX;
         end*/
 
-        if (!RESET)
+        if (isahighctr < 1 & ISACLK)
         begin
-            ibuffer <= 69;
-            //obuffer <= 0;
-            //ivalid <= 1;
-            ivalid_fake <= 0;
-            byteToCopy <= 0;
-            dataorindex <= 0;
-            rindex <= 0;
-            rdata <= 0;
-            control_register <= 0;
-            status_register <= 0;
-            //ovalid <= 0;
-            debugDid <= 0;
-            debugByteCopy <= 0;
-            step <= 0;
-        end else if (~dataorindex & ovalid & ~byteToCopy)
-        begin
-            rindex <= obuffer;
-            dataorindex <= 1;
-            step <= 0;
-            //ivalid <= 0;  //
-            //debugDid <= 1;
-        end
-        else if (ovalid & dataorindex & ~byteToCopy)
-        begin
-            dataorindex <= 0;
-            //ivalid <= 0;
-            //ibuffer <= obuffer;
-                //save the data to a data register if this is a non-register index setting operation
-                rdata <= obuffer;
-
-                //function 0xB0
-                if (rindex == 176)//176 in decimal is the5 same as B0 hex. vram pointer address bits 0-7
-                begin 
-                    inputNum <= obuffer;
-                    writeAddress[0] <= obuffer[0];
-                    writeAddress[1] <= obuffer[1];
-                    writeAddress[2] <= obuffer[2];
-                    writeAddress[3] <= obuffer[3];
-                    writeAddress[4] <= obuffer[4];
-                    writeAddress[5] <= obuffer[5];
-                    writeAddress[6] <= obuffer[6];
-                    writeAddress[7] <= obuffer[7];
-                    //ivalid <= 0;    //this is not an input command
-                end
-
-                if (rindex == 177)  //probably 0xB1 when converted to hex. vram pointer address bits 8-15
-                begin
-                    outputNum <= obuffer;
-                    writeAddress[8] <= obuffer[0];
-                    writeAddress[9] <= obuffer[1];
-                    writeAddress[10] <= obuffer[2];
-                    writeAddress[11] <= obuffer[3];
-                    writeAddress[12] <= obuffer[4];
-                    writeAddress[13] <= obuffer[5];
-                    writeAddress[14] <= obuffer[6];
-                    writeAddress[15] <= obuffer[7];
-                    //ivalid <= 0;    //this is not an input command
-                end
-
-                if (rindex == 178)  //register 0xB2. vram pointer address bits 16-24 (on this system only bits 16-19 are used)
-                begin
-                    testResult <= obuffer;
-                    writeAddress[16] <= obuffer[0];
-                    writeAddress[17] <= obuffer[1];
-                    writeAddress[18] <= obuffer[2];
-                    writeAddress[19] <= obuffer[3];
-                    //ivalid <= 0;    //this is not an input command
-                    //writeAddress[20] = obuffer[4];
-                    //writeAddress[21] = obuffer[5];
-                    //writeAddress[22] = obuffer[6];
-                    //1writeAddress[23] = obuffer[7];
-                end
-
-                if (rindex == 179)  //register 0xB3. control register. bit 0 low means test mode. bit 0 high means display contents of vram
-                begin
-                    control_register <= obuffer;
-                    //ivalid <= 0;    //this is not an input command
-                end
-
-                if (rindex == 180)
-                begin
-                    if (!step)
-                    begin
-                    inputPixel[0] <= obuffer[0];
-                    inputPixel[1] <= obuffer[1];
-                    inputPixel[2] <= obuffer[2];
-                    inputPixel[3] <= obuffer[3];
-                    inputPixel[4] <= obuffer[4];
-                    inputPixel[5] <= obuffer[5];
-                    inputPixel[6] <= obuffer[6];
-                    inputPixel[7] <= obuffer[7];
-                    //ivalid <= 0;    //this is not an input command
-                    step <= 1;
-                    dataorindex <= 1;
-                    end else if (step)
-                    begin
-                        inputPixel[8] <= obuffer[0];
-                        inputPixel[9] <= obuffer[1];
-                        inputPixel[10] <= obuffer[2];
-                        inputPixel[11] <= obuffer[3];
-                        inputPixel[12] <= obuffer[4];
-                        inputPixel[13] <= obuffer[5];
-                        inputPixel[14] <= obuffer[6];
-                        inputPixel[15] <= obuffer[7];
-                        //ivalid <= 0;    //this is not an input command
-                        step <= 0;
-                        byteToCopy <= 1;
-                        dataorindex <= 0;
-                        writeAddress <= writeAddress + 2;
-                        status_register[5] <= 1;    //the single-pixel output buffer is full. set input buffer bit to 1
-                    end
-
-                end
-        //you have to do things a little differently for recieve commands
-        end else if (rindex == 128 & ~byteToCopy)
-        begin
-            debugDid <= 1;
-            ibuffer <= status_register;
+            synchronizedDataInput <= DS_RX;
+            syncIOR <= IOR | BALE;
+            syncIOW <= IOW | BALE;
+        end else if (ISACLK) begin
+            isahighctr <= isahighctr - 1;
+        end else begin
+            isahighctr <= 3;
         end
 
-        else if (byteToCopy/* & byteCopied*/ & ~bus_free)
-        begin
-            //if the word copy operation completed sucessfully, deassert the byte copy signal
-            byteToCopy <= 0;
-            status_register[5] <= 0;//the single-pixel output buffer is no longer full. set input buffer bit to 0
-        end
+
     end
 
+    //wire[15:0] writeBufferOut;
+    //wire writeBufferFull, writeBufferEmpty, writeBufferValid, writeBufferAlmostFull;
+    //psuedofiforam_new pfr(nextThingToWrite, 1'b1, 1'b1, alreadyIncrementedAdsPtr, pllClk, writeBufferOut, RESET, writeBufferFull, writeBufferEmpty, writeBufferValid, writeBufferAlmostFull);
+
+    //basically, whenever the composite bank swap buffer for the current frame is full, spend that time copying data to vram
+    wire[15:0] writeBufferVramData;
+    wire[19:0] writeBufferVramAddress;
+    wire vbuf_WE, vbuf_CE, WRITEBUF_IO_EN;
+    wire writeBufferFull, writeBufferAlmostFull, writeBufferEmpty;
+    writeBufferVram wbv(nextThingToWrite, addressComReg[19:0], pllClk, doData, writeBufferVramData, writeBufferVramAddress, vbuf_WE, vbuf_CE, full & !FPGA_IO_EN & !undecidedIsaCycle, pllClk, RESET, WRITEBUF_IO_EN, writeBufferFull, writeBufferAlmostFull, writeBufferEmpty);
+    
+    reg numTimesWrittenTo;//workaround hack for a open collector vs totem pole issue. ugh
+    reg gtfoonnextclock;
+    reg doData;
+
+    //it misses read and write cycles like 25%-50% of the time. It may be related to the address decode bug, still not sure if these 2 bugs are caused by the same thing or not
+    always@(posedge /*ISACLK*/pllClk)
+    begin
+        //make it possible to find out if the write buffer is full or empty
+        statusRegister[7] <= vblank;
+        statusRegister[6] <= full;
+        statusRegister[5] <= writeBufferFull;//bit 5: input buffer full. 0 if not full. 1 if full
+        statusRegister[4] <= writeBufferAlmostFull;//welp, there isn't a way to find if it's *almost* full because of the impossibly intricate architecture of the async fifo buffer. fuck.
+
+
+        //upon reset, load the registers with default values
+        if (!RESET) begin
+            videoDisplayRegister <= 8'h18;//b7-4 = 1 for 640x480. bit 3-2 = 2 for 16 bit color.
+            settingsRegister <= 8'h70;//tldr 0x60 is for test pattern, 0x70 is for vram display mode.
+            statusRegister <= 8'h0;
+            alreadyIncrementedAdsPtr <= 0;
+            addressComReg <= 0;
+            numTimesWrittenTo<=0;
+            gtfoonnextclock <= 0;
+            doData <= 0;
+        end else if (/*(~IOR | ~IOW)*/(~syncIOW | ~syncIOW) & actualBusCycle) begin//only io cycles for now
+            //if (AV_RX == 20'h423) begin
+            if (lastAdsRequest == 20'h422) begin
+                if (FPGA_WR) begin
+                    DStxresult[7:0] <= videoDisplayRegister;
+                end else begin
+                    videoDisplayRegister <= DS_RX[7:0];
+                end
+            end else if (lastAdsRequest == 20'h423) begin
+                if (FPGA_WR) begin
+                    DStxresult[15:8] <= settingsRegister[7:0];
+                end else begin
+                    settingsRegister[7:0] <= synchronizedDataInput[15:8];
+                end
+
+                //DStxresult <= 16'hA9A9;
+                deviceBeingSelected <= 1;
+                numTimesWrittenTo<=0;
+            end else if (lastAdsRequest == 20'h426) begin
+                if (FPGA_WR) begin
+                    DStxresult[7:0] <= statusRegister;
+                end else begin
+                    statusRegister <= DS_RX[7:0];
+                end
+                deviceBeingSelected <= 1;
+                numTimesWrittenTo<=0;
+            end else if (lastAdsRequest == 20'h428) begin
+                if (FPGA_WR) begin
+                    DStxresult[7:0] <= addressComReg[7:0];
+                end else begin
+                    //addressComReg[7:0] <= DS_RX[7:0];
+                    //addressComReg[7:0] <= DS_RX[7:0];
+                    addressComReg[0] <= 0;
+                    addressComReg[8:1] <= DS_RX[7:0];
+                end
+                deviceBeingSelected <= 1;
+                numTimesWrittenTo <= 0;
+            end else if (lastAdsRequest == 20'h429) begin
+                if (FPGA_WR) begin
+                    DStxresult[15:8] <= addressComReg[15:8];
+                end else begin
+                    //addressComReg[15:8] <= DS_RX[15:8];
+                    //addressComReg[15:8] <= DS_RX[15:8];
+                    addressComReg[16:9] <= DS_RX[15:8];
+                    numTimesWrittenTo <= 0;
+                end
+                deviceBeingSelected <= 1;
+            end else if (lastAdsRequest == 20'h42A) begin
+                if (FPGA_WR) begin
+                    DStxresult[7:0] <= addressComReg[23:16];
+                end else begin
+                    //addressComReg[23:16] <= DS_RX[7:0];
+                    //addressComReg[23:16] <= DS_RX[7:0];
+                    addressComReg[23:17] <= DS_RX[6:0];
+                    numTimesWrittenTo <= 0;
+                end
+                deviceBeingSelected <= 1;
+            end else if (lastAdsRequest == 20'h42C) begin
+                if (FPGA_WR) begin
+                    DStxresult[15:0] <= nextThingToWrite;
+                end else begin
+                    //nextThingToWrite <= DS_RX[15:0];
+                    nextThingToWrite <= DS_RX;
+                    //nextThingToWrite <= 16'hffff;
+                    if (!alreadyIncrementedAdsPtr & !numTimesWrittenTo) begin
+                        //hack so that repeated psuedo 16 bit writes don't get counted as 2 write cycles. just dont do 8 bit writes to this port and it'll be fine
+                        addressComReg <= addressComReg + 2;//increment the address pointer for easiness
+                        alreadyIncrementedAdsPtr <= 1;
+                        numTimesWrittenTo <= 1;
+                        doData <= 1;
+                    end else if (!alreadyIncrementedAdsPtr & numTimesWrittenTo) begin
+                        //fuck
+                        gtfoonnextclock <= 1;
+                    end
+                end
+                deviceBeingSelected <= 1;
+            end else if (lastAdsRequest >= 20'h420 & lastAdsRequest <= 20'h430) begin
+                DStxresult <= 16'h5555;
+                deviceBeingSelected <= 1;
+                //numTimesWrittenTo <= 0;
+            end else begin
+                DStxresult <= 16'bZ;     //set DS_TX to 0 when not in use to circumvent the tristate bug (there probably isn't a tristate bug anymore)
+                deviceBeingSelected <= 0;
+                //numTimesWrittenTo <= 0;
+            end
+        end else begin
+            DStxresult <= 16'bZ;         //set DS_TX to 0 when not in use to circumvent the tristate bug (there probably isn't a tristate bug anymore)
+            deviceBeingSelected <= 0;
+            alreadyIncrementedAdsPtr <= 0;
+            //numTimesWrittenTo <= 0;
+
+            if (gtfoonnextclock) begin
+                gtfoonnextclock <= 0;
+                numTimesWrittenTo <= 0;
+            end
+        end
+
+        if (doData) begin
+            doData <= 0;
+        end
+    end
 
 endmodule
