@@ -976,13 +976,11 @@ module top(
 
     //try to modify BALE to behave better when used for things in the pllClk domain
     reg b1_Pulse, b2_Pulse, b3_Pulse;
+    reg p1_Pulse, p2_Pulse, p3_Pulse;
     reg syncBale;
 
     always@(posedge pllClk)
     begin
-
-        sverticalCount <= verticalCount;
-        shorizontalCount <= horizontalCount;
 
         RESET <= ~HOST_RESET;       //isa reset is inverted from what I assumed it to be, so do this to fix it
         //DEBUG0 <= ivalid;
@@ -1008,6 +1006,18 @@ module top(
         end else if (b3_Pulse & ~b2_Pulse) begin
             syncBale <= 0;
         end
+
+        //maybe doing it this different way will make a difference
+        p1_Pulse <= spixelClock;
+        p2_Pulse <= p1_Pulse;
+        p3_Pulse <= p2_Pulse;
+        if(~p3_Pulse & p2_Pulse) begin
+            //sverticalCount <= verticalCount;
+            //shorizontalCount <= horizontalCount;
+            ivblank <= VALID_PIXELS;
+        end
+        //sverticalCount <= verticalCount;
+        //shorizontalCount <= horizontalCount;
 
         if (!settingsRegister[4])   //if bit 5 of settings register 0x423 is 0, do the test pattern instead of displaying vram
         begin
@@ -1063,12 +1073,12 @@ module top(
             end
         end
 
-        if (shorizontalCount > 641/* & horizontalCount <= 800 */| sverticalCount > 481/* & verticalCount <= 525*/)
+        /*if (shorizontalCount > 641 | sverticalCount > 481)
         begin
             ivblank <= 0;
         end else begin
             ivblank <= 1;
-        end
+        end*/
 
     end
 
