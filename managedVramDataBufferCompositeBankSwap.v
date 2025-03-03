@@ -262,7 +262,7 @@ module managedVramDataBufferCompositeBankSwap(
         end*/
 
         if (!RESET) begin
-            //bugFix <= 0;
+            bugFix <= 0;
             alreadySubtracted <= 1;
             delayBeforeWriteAgain <= 0;
             iNextVramAddress <= 20'h0;//this is how to ensure the first valid cycle is starts the vram address at 0 and not 1
@@ -273,7 +273,7 @@ module managedVramDataBufferCompositeBankSwap(
             ififoWrite <= 1;
             waddr <= 0;
         end else if (fastFrameEnd) begin //if the buffer is not completely full, try to make it full
-            //bugFix <= 0;
+            bugFix <= 0;
             ireadSignal <= 1;           //DO NOT TOUCH THIS
             ichipEnable <= 1;           //DO NOT TOUCH THIS
             ififoWrite <= 1;
@@ -282,7 +282,7 @@ module managedVramDataBufferCompositeBankSwap(
             delayBeforeWriteAgain <= 10;//fastclk cycles will probably do the trick
             alreadySubtracted <= 1;
         end else if (~vblank) begin //if vblank is zero and therefore not supposed to have stuff on the screen, reset the waddr pointer but not the vram address
-            //bugFix <= 0;
+            bugFix <= 0;
             ireadSignal <= 1;           //DO NOT TOUCH THIS
             ichipEnable <= 1;           //DO NOT TOUCH THIS
             ififoWrite <= 1;
@@ -295,7 +295,7 @@ module managedVramDataBufferCompositeBankSwap(
             end
         end else if (~full & ~bus_free)  //bus free is active low. 0 = bus not being used
         begin
-            //bugFix <= 0;
+            bugFix <= 0;
             //get the byte from vram
             //ireadSignal <= 0;           //DO NOT TOUCH THIS
             //ichipEnable <= 0;           //DO NOT TOUCH THIS
@@ -324,7 +324,7 @@ module managedVramDataBufferCompositeBankSwap(
             ireadSignal <= 1;
             ichipEnable <= 1;
             ififoWrite <= 0;
-            delayBeforeWriteAgain <= 2;
+            delayBeforeWriteAgain <= 4;
 
             /*if (~bugFix) begin
                 bugFix <= 1;

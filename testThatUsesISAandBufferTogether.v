@@ -64,7 +64,7 @@ always #(CLK_PERIOD/2) clk=~clk;
 
 managedVramDataBufferCompositeBankSwap testramthingy(vramDataBus, Ri, Gi, Bi, RD, CE, clk, actualBusCycle | undecidedIsaCycle, vblank, empty, full, 
 valid, write_en, read_en, genVramAddress, maxVramAddress, rst_n, pixelClock, frameEnd, HSYNC,
-VSYNC, evenOrOdd, alreadyDidHsyncReset
+VSYNC, evenOrOdd, alreadyDidHsyncReset, vblank
 );
                                                                                 //use ADS_OE for bus free? it's either doing an isa transfer for a fpga <=> vram transfer basically
 wire[15:0] isaDataOut;
@@ -121,7 +121,7 @@ initial begin
     ISA_CLK=0;
     BALE=1;//uncomment this for normal test
     SBHE=0;
-    isaAddressBus=20'h520;
+    isaAddressBus=20'h420;
     #30
     ISA_CLK=1;
     BALE=0;
@@ -293,7 +293,7 @@ initial begin
     pixelClock = 0;
     #10
     pixelClock = 1;
-    vblank=0;     //uncomment to test ISA cycles during vblank transition periods, comment out for a normal isa cycle test
+    vblank=1;     //uncomment to test ISA cycles during vblank transition periods, comment out for a normal isa cycle test
     #10
     pixelClock = 0;
     #10
