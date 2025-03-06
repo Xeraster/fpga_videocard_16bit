@@ -21,4 +21,10 @@ Here is a test pattern
 ![test_pattern](test_pattern.jpg)
 
 ### disclaimer
-This is far from working. If anyone finds ways to make this work better, please say so, all suggestions are welcome. There is a discord server to discuss this stuff here: [discord server](https://discord.gg/2UbdS4unc4)
+This is not a fully completed and fully functional video card. If anyone finds ways to make this work better, please say so, all suggestions are welcome. There is a discord server to discuss this stuff here: [discord server](https://discord.gg/2UbdS4unc4)
+
+### What you need for building the verilog code
+- nextpnr
+- icestorm
+- yosys
+(i think that's everything)

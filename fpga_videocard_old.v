@@ -1143,6 +1143,12 @@ module top(
 
     reg [2:0] isahighctr;
 
+    reg IOW1_Pulse, IOW2_Pulse, IOW3_Pulse;
+    reg IOR1_Pulse, IOR2_Pulse, IOR3_Pulse;
+    reg BALE1_Pulse, BALE2_Pulse, BALE3_Pulse;
+    reg ISACLK1_Pulse, ISACLK2_Pulse, ISACLK3_Pulse;
+    reg absIOW, absIOR, absBALE;
+
     always@(posedge /*FASTCLK*/pllClk)
     begin
         if (!RESET) begin
@@ -1166,6 +1172,35 @@ module top(
             syncedISACLK <= 0;
             synchronizedDataInput <= DS_RX;
         end*/
+        BALE1_Pulse <= BALE;
+        BALE2_Pulse <= BALE1_Pulse;
+        BALE3_Pulse <= BALE2_Pulse;
+
+        IOW1_Pulse <= IOW;
+        IOW2_Pulse <= IOW1_Pulse;
+        IOW3_Pulse <= IOW2_Pulse;
+
+        IOR1_Pulse <= IOR;
+        IOR2_Pulse <= IOR1_Pulse;
+        IOR3_Pulse <= IOR2_Pulse;
+
+        if (~IOW3_Pulse & IOW2_Pulse) begin 
+            absIOW <= 1;
+        end else if (IOW3_Pulse & ~IOW2_Pulse) begin
+            absIOW <= 0;
+        end
+
+        if (~IOR3_Pulse & IOR2_Pulse) begin 
+            absIOR <= 1;
+        end else if (IOR3_Pulse & ~IOR2_Pulse) begin
+            absIOR <= 0;
+        end
+
+        if (~BALE3_Pulse & BALE2_Pulse) begin 
+            absBALE <= 1;
+        end else if (BALE3_Pulse & ~BALE2_Pulse) begin
+            absBALE <= 0;
+        end
 
         if (isahighctr < 1 & ISACLK)
         begin
@@ -1216,7 +1251,7 @@ module top(
             numTimesWrittenTo<=0;
             gtfoonnextclock <= 0;
             doData <= 0;
-        end else if (/*(~IOR | ~IOW)*/(~syncIOR | ~syncIOW) & actualBusCycle) begin//only io cycles for now
+        end else if (/*(~IOR | ~IOW)*/(~syncIOW | ~syncIOW) & actualBusCycle) begin//only io cycles for now
             //if (AV_RX == 20'h423) begin
             if (lastAdsRequest == 20'h422) begin
                 if (FPGA_WR) begin
