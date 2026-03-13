@@ -1,0 +1,422 @@
+$date
+	Tue Feb 11 16:35:20 2025
+$end
+$version
+	Icarus Verilog
+$end
+$timescale
+	1s
+$end
+$scope module tb $end
+$var wire 1 ! full $end
+$var wire 1 " empty $end
+$var wire 16 # dataOut [15:0] $end
+$var parameter 32 $ CLK_PERIOD $end
+$var reg 1 % clk $end
+$var reg 16 & dataIn [15:0] $end
+$var reg 8 ' raddr [7:0] $end
+$var reg 1 ( read_en $end
+$var reg 1 ) rst_n $end
+$var reg 1 * test_signal $end
+$var reg 8 + waddr [7:0] $end
+$var reg 1 , write_en $end
+$scope module testfiforam $end
+$var wire 1 % rclk $end
+$var wire 1 ( rinc $end
+$var wire 1 ) rrst_n $end
+$var wire 1 % wclk $end
+$var wire 16 - wdata [15:0] $end
+$var wire 1 , winc $end
+$var wire 1 ) wrst_n $end
+$var wire 9 . wq2_rptr [8:0] $end
+$var wire 9 / wptr [8:0] $end
+$var wire 1 ! wfull $end
+$var wire 8 0 waddr [7:0] $end
+$var wire 9 1 rq2_wptr [8:0] $end
+$var wire 9 2 rptr [8:0] $end
+$var wire 1 " rempty $end
+$var wire 16 3 rdata [15:0] $end
+$var wire 8 4 raddr [7:0] $end
+$var parameter 32 5 ASIZE $end
+$var parameter 32 6 DSIZE $end
+$scope module fifomem $end
+$var wire 16 7 rdata [15:0] $end
+$var wire 1 % wclk $end
+$var wire 16 8 wdata [15:0] $end
+$var wire 1 , winc $end
+$var wire 1 ! wfull $end
+$var wire 8 9 waddr [7:0] $end
+$var wire 8 : raddr [7:0] $end
+$var parameter 32 ; ADDRSIZE $end
+$var parameter 32 < DATASIZE $end
+$var parameter 40 = DEPTH $end
+$upscope $end
+$scope module rptr_empty $end
+$var wire 1 % rclk $end
+$var wire 9 > rgraynext [8:0] $end
+$var wire 1 ( rinc $end
+$var wire 1 ) rrst_n $end
+$var wire 9 ? rq2_wptr [8:0] $end
+$var wire 1 @ rempty_val $end
+$var wire 9 A rbinnext [8:0] $end
+$var wire 8 B raddr [7:0] $end
+$var parameter 32 C ADDRSIZE $end
+$var reg 9 D rbin [8:0] $end
+$var reg 1 " rempty $end
+$var reg 9 E rptr [8:0] $end
+$upscope $end
+$scope module sync_r2w $end
+$var wire 9 F rptr [8:0] $end
+$var wire 1 % wclk $end
+$var wire 1 ) wrst_n $end
+$var parameter 32 G ADDRSIZE $end
+$var reg 9 H wq1_rptr [8:0] $end
+$var reg 9 I wq2_rptr [8:0] $end
+$upscope $end
+$scope module sync_w2r $end
+$var wire 1 % rclk $end
+$var wire 1 ) rrst_n $end
+$var wire 9 J wptr [8:0] $end
+$var parameter 32 K ADDRSIZE $end
+$var reg 9 L rq1_wptr [8:0] $end
+$var reg 9 M rq2_wptr [8:0] $end
+$upscope $end
+$scope module wptr_full $end
+$var wire 1 % wclk $end
+$var wire 9 N wgraynext [8:0] $end
+$var wire 1 , winc $end
+$var wire 9 O wq2_rptr [8:0] $end
+$var wire 1 ) wrst_n $end
+$var wire 1 P wfull_val $end
+$var wire 9 Q wbinnext [8:0] $end
+$var wire 8 R waddr [7:0] $end
+$var parameter 32 S ADDRSIZE $end
+$var reg 9 T wbin [8:0] $end
+$var reg 1 ! wfull $end
+$var reg 9 U wptr [8:0] $end
+$upscope $end
+$upscope $end
+$upscope $end
+$enddefinitions $end
+$comment Show the parameter values. $end
+$dumpall
+b1000 S
+b1000 K
+b1000 G
+b1000 C
+b100000000 =
+b10000 <
+b1000 ;
+b10000 6
+b1000 5
+b1010 $
+$end
+#0
+$dumpvars
+bx U
+bx T
+bx R
+bx Q
+xP
+bx O
+bx N
+bx M
+bx L
+bx J
+bx I
+bx H
+bx F
+bx E
+bx D
+bx B
+bx A
+x@
+bx ?
+bx >
+bx :
+bx 9
+bx 8
+bx 7
+bx 4
+bx 3
+bx 2
+bx 1
+bx 0
+bx /
+bx .
+bx -
+x,
+bx +
+x*
+x)
+x(
+bx '
+bx &
+x%
+bx #
+x"
+x!
+$end
+#5
+0(
+0*
+#10
+1*
+#20
+0*
+#30
+1,
+b0 '
+b0 +
+b1010010001010101 &
+b1010010001010101 -
+b1010010001010101 8
+1*
+#31
+1)
+#40
+0,
+#50
+0*
+#61
+0P
+1@
+b0 4
+b0 :
+b0 B
+b0 >
+b0 0
+b0 9
+b0 R
+b0 N
+b0 .
+b0 I
+b0 O
+b0 H
+b0 1
+b0 ?
+b0 M
+b0 L
+b0 A
+b0 D
+b0 2
+b0 E
+b0 F
+1"
+b0 Q
+b0 T
+b0 /
+b0 J
+b0 U
+0!
+0%
+0)
+#65
+b1010010001010101 #
+b1010010001010101 3
+b1010010001010101 7
+b1 N
+b1 Q
+1%
+1,
+1*
+#70
+0%
+#75
+1)
+1%
+#80
+0%
+#85
+b1 0
+b1 9
+b1 R
+b11 N
+b10 Q
+b1 T
+b1 /
+b1 J
+b1 U
+1%
+#90
+b1 N
+b1 Q
+0%
+0,
+#95
+b10 0
+b10 9
+b10 R
+b1 L
+b10 T
+b10 N
+b11 Q
+1%
+1,
+b1111111111111111 &
+b1111111111111111 -
+b1111111111111111 8
+#100
+0%
+#105
+b11 0
+b11 9
+b11 R
+b110 N
+b100 Q
+b11 T
+b10 /
+b10 J
+b10 U
+0@
+b1 1
+b1 ?
+b1 M
+1%
+b1000101011100 &
+b1000101011100 -
+b1000101011100 8
+#110
+0%
+#115
+b10 L
+0"
+b110 /
+b110 J
+b110 U
+b10 N
+b11 Q
+1%
+0,
+#120
+0%
+#125
+b1111111111111111 #
+b1111111111111111 3
+b1111111111111111 7
+b1 4
+b1 :
+b1 B
+b10 /
+b10 J
+b10 U
+b1 D
+b10 1
+b10 ?
+b10 M
+b110 L
+0@
+b11 >
+b10 A
+1%
+1(
+#130
+0%
+#135
+b1000101011100 #
+b1000101011100 3
+b1000101011100 7
+b10 4
+b10 :
+b10 B
+b10 >
+b110 1
+b110 ?
+b110 M
+b10 L
+b11 A
+b10 D
+b11 2
+b11 E
+b11 F
+1%
+#140
+0%
+#145
+bx #
+bx 3
+bx 7
+b11 4
+b11 :
+b11 B
+b110 >
+b100 A
+b11 D
+b10 2
+b10 E
+b10 F
+0@
+b10 1
+b10 ?
+b10 M
+b11 H
+1%
+#150
+0%
+#155
+b100 4
+b100 :
+b100 B
+b111 >
+b11 .
+b11 I
+b11 O
+b10 H
+b101 A
+b100 D
+b110 2
+b110 E
+b110 F
+1%
+0*
+#160
+0%
+#165
+b101 4
+b101 :
+b101 B
+b101 >
+b110 A
+b101 D
+b111 2
+b111 E
+b111 F
+b10 .
+b10 I
+b10 O
+b110 H
+1%
+#170
+0%
+#175
+b110 4
+b110 :
+b110 B
+b100 >
+b110 .
+b110 I
+b110 O
+b111 H
+b111 A
+b110 D
+b101 2
+b101 E
+b101 F
+1%
+#180
+0%
+#185
+b111 4
+b111 :
+b111 B
+b1100 >
+b1000 A
+b111 D
+b100 2
+b100 E
+b100 F
+b111 .
+b111 I
+b111 O
+b101 H
+1%

@@ -19,23 +19,22 @@ this is the version that gets put on the video card with the 16 bit vga, don't p
 `include "isa_slave_controller_new.v"
 `include "writeBufferVram_different.v"
 
-//reused the fixed modified manageReset from 32 bit 486 chipset fpga 0
-module manageReset(output SYSTEM_RESET, input CPU_CLK);//SYSTEM_RESET is declared here as wire. 
-    assign SYSTEM_RESET = SYSTEM_RESET_i;
-    reg SYSTEM_RESET_i;
-	reg [18:0] count = 0;           //use reset state to set it to zero
+//tested working
+module manageReset(input FPGA_RESET, output reg SYSTEM_RESET, input CPU_CLK);
+
+	reg [3:0] count;
 	always@(posedge CPU_CLK)
 	begin
-		/*if (!FPGA_RESET) begin
+		if (!FPGA_RESET)
 			count <= 0;
-            SYSTEM_RESET_i <= 1;
-        end else */if (count > 500) begin           //dont wait as long on the video card as on the chipset. 500 instead of 500000 should be fine
-			SYSTEM_RESET_i <= 1;
-        end else begin
-            count <= count + 1;
-			SYSTEM_RESET_i <= 0;
-	    end
-    end
+		else if (count < 4)
+			count <= count + 1;
+
+		if (count > 3)
+			SYSTEM_RESET <= 1;
+		else
+			SYSTEM_RESET <= 0;
+	end
 endmodule
 
 //tested working
@@ -961,7 +960,6 @@ module top(
     assign Blue = iBlue;
 
     reg RESET;
-    manageReset mr(RESET, pixelClock);
 
     reg iVRAM_low_en, iVRAM_high_en, iwrite_cmd, iread_cmd;
     assign VRAM_low_en = iVRAM_low_en;
@@ -984,8 +982,7 @@ module top(
     always@(posedge pllClk)
     begin
 
-        //don't manage RESET this way anymore because it causes problems
-        //RESET <= ~HOST_RESET;       //isa reset is inverted from what I assumed it to be, so do this to fix it
+        RESET <= ~HOST_RESET;       //isa reset is inverted from what I assumed it to be, so do this to fix it
         //DEBUG0 <= ivalid;
         //DEBUG1 <= VGASCK;
 
@@ -1146,6 +1143,12 @@ module top(
 
     reg [2:0] isahighctr;
 
+    reg IOW1_Pulse, IOW2_Pulse, IOW3_Pulse;
+    reg IOR1_Pulse, IOR2_Pulse, IOR3_Pulse;
+    reg BALE1_Pulse, BALE2_Pulse, BALE3_Pulse;
+    reg ISACLK1_Pulse, ISACLK2_Pulse, ISACLK3_Pulse;
+    reg absIOW, absIOR, absBALE, absISACLK;
+
     always@(posedge /*FASTCLK*/pllClk)
     begin
         if (!RESET) begin
@@ -1169,6 +1172,45 @@ module top(
             syncedISACLK <= 0;
             synchronizedDataInput <= DS_RX;
         end*/
+        BALE1_Pulse <= BALE;
+        BALE2_Pulse <= BALE1_Pulse;
+        BALE3_Pulse <= BALE2_Pulse;
+
+        IOW1_Pulse <= IOW;
+        IOW2_Pulse <= IOW1_Pulse;
+        IOW3_Pulse <= IOW2_Pulse;
+
+        IOR1_Pulse <= IOR;
+        IOR2_Pulse <= IOR1_Pulse;
+        IOR3_Pulse <= IOR2_Pulse;
+
+        ISACLK1_Pulse <= ISACLK;
+        ISACLK2_Pulse <= ISACLK1_Pulse;
+        ISACLK3_Pulse <= ISACLK2_Pulse;
+
+        if (~IOW3_Pulse & IOW2_Pulse) begin 
+            absIOW <= 1;
+        end else if (IOW3_Pulse & ~IOW2_Pulse) begin
+            absIOW <= 0;
+        end
+
+        if (~IOR3_Pulse & IOR2_Pulse) begin 
+            absIOR <= 1;
+        end else if (IOR3_Pulse & ~IOR2_Pulse) begin
+            absIOR <= 0;
+        end
+
+        if (~BALE3_Pulse & BALE2_Pulse) begin 
+            absBALE <= 1;
+        end else if (BALE3_Pulse & ~BALE2_Pulse) begin
+            absBALE <= 0;
+        end
+
+        if (~ISACLK3_Pulse & ISACLK2_Pulse) begin 
+            absISACLK <= 1;
+        end else if (ISACLK3_Pulse & ~ISACLK2_Pulse) begin
+            absISACLK <= 0;
+        end
 
         if (isahighctr < 1 & ISACLK)
         begin
@@ -1229,11 +1271,9 @@ module top(
                 end
             end else if (lastAdsRequest == 20'h423) begin
                 if (FPGA_WR) begin
-                    //DStxresult[15:8] <= settingsRegister[7:0];
-                    DStxresult[7:0] <= settingsRegister[7:0];//temporarily modified to work with isa chipsets that dont do 16 bit isa cycles at all
+                    DStxresult[15:8] <= settingsRegister[7:0];
                 end else begin
-                    //settingsRegister[7:0] <= synchronizedDataInput[15:8];
-                    settingsRegister[7:0] <= synchronizedDataInput[7:0];//temporarily modified to work with isa chipsets that dont do 16 bit isa cycles at all
+                    settingsRegister[7:0] <= synchronizedDataInput[15:8];
                 end
 
                 //DStxresult <= 16'hA9A9;

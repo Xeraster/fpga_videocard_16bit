@@ -1,6 +1,6 @@
 set_io pixelClock 52
 #set_io clock1024 55
-set_io RESET 1
+set_io HOST_RESET 1
 set_io HSYNC 16
 set_io VSYNC 15
 
@@ -76,7 +76,33 @@ set_io VGAMISO 56
 set_io VGACS0 49
 
 #just test ports, nothing special
-set_io DEBUG0 93
-set_io DEBUG1 110
+set_io DEBUG0 93    #u2
+set_io DEBUG1 110   #u1
 set_io MCLK0 4
 set_io MCLK1 7
+
+#isa related stuff
+set_io SBHE 62
+set_io BALE 61
+set_io IOCS16 74
+set_io MEMCS16 73
+set_io IOERR 44
+set_io IO_RDY 117
+set_io NOWS 45
+set_io ADS_OE 42
+set_io ADS_LATCH 43
+set_io MEMR 119
+set_io MEMW 118
+set_io SMEMR 76
+set_io SMEMW 75
+set_io IOR 79
+set_io IOW 78
+set_io ISACLK 94
+
+set_io FPGA_WR 116
+set_io TE0 115
+set_io TE1 114
+set_io TE2 113
+set_io TE3 112
+set_io FASTCLK 55
+set_io isa_ctrl_out_en 80
