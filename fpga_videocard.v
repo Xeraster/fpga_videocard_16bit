@@ -1156,11 +1156,11 @@ module top(
             lastAdsRequest <= AV_RX;
         end
 
-        //r1_Pulse <= ISACLK;    //the ONLY TIME ISA_CLK EVER GETS REFERENCED
-        //r2_Pulse <= r1_Pulse;
-        //r3_Pulse <= r2_Pulse;
+        r1_Pulse <= ISACLK;    //the ONLY TIME ISA_CLK EVER GETS REFERENCED
+        r2_Pulse <= r1_Pulse;
+        r3_Pulse <= r2_Pulse;
 
-        /*if ((~r3_Pulse & r2_Pulse)) begin
+        if ((~r3_Pulse & r2_Pulse)) begin
             syncedISACLK <= 1;
             synchronizedDataInput <= DS_RX;
             syncIOR <= IOR | BALE;
@@ -1168,9 +1168,9 @@ module top(
         end else if (r3_Pulse & ~r2_Pulse) begin
             syncedISACLK <= 0;
             synchronizedDataInput <= DS_RX;
-        end*/
+        end
 
-        if (isahighctr < 1 & ISACLK)
+        /*if (isahighctr < 1 & ISACLK)
         begin
             synchronizedDataInput <= DS_RX;
             syncIOR <= IOR | BALE;
@@ -1179,7 +1179,7 @@ module top(
             isahighctr <= isahighctr - 1;
         end else begin
             isahighctr <= 3;
-        end
+        end*/
 
 
     end
