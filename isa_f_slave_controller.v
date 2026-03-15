@@ -128,7 +128,8 @@ module isaSlaveBusController(
 
             lastAdsRequest <= 20'h0;
 
-            baleassertctr <= 3;
+            //baleassertctr <= 3;
+            baleassertctr <= 0; //changed to start from 0 and not 3
 
             isacyclessincebale <= 0;
 
@@ -222,37 +223,6 @@ module isaSlaveBusController(
             absSMEMR <= 0;
         end
 
-        //stuff that is normally supposed to happen on the rising edge of the isa clock shouldbe inside this
-        //doesnt seem to avoid any problems. time for a different approach i guess
-        //if ((~r3_Pulse & r2_Pulse) | (r3_Pulse & ~r2_Pulse)) begin//its too slow to not do on the rising and falling edge
-            //memory or io cycles only count is BALE is low. This device is to give zero fucks about any ISA cycles generated while the host is not the bus master
-            //absIOR <= IOR | BALE;
-            //absIOW <= IOW | BALE;
-            //absSMEMR <= SMEMR | BALE;
-            //absSMEMW <= SMEMW | BALE;
-            //absMEMR <= MEMR | BALE;
-            //absMEMW <= MEMW | BALE;
-
-            //fastSBHE <= SBHE; //sample SBHE on rising edge of isa clock should be enough
-            //fastBALE <= BALE;
-
-            //wr <= IOW & MEMW & SMEMW;
-            //mio <= ~MEMW | ~MEMR | ~SMEMW | ~SMEMW;
-
-            /*if (~fastSBHE) begin
-                iIOCS16 <= 0;
-            end else begin
-                iIOCS16 <= 1;
-            end*/
-
-        //end
-
-        /*if (~SBHE) begin
-            iIOCS16 <= 0;
-        end else begin
-            iIOCS16 <= 1;
-        end*/
-
         if (isahighctr < 1 & ISACLKSTATE)
         begin
             //absIOR <= IOR | BALE;
@@ -266,101 +236,33 @@ module isaSlaveBusController(
             wr <= IOW & MEMW & SMEMW;
             mio <= ~MEMW | ~MEMR | ~SMEMW | ~SMEMW;
 
-            /*if (~fastSBHE) begin
-                iIOCS16 <= 0;
-            end else begin
-                iIOCS16 <= 1;
-            end*/
-
         end else if (ISACLKSTATE) begin
             isahighctr <= isahighctr - 1;
         end else begin
             isahighctr <= 3;
         end
 
-        //treat BALE like a standalone asynchronous signal that has to be clock domain cross de-fucked seperately
-        /*if (~b3_Pulse & b2_Pulse) begin
-            fastBALE <= 1;//FPGACLK compatible BALE signal
-        end else if (b3_Pulse & ~b2_Pulse) begin
-            fastBALE <= 0;//FPGACLK compatible BALE signal
-
-            //the falling edge of BALE means there's an address cycle I guess
-        end*/
-
-        //when BALE is low and the respective select line is low, output low.
-        /*absIOR <= fastIOR | fastBALE;
-        absIOW <= fastIOW | fastBALE;
-        absSMEMR <= fastSMEMR | fastBALE;
-        absSMEMW <= fastSMEMW | fastBALE;
-        absMEMR <= fastMEMR | fastBALE;
-        absMEMW <= fastMEMW | fastBALE;*/
-
-        //the address has to be fetched while BALE is high because the host system needs the IOC16 signal sooner than after ADS_OE. some isa devices assert IOCS16 rising edge of BALE for some stupid reason
-        if (fastBALE & baleassertctr > 0) 
-        begin
-            i_undedicedIsaCycle <= 1;
-            baleassertctr <= baleassertctr - 1;
-            iADS_OE <= 1;
-        end else if (fastBALE & baleassertctr < 1)
-        begin
-            i_undedicedIsaCycle <= 1;
-            //ADS_OE and hurry up about it
-            iADS_OE <= 0;   //get the address. while BALE Is still high
+        /*if (fastBALE & baleassertctr == 0) begin
+            iADS_OE <= 0;
+            baleassertctr <= baleassertctr + 1;
+        end else if (fastBALE & baleassertctr == 1) begin
             lastAdsRequest <= addressBus;
-        end else if (~fastBALE)
-        begin
-            baleassertctr <= 3;
+            baleassertctr <= baleassertctr + 1;
+        end else if (~fastBALE & baleassertctr == 2) begin
+            iADS_OE <= 1;
+            baleassertctr <= 0;
+        end*/
+        if (fastBALE) begin
+            iADS_OE <= 0;
+            lastAdsRequest <= addressBus;
+        end else begin
             iADS_OE <= 1;
         end
 
-        /*if ((~IOW & ~BALE) | (~IOR & ~BALE)) begin
-            if (stupidCtr == 0) begin
-                stupidCtr <= 4;
-                iFPGA_IO_EN <= 1;
-                waitAlreadySet <= 0;
-            end else if (stupidCtr == 3) begin
-                iADS_OE <= 0;//give things time to back off te bus
-            end else if (stupidCtr == 2) begin
-                lastAdsRequest <= addressBus;
-            end else if (stupidCtr == 1) begin
-               iADS_OE <= 1;
-               needToDecode <= 1; 
-            end
-
-            if (stupidCtr > 1) begin
-                stupidCtr <= stupidCtr - 1;
-            end
-        end else begin
-            needToDecode <= 0;
-            actualBusCycle <= 0;
-
-            iFPGA_IO_EN <= 0;
-            waitAlreadySet <= 1;
-            if (~waitAlreadySet) begin
-                FPGA_IO_WAITCTR <= 3;
-            end
-
-            //huh, i wasnt doing this. oh well.
-            lastAdsRequest <= 20'h0;
-
-            stupidCtr <= 0;
-        end*/
-
-        /*if (needToDecode) begin
-            needToDecode <= 0;
-            if (lastAdsRequest >= 20'h420 & lastAdsRequest <= 20'h430 & ~mio & (~IOR | ~IOW) & ~BALE) begin//its fucking bullshit i have to add those extra condition. why the fuck is it not respecting my logic
-                actualBusCycle <= 1;
-            end else begin
-                iFPGA_IO_EN <= 0;//the end of the isa cycle. the isa controller no longer owns the bus
-                waitAlreadySet <= 1;
-
-                if (~waitAlreadySet) begin
-                    FPGA_IO_WAITCTR <= 3;
-                end
-            end
-        end*/
         //if (lastAdsRequest >= 20'h420 & lastAdsRequest <= 20'h430 /*& ~mio*/ & ((~IOR | ~IOW) | (MEMR & MEMW & SMEMR & SMEMW & isacyclessincebale < 2)) & ~BALE) begin
-        if (lastAdsRequest >= 20'h420 & lastAdsRequest <= 20'h430 /*& ~mio*/ & ((~absIOR | ~absIOW) | (absMEMR & absMEMW & absSMEMR & absSMEMW & isacyclessincebale < 2)) & ~fastBALE) begin
+        //if (lastAdsRequest >= 20'h420 & lastAdsRequest <= 20'h430 /*& ~mio*/ & ((~absIOR | ~absIOW) | (absMEMR & absMEMW & absSMEMR & absSMEMW & isacyclessincebale < 2)) & ~fastBALE) begin
+        //if its not an IO cycle it doesn't fuckin matter right now
+        if (lastAdsRequest >= 20'h420 & lastAdsRequest <= 20'h430 /*& ~mio*/ & ((~absIOR | ~absIOW)) & ~fastBALE) begin
             actualBusCycle <= 1;
             //if (FPGA_IO_WAITCTR < 1) begin
                 iFPGA_IO_EN <= 1;
@@ -399,11 +301,13 @@ module isaSlaveBusController(
                 //only if completeCycle is asserted is this device supposed to do anything with the isa bus
                 if (~SBHE) begin    //SBHE is active low - a 16 bit cycle
                     if (lastAdsRequest[0] == 0) begin   //if even byte aligned 16 bit cycle
+                        //TE0i <= 0;
+                        //TE1i <= 0;
                         TE0i <= 0;
-                        TE1i <= 0;
                     end else begin  //if odd byte aligned 16 bit cycle
-                        TE2i <= 0;
-                        TE3i <= 0;
+                        //TE2i <= 0;
+                        //TE3i <= 0;
+                        TE3i <= 0;//temporarily make it 8 bit only for debugging
                     end
                 end else begin  //if SBHE is high - an 8 bit cycle
                     if (lastAdsRequest[0] == 0) begin   //if even byte aligned 8 bit cycle

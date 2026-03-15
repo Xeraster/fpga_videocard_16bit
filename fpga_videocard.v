@@ -16,7 +16,8 @@ this is the version that gets put on the video card with the 16 bit vga, don't p
 //`include "managedVramDataBuffer.v"
 `include "managedVramDataBufferCompositeBankSwap.v"
 //`include "isa_slave_controller.v"
-`include "isa_slave_controller_new.v"
+//`include "isa_slave_controller_new.v"
+`include "isa_f_slave_controller.v"
 `include "writeBufferVram_different.v"
 
 //reused the fixed modified manageReset from 32 bit 486 chipset fpga 0
@@ -990,11 +991,14 @@ module top(
         //DEBUG1 <= VGASCK;
 
         //test points on the pcb
-        MCLK1 <= lastAdsRequest == 20'h426;//(~ADS_OE & FPGA_WR & ~write_en);      //1 pin
-        MCLK0 <= writeBufferEmpty/*lastAdsRequest >= 20'h420 & lastAdsRequest <= 20'h430*/;    //0 pin
-        DEBUG0 <= writeBufferAlmostFull;//u2
-        //DEBUG1 = TE0 & TE1 & TE2 & TE3;//if any of the TEn signals go low, make DEBUG1 go high
-        DEBUG1 <= full & !FPGA_IO_EN & !undecidedIsaCycle;//u1
+        MCLK1 <= ADS_OE;//(~ADS_OE & FPGA_WR & ~write_en);      //1 pin
+        //MCLK0 <= writeBufferEmpty/*lastAdsRequest >= 20'h420 & lastAdsRequest <= 20'h430*/;    //0 pin
+        MCLK0 <= lastAdsRequest >= 20'h420 & lastAdsRequest <= 20'h430;
+        //DEBUG0 <= syncIOR;//u2
+        DEBUG0 = TE0 & TE1 & TE2 & TE3;//if any of the TEn signals go low, make DEBUG1 go high
+        //DEBUG1 = actualBusCycle;
+        DEBUG1 = isa_ctrl_out_en;
+        //DEBUG1 <= full & !FPGA_IO_EN & !undecidedIsaCycle;//u1
     
         //Red = Rt;
         //Green = Gt;
@@ -1149,7 +1153,7 @@ module top(
     always@(posedge /*FASTCLK*/pllClk)
     begin
         if (!RESET) begin
-            isahighctr <= 3;
+            isahighctr <= 2;
         end
 
         if (~ADS_OE) begin
@@ -1159,8 +1163,19 @@ module top(
         r1_Pulse <= ISACLK;    //the ONLY TIME ISA_CLK EVER GETS REFERENCED
         r2_Pulse <= r1_Pulse;
         r3_Pulse <= r2_Pulse;
-
         if ((~r3_Pulse & r2_Pulse)) begin
+            syncedISACLK <= 1;
+        end else if (r3_Pulse & ~r2_Pulse) begin
+            syncedISACLK <= 0;
+        end
+
+        if (syncedISACLK) begin
+            synchronizedDataInput <= DS_RX;
+            syncIOR <= IOR | syncBale;
+            syncIOW <= IOW | syncBale;
+        end
+
+        /*if ((~r3_Pulse & r2_Pulse)) begin
             syncedISACLK <= 1;
             synchronizedDataInput <= DS_RX;
             syncIOR <= IOR | BALE;
@@ -1168,7 +1183,7 @@ module top(
         end else if (r3_Pulse & ~r2_Pulse) begin
             syncedISACLK <= 0;
             synchronizedDataInput <= DS_RX;
-        end
+        end*/
 
         /*if (isahighctr < 1 & ISACLK)
         begin
@@ -1178,7 +1193,7 @@ module top(
         end else if (ISACLK) begin
             isahighctr <= isahighctr - 1;
         end else begin
-            isahighctr <= 3;
+            isahighctr <= 2;
         end*/
 
 
