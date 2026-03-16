@@ -1,0 +1,1 @@
+an attempt at making a real time simulator for the video card. I do not expect this to be possible in the end nor do I expect it to provide useful debugging but such a thing would be so useful that I have to try anyway for the small chance it *might* be possible.
