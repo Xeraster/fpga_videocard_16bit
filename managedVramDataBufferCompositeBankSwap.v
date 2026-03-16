@@ -231,7 +231,7 @@ module managedVramDataBufferCompositeBankSwap(
     always@(posedge clock)
     begin
         //using this results in fewer undefined pixels in software testbench
-        if (delayBeforeWriteAgain > 0 & bus_free) begin
+        if (delayBeforeWriteAgain > 0 & ~bus_free) begin
             delayBeforeWriteAgain <= delayBeforeWriteAgain - 1;
         end
 
@@ -326,7 +326,7 @@ module managedVramDataBufferCompositeBankSwap(
             ififoWrite <= 0;
             delayBeforeWriteAgain <= 4;
 
-            /*if (~bugFix & ~alreadySubtracted & bus_free) begin
+            /*if (~bugFix & ~alreadySubtracted & bus_free & ~full) begin
                 bugFix <= 1;
                 if (waddr > 1 & ~full) begin    //don't bother with the stupid bugfix if it will result in waddr rolling over
                     waddr <= waddr - 1;
