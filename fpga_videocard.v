@@ -773,7 +773,7 @@ module top(
     
                                                                                 //use ADS_OE for bus free? it's either doing an isa transfer for a fpga <=> vram transfer basically
 
-    managedVramDataBufferCompositeBankSwap testramthingy(DS_RX, Ri, Gi, Bi, OE, CE, pllClk/*FASTCLK*/, actualBusCycle | undecidedIsaCycle, 
+    managedVramDataBufferCompositeBankSwap testramthingy(DS_RX, Ri, Gi, Bi, OE, CE, pllClk/*FASTCLK*/, actualBusCycle | undecidedIsaCycle | ~ADS_OE, 
     /*VALID_PIXELS*/ivblank, empty, full, fifovalid, write_en, read_en, bufferRequestedAddress, maxVramAddress, RESET, spixelClock, 
     frameEnd, HSYNC, VSYNC, vsyncctr/*verticalCount[0]*/, alreadyDidHsyncReset, VALID_PIXELS);
 

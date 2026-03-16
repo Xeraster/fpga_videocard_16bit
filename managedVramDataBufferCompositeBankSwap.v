@@ -326,13 +326,14 @@ module managedVramDataBufferCompositeBankSwap(
             ififoWrite <= 0;
             delayBeforeWriteAgain <= 4;
 
-            if (~bugFix) begin
+            /*if (~bugFix & ~alreadySubtracted & bus_free) begin
                 bugFix <= 1;
                 if (waddr > 1 & ~full) begin    //don't bother with the stupid bugfix if it will result in waddr rolling over
                     waddr <= waddr - 1;
                     iNextVramAddress <= iNextVramAddress - 2;
+                    alreadySubtracted <= 1;
                 end
-            end
+            end*/
 
             //if this is happening, it's probably because of a ADS_OE cycle so backpedel on the counter and write address a little
 
