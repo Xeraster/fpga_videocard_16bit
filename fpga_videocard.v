@@ -981,6 +981,7 @@ module top(
     reg b1_Pulse, b2_Pulse, b3_Pulse;
     reg p1_Pulse, p2_Pulse, p3_Pulse;
     reg syncBale;
+    reg debugDataOut;
 
     always@(posedge pllClk)
     begin
@@ -991,13 +992,20 @@ module top(
         //DEBUG1 <= VGASCK;
 
         //test points on the pcb
-        MCLK1 <= ADS_OE;//(~ADS_OE & FPGA_WR & ~write_en);      //1 pin
+        MCLK1 <= settingsRegister[4];//(~ADS_OE & FPGA_WR & ~write_en);      //1 pin
+        //MCLK1 <= debugDataOut;
+        //MCLK1 <= DATA_OUTPUT_ENABLE;
         //MCLK0 <= writeBufferEmpty/*lastAdsRequest >= 20'h420 & lastAdsRequest <= 20'h430*/;    //0 pin
-        MCLK0 <= lastAdsRequest >= 20'h420 & lastAdsRequest <= 20'h430;
+        //MCLK0 <= lastAdsRequest >= 20'h420 & lastAdsRequest <= 20'h430;
+        //MCLK0 <= lastAdsRequest == 20'h423;
+        MCLK0 <= lastAdsRequest == 20'h423;
         //DEBUG0 <= syncIOR;//u2
-        DEBUG0 = TE0 & TE1 & TE2 & TE3;//if any of the TEn signals go low, make DEBUG1 go high
-        //DEBUG1 = actualBusCycle;
-        DEBUG1 = isa_ctrl_out_en;
+        DEBUG0 <= TE0;//u2
+        //DEBUG0 = TE0 & TE1 & TE2 & TE3;//if any of the TEn signals go low, make DEBUG1 go high
+        //DEBUG0 = deviceBeingSelected;
+        //DEBUG0 = alreadyWrote < 20;
+        DEBUG1 = actualBusCycle;
+        //DEBUG1 = deviceBeingSelected;
         //DEBUG1 <= full & !FPGA_IO_EN & !undecidedIsaCycle;//u1
     
         //Red = Rt;
@@ -1040,6 +1048,8 @@ module top(
             iRed <= Rt;
             iGreen <= Gt;
             iBlue <= Bt;
+
+            dataBusOut <= DStxresult;//fix a bug where data outputs dont work if the test pattern is enabled.
         end else begin
             //Red = 4'h15;
             //Green = 5'h0;
@@ -1061,6 +1071,7 @@ module top(
 
                 addressBusOut <= writeBufferVramAddress;
                 dataBusOut <= writeBufferVramData;
+                debugDataOut <= 0;
             end else if (!FPGA_IO_EN & !undecidedIsaCycle) begin
                 //if there is no relevant isa bus cycle happening, relay the signals to the vram chips for copying stuff into the buffer
                 iVRAM_low_en <= CE;
@@ -1069,6 +1080,7 @@ module top(
                 iwrite_cmd <= 1;
                 addressBusOut <= bufferRequestedAddress;
                 dataBusOut <= DStxresult;
+                debugDataOut <= 1;
             end else begin
                 //explicitly set this stuff to 1, disabling it all in invalid states. it didn't solve any bugs or artifacts but this seems like a good thing to do
                 iVRAM_low_en <= 1;
@@ -1077,6 +1089,7 @@ module top(
                 iwrite_cmd <= 1;
                 addressBusOut <= bufferRequestedAddress;
                 dataBusOut <= DStxresult;
+                debugDataOut <= 1;
             end
         end
 
@@ -1115,6 +1128,7 @@ module top(
     .PACKAGE_PIN(DS),
     .OUTPUT_ENABLE(DATA_OUTPUT_ENABLE/*(~ADS_OE & FPGA_WR & ~write_en)*/),
     .D_OUT_0(dataBusOut),
+    //.D_OUT_0(16'h45),
     .D_IN_0(DS_RX)
     );
     //assign DS = DStxresult;
@@ -1135,7 +1149,7 @@ module top(
 
     //do stuff on the edge of the fast clock
     reg[15:0] DStxresult;
-    reg deviceBeingSelected;
+    //reg deviceBeingSelected;
     reg syncedISACLK;
     //assign DS_TX = DStxresult;
     reg vsyncctr;
@@ -1213,9 +1227,10 @@ module top(
     reg numTimesWrittenTo;//workaround hack for a open collector vs totem pole issue. ugh
     reg gtfoonnextclock;
     reg doData;
+    reg[7:0] alreadyWrote;//deal with write cycle unreliability by only respecting 1 single write per isa write cycle
 
     //it misses read and write cycles like 25%-50% of the time. It may be related to the address decode bug, still not sure if these 2 bugs are caused by the same thing or not
-    always@(posedge /*ISACLK*/pllClk)
+    always@(posedge pllClk)
     begin
         //make it possible to find out if the write buffer is full or empty
         statusRegister[7] <= vblank;
@@ -1234,13 +1249,16 @@ module top(
             numTimesWrittenTo<=0;
             gtfoonnextclock <= 0;
             doData <= 0;
-        end else if (/*(~IOR | ~IOW)*/(~syncIOR | ~syncIOW) & actualBusCycle) begin//only io cycles for now
+            alreadyWrote <= 4'h0;
+        //end else if (/*(~IOR | ~IOW)*/(~syncIOR | ~syncIOW) & actualBusCycle) begin//only io cycles for now
+        end else if ((~IOR | ~IOW) & actualBusCycle & alreadyWrote < 20) begin//only io cycles for now. doesnt make a difference? THATS FUCKING IMPOSSIBLE
             //if (AV_RX == 20'h423) begin
             if (lastAdsRequest == 20'h422) begin
                 if (FPGA_WR) begin
                     DStxresult[7:0] <= videoDisplayRegister;
                 end else begin
                     videoDisplayRegister <= DS_RX[7:0];
+                    alreadyWrote <= alreadyWrote + 1;
                 end
             end else if (lastAdsRequest == 20'h423) begin
                 if (FPGA_WR) begin
@@ -1248,20 +1266,22 @@ module top(
                     DStxresult[7:0] <= settingsRegister[7:0];//temporarily modified to work with isa chipsets that dont do 16 bit isa cycles at all
                 end else begin
                     //settingsRegister[7:0] <= synchronizedDataInput[15:8];
-                    settingsRegister[7:0] <= synchronizedDataInput[7:0];//temporarily modified to work with isa chipsets that dont do 16 bit isa cycles at all
+                    settingsRegister[7:0] <= DS_RX[7:0];//temporarily modified to work with isa chipsets that dont do 16 bit isa cycles at all
+                    alreadyWrote <= alreadyWrote + 1;
                 end
 
                 //DStxresult <= 16'hA9A9;
-                deviceBeingSelected <= 1;
-                numTimesWrittenTo<=0;
+                //deviceBeingSelected <= 1;
+                //numTimesWrittenTo<=0;
             end else if (lastAdsRequest == 20'h426) begin
                 if (FPGA_WR) begin
                     DStxresult[7:0] <= statusRegister;
                 end else begin
                     statusRegister <= DS_RX[7:0];
+                    alreadyWrote <= alreadyWrote + 1;
                 end
-                deviceBeingSelected <= 1;
-                numTimesWrittenTo<=0;
+                //deviceBeingSelected <= 1;
+                //numTimesWrittenTo<=0;
             end else if (lastAdsRequest == 20'h428) begin
                 if (FPGA_WR) begin
                     DStxresult[7:0] <= addressComReg[7:0];
@@ -1270,19 +1290,21 @@ module top(
                     //addressComReg[7:0] <= DS_RX[7:0];
                     addressComReg[0] <= 0;
                     addressComReg[8:1] <= DS_RX[7:0];
+                    alreadyWrote <= alreadyWrote + 1;
                 end
-                deviceBeingSelected <= 1;
-                numTimesWrittenTo <= 0;
+                //deviceBeingSelected <= 1;
+                //numTimesWrittenTo <= 0;
             end else if (lastAdsRequest == 20'h429) begin
                 if (FPGA_WR) begin
-                    DStxresult[15:8] <= addressComReg[15:8];
+                    //DStxresult[15:8] <= addressComReg[15:8];
+                    DStxresult[7:0] <= addressComReg[15:8];
                 end else begin
-                    //addressComReg[15:8] <= DS_RX[15:8];
-                    //addressComReg[15:8] <= DS_RX[15:8];
-                    addressComReg[16:9] <= DS_RX[15:8];
-                    numTimesWrittenTo <= 0;
+                    //addressComReg[16:9] <= DS_RX[15:8];
+                    addressComReg[16:9] <= DS_RX[7:0];
+                    //numTimesWrittenTo <= 0;
+                    alreadyWrote <= alreadyWrote + 1;
                 end
-                deviceBeingSelected <= 1;
+                //deviceBeingSelected <= 1;
             end else if (lastAdsRequest == 20'h42A) begin
                 if (FPGA_WR) begin
                     DStxresult[7:0] <= addressComReg[23:16];
@@ -1290,15 +1312,18 @@ module top(
                     //addressComReg[23:16] <= DS_RX[7:0];
                     //addressComReg[23:16] <= DS_RX[7:0];
                     addressComReg[23:17] <= DS_RX[6:0];
-                    numTimesWrittenTo <= 0;
+                    //numTimesWrittenTo <= 0;
+                    alreadyWrote <= alreadyWrote + 1;
                 end
-                deviceBeingSelected <= 1;
+                //deviceBeingSelected <= 1;
             end else if (lastAdsRequest == 20'h42C) begin
                 if (FPGA_WR) begin
-                    DStxresult[15:0] <= nextThingToWrite;
+                    //DStxresult[15:0] <= nextThingToWrite;
+                    DStxresult[7:0] <= nextThingToWrite;
                 end else begin
                     //nextThingToWrite <= DS_RX[15:0];
                     nextThingToWrite <= DS_RX;
+                    alreadyWrote <= alreadyWrote + 1;
                     //nextThingToWrite <= 16'hffff;
                     if (!alreadyIncrementedAdsPtr & !numTimesWrittenTo) begin
                         //hack so that repeated psuedo 16 bit writes don't get counted as 2 write cycles. just dont do 8 bit writes to this port and it'll be fine
@@ -1311,19 +1336,19 @@ module top(
                         gtfoonnextclock <= 1;
                     end
                 end
-                deviceBeingSelected <= 1;
+                //deviceBeingSelected <= 1;
             end else if (lastAdsRequest >= 20'h420 & lastAdsRequest <= 20'h430) begin
                 DStxresult <= 16'h5555;
-                deviceBeingSelected <= 1;
+            //    deviceBeingSelected <= 1;
                 //numTimesWrittenTo <= 0;
             end else begin
                 DStxresult <= 16'bZ;     //set DS_TX to 0 when not in use to circumvent the tristate bug (there probably isn't a tristate bug anymore)
-                deviceBeingSelected <= 0;
+                //deviceBeingSelected <= 0;
                 //numTimesWrittenTo <= 0;
             end
         end else begin
             DStxresult <= 16'bZ;         //set DS_TX to 0 when not in use to circumvent the tristate bug (there probably isn't a tristate bug anymore)
-            deviceBeingSelected <= 0;
+            //deviceBeingSelected <= 0;
             alreadyIncrementedAdsPtr <= 0;
             //numTimesWrittenTo <= 0;
 
@@ -1335,6 +1360,11 @@ module top(
 
         if (doData) begin
             doData <= 0;
+        end
+
+        //every time a bus cycle ends, disable the alreadyWrote blocker signal
+        if (~actualBusCycle) begin
+            alreadyWrote <= 7'h0;
         end
     end
 

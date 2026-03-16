@@ -80,10 +80,32 @@ module isaSlaveBusController(
 
     //tranciever enable signals
     reg TE0i, TE1i, TE2i, TE3i;
-    assign TE0 = TE0i;
-    assign TE1 = TE1i;
-    assign TE2 = TE2i;
-    assign TE3 = TE3i;
+    //assign TE0 = TE0i;
+    //assign TE1 = TE1i;
+    //assign TE2 = TE2i;
+    //assign TE3 = TE3i;
+
+    //stop bus contention on write cycles due to "slow" pll fpga clock logic once and for all
+    //yosys prefers this notation
+    assign TE0 = (((~IOR & ~BALE) | (~IOW & ~BALE)) & actualBusCycle) ? TE0i : 1;
+    assign TE1 = (((~IOR & ~BALE) | (~IOW & ~BALE)) & actualBusCycle) ? TE1i : 1;
+    assign TE2 = (((~IOR & ~BALE) | (~IOW & ~BALE)) & actualBusCycle) ? TE2i : 1;
+    assign TE3 = (((~IOR & ~BALE) | (~IOW & ~BALE)) & actualBusCycle) ? TE3i : 1;
+
+    //stop bus contention on write cycles due to "slow" pll fpga clock logic once and for all
+    /*always@(*) begin
+       if (((~IOR & ~BALE) | (~IOR & ~BALE)) & actualBusCycle) begin
+        TE0 = TE0i;
+        TE1 = TE1i;
+        TE2 = TE2i;
+        TE3 = TE3i;
+       end else begin
+        TE0 = 1;
+        TE1 = 1;
+        TE2 = 1;
+        TE3 = 1;
+       end
+    end*/
 
     reg[2:0] FPGA_IO_WAITCTR;//waitstating FPGA_IO_EN for a clock cycle or two after its supposed to go low is a thing i have not tried yet
     reg waitAlreadySet;//this didn't improve or mess up anything. fuck. no difference.
@@ -293,7 +315,8 @@ module isaSlaveBusController(
         end
 
 
-        if (/*(~absIOR & ~fastBALE) | (~absIOW & ~fastBALE)*/ (~absIOR & ~fastBALE) | (~absIOW & ~fastBALE))//not sure which is better, it generally behaves the same way with both methods
+        //if (/*(~absIOR & ~fastBALE) | (~absIOW & ~fastBALE)*/ (~absIOR & ~fastBALE) | (~absIOW & ~fastBALE))//not sure which is better, it generally behaves the same way with both methods
+        if ((~fastBALE & ~IOR) | (~fastBALE & ~IOW))
         begin
 
             //figure out wtf to do about TE0-TE3 signals
@@ -307,13 +330,13 @@ module isaSlaveBusController(
                     end else begin  //if odd byte aligned 16 bit cycle
                         //TE2i <= 0;
                         //TE3i <= 0;
-                        TE3i <= 0;//temporarily make it 8 bit only for debugging
+                        TE0i <= 0;//temporarily make it 8 bit only for debugging
                     end
                 end else begin  //if SBHE is high - an 8 bit cycle
                     if (lastAdsRequest[0] == 0) begin   //if even byte aligned 8 bit cycle
                         TE0i <= 0;   //every even byte of vram can only go on bits 0-7. That's why there are 2 74ALVC16245s
                     end else begin  //if odd byte aligned 8 bit cycle
-                        TE3i <= 0;   //every odd byte of vram can only go on bits 8-15. That's why there are 2 74ALVC16245s
+                        TE0i <= 0;   //every odd byte of vram can only go on bits 8-15. That's why there are 2 74ALVC16245s
                     end
                 end
             end else begin
