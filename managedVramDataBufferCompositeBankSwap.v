@@ -231,7 +231,7 @@ module managedVramDataBufferCompositeBankSwap(
     always@(posedge clock)
     begin
         //using this results in fewer undefined pixels in software testbench
-        if (delayBeforeWriteAgain > 0) begin
+        if (delayBeforeWriteAgain > 0 & bus_free) begin
             delayBeforeWriteAgain <= delayBeforeWriteAgain - 1;
         end
 
