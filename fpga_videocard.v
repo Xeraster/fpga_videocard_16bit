@@ -992,15 +992,15 @@ module top(
         //DEBUG1 <= VGASCK;
 
         //test points on the pcb
-        MCLK1 <= settingsRegister[4];//(~ADS_OE & FPGA_WR & ~write_en);      //1 pin
+        MCLK1 <= statusRegister[4];//(~ADS_OE & FPGA_WR & ~write_en);      //1 pin
         //MCLK1 <= debugDataOut;
         //MCLK1 <= DATA_OUTPUT_ENABLE;
         //MCLK0 <= writeBufferEmpty/*lastAdsRequest >= 20'h420 & lastAdsRequest <= 20'h430*/;    //0 pin
         //MCLK0 <= lastAdsRequest >= 20'h420 & lastAdsRequest <= 20'h430;
         //MCLK0 <= lastAdsRequest == 20'h423;
-        MCLK0 <= lastAdsRequest == 20'h423;
+        MCLK0 <= lastAdsRequest == 20'h42C;
         //DEBUG0 <= syncIOR;//u2
-        DEBUG0 <= TE0;//u2
+        DEBUG0 <= statusRegister[5];//u2
         //DEBUG0 = TE0 & TE1 & TE2 & TE3;//if any of the TEn signals go low, make DEBUG1 go high
         //DEBUG0 = deviceBeingSelected;
         //DEBUG0 = alreadyWrote < 20;
@@ -1290,6 +1290,7 @@ module top(
                     //addressComReg[7:0] <= DS_RX[7:0];
                     addressComReg[0] <= 0;
                     addressComReg[8:1] <= DS_RX[7:0];
+                    addressComReg[16:9] <= DS_RX[15:8];
                     alreadyWrote <= alreadyWrote + 1;
                 end
                 //deviceBeingSelected <= 1;
@@ -1300,7 +1301,7 @@ module top(
                     DStxresult[7:0] <= addressComReg[15:8];
                 end else begin
                     //addressComReg[16:9] <= DS_RX[15:8];
-                    addressComReg[16:9] <= DS_RX[7:0];
+                    addressComReg[16:9] <= DS_RX[15:8];
                     //numTimesWrittenTo <= 0;
                     alreadyWrote <= alreadyWrote + 1;
                 end
@@ -1325,7 +1326,12 @@ module top(
                     nextThingToWrite <= DS_RX;
                     alreadyWrote <= alreadyWrote + 1;
                     //nextThingToWrite <= 16'hffff;
-                    if (!alreadyIncrementedAdsPtr & !numTimesWrittenTo) begin
+                    if (~alreadyIncrementedAdsPtr) begin
+                        addressComReg <= addressComReg + 2;
+                        alreadyIncrementedAdsPtr <= 1;
+                        doData <= 1;
+                    end
+                    /*if (!alreadyIncrementedAdsPtr & !numTimesWrittenTo) begin
                         //hack so that repeated psuedo 16 bit writes don't get counted as 2 write cycles. just dont do 8 bit writes to this port and it'll be fine
                         addressComReg <= addressComReg + 2;//increment the address pointer for easiness
                         alreadyIncrementedAdsPtr <= 1;
@@ -1334,7 +1340,7 @@ module top(
                     end else if (!alreadyIncrementedAdsPtr & numTimesWrittenTo) begin
                         //fuck
                         gtfoonnextclock <= 1;
-                    end
+                    end*/
                 end
                 //deviceBeingSelected <= 1;
             end else if (lastAdsRequest >= 20'h420 & lastAdsRequest <= 20'h430) begin

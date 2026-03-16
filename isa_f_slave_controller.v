@@ -327,6 +327,7 @@ module isaSlaveBusController(
                         //TE0i <= 0;
                         //TE1i <= 0;
                         TE0i <= 0;
+                        TE1i <= 0;
                     end else begin  //if odd byte aligned 16 bit cycle
                         //TE2i <= 0;
                         //TE3i <= 0;
@@ -335,6 +336,7 @@ module isaSlaveBusController(
                 end else begin  //if SBHE is high - an 8 bit cycle
                     if (lastAdsRequest[0] == 0) begin   //if even byte aligned 8 bit cycle
                         TE0i <= 0;   //every even byte of vram can only go on bits 0-7. That's why there are 2 74ALVC16245s
+                        TE1i <= 0;
                     end else begin  //if odd byte aligned 8 bit cycle
                         TE0i <= 0;   //every odd byte of vram can only go on bits 8-15. That's why there are 2 74ALVC16245s
                     end
