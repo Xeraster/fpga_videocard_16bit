@@ -1,57 +1,99 @@
-//#include "Vvideo.h"
+#include "Vvideo.h"
 #include <verilated.h>
 #include <SDL2/SDL.h>
+#include <cstring>
 
-int main() {
+//simulate random pixel data upon startup
+void fillRandom(uint8_t *buf, size_t size)
+{
+    for(size_t i = 0; i < size; i++)
+        buf[i] = rand() & 0xFF;
+}
+
+int main(int argc, char** argv)
+{
+    Verilated::commandArgs(argc, argv);
 
     Vvideo *top = new Vvideo;
 
     SDL_Init(SDL_INIT_VIDEO);
 
     SDL_Window *window = SDL_CreateWindow(
-        "FPGA Video",
+        "FPGA VGA",
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
         640,480,0);
 
     SDL_Renderer *renderer = SDL_CreateRenderer(window,-1,0);
-    SDL_Texture *texture =
-        SDL_CreateTexture(renderer,
-                          SDL_PIXELFORMAT_RGB24,
-                          SDL_TEXTUREACCESS_STREAMING,
-                          640,480);
+
+    SDL_Texture *texture = SDL_CreateTexture(
+        renderer,
+        SDL_PIXELFORMAT_RGB24,
+        SDL_TEXTUREACCESS_STREAMING,
+        640,480);
 
     uint8_t framebuffer[640*480*3];
+    memset(framebuffer,0,sizeof(framebuffer));
+    fillRandom(framebuffer, sizeof(framebuffer));
 
-    int x=0;
-    int y=0;
+    SDL_Event event;
 
-    while(!Verilated::gotFinish()) {
+    //defaults or whatever
+    top->BALE = 0;
 
-        top->clk = !top->clk;
+    /* reset */
+    top->pllclk = 0;
+    top->RESET = 0;
+
+    for(int i=0;i<10;i++){
+        top->pllclk ^= 1;
+        top->eval();
+    }
+
+    top->RESET = 1;
+
+    bool last_vsync = 1;
+
+    while(!Verilated::gotFinish())
+    {
+        while(SDL_PollEvent(&event)){
+            if(event.type == SDL_QUIT)
+                return 0;
+        }
+
+        /* clock */
+        top->pllclk ^= 1;
         top->eval();
 
-        if(top->clk) {
+        if(top->pixelClock)
+        {
+            /* draw pixel only when valid */
+            if(top->VALID_PIXELS)
+            {
+                int x = top->horizontalCount;
+                int y = top->verticalCount;
 
-            if(!top->hsync) x = 0;
+                if(x < 640 && y < 480)
+                {
+                    int idx = (y*640 + x)*3;
 
-            if(!top->vsync) {
-                y = 0;
+                    /* convert 5-6-5 to 8-bit */
+                    framebuffer[idx+0] = (top->Rt << 3);
+                    framebuffer[idx+1] = (top->Gt << 2);
+                    framebuffer[idx+2] = (top->Bt << 3);
+                }
+            }
+
+            /* detect start of frame */
+            if(!top->VSYNC && last_vsync)
+            {
                 SDL_UpdateTexture(texture,NULL,framebuffer,640*3);
+                SDL_RenderClear(renderer);
                 SDL_RenderCopy(renderer,texture,NULL,NULL);
                 SDL_RenderPresent(renderer);
             }
 
-            framebuffer[(y*640 + x)*3 + 0] = top->r;
-            framebuffer[(y*640 + x)*3 + 1] = top->g;
-            framebuffer[(y*640 + x)*3 + 2] = top->b;
-
-            x++;
-
-            if(x==640){
-                x=0;
-                y++;
-            }
+            last_vsync = top->VSYNC;
         }
     }
 }
