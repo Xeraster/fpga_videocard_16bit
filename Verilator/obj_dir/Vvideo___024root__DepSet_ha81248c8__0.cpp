@@ -5,6 +5,59 @@
 #include "Vvideo__pch.h"
 #include "Vvideo___024root.h"
 
+void Vvideo___024root___ico_sequent__TOP__0(Vvideo___024root* vlSelf);
+
+void Vvideo___024root___eval_ico(Vvideo___024root* vlSelf) {
+    VL_DEBUG_IF(VL_DBG_MSGF("+    Vvideo___024root___eval_ico\n"); );
+    Vvideo__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
+    auto& vlSelfRef = std::ref(*vlSelf).get();
+    // Body
+    if ((1ULL & vlSelfRef.__VicoTriggered.word(0U))) {
+        Vvideo___024root___ico_sequent__TOP__0(vlSelf);
+    }
+}
+
+VL_INLINE_OPT void Vvideo___024root___ico_sequent__TOP__0(Vvideo___024root* vlSelf) {
+    VL_DEBUG_IF(VL_DBG_MSGF("+    Vvideo___024root___ico_sequent__TOP__0\n"); );
+    Vvideo__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
+    auto& vlSelfRef = std::ref(*vlSelf).get();
+    // Init
+    CData/*0:0*/ video__DOT__isathing__DOT____VdfgRegularize_h12aca4bb_0_1;
+    video__DOT__isathing__DOT____VdfgRegularize_h12aca4bb_0_1 = 0;
+    // Body
+    vlSelfRef.ADS_LATCH = vlSelfRef.BALE;
+    vlSelfRef.IOCS16 = vlSelfRef.SBHE;
+    video__DOT__isathing__DOT____VdfgRegularize_h12aca4bb_0_1 
+        = (1U & (~ ((((~ (IData)(vlSelfRef.IOR)) | 
+                      (~ (IData)(vlSelfRef.IOW))) & 
+                     (~ (IData)(vlSelfRef.BALE))) & (IData)(vlSelfRef.video__DOT__isathing__DOT__actualBusCycle))));
+    vlSelfRef.TE0 = ((IData)(video__DOT__isathing__DOT____VdfgRegularize_h12aca4bb_0_1) 
+                     | (IData)(vlSelfRef.video__DOT__isathing__DOT__TE0i));
+    vlSelfRef.TE1 = ((IData)(video__DOT__isathing__DOT____VdfgRegularize_h12aca4bb_0_1) 
+                     | (IData)(vlSelfRef.video__DOT__isathing__DOT__TE1i));
+    vlSelfRef.TE2 = ((IData)(video__DOT__isathing__DOT____VdfgRegularize_h12aca4bb_0_1) 
+                     | (IData)(vlSelfRef.video__DOT__isathing__DOT__TE2i));
+    vlSelfRef.TE3 = ((IData)(video__DOT__isathing__DOT____VdfgRegularize_h12aca4bb_0_1) 
+                     | (IData)(vlSelfRef.video__DOT__isathing__DOT__TE3i));
+}
+
+void Vvideo___024root___eval_triggers__ico(Vvideo___024root* vlSelf);
+
+bool Vvideo___024root___eval_phase__ico(Vvideo___024root* vlSelf) {
+    VL_DEBUG_IF(VL_DBG_MSGF("+    Vvideo___024root___eval_phase__ico\n"); );
+    Vvideo__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
+    auto& vlSelfRef = std::ref(*vlSelf).get();
+    // Init
+    CData/*0:0*/ __VicoExecute;
+    // Body
+    Vvideo___024root___eval_triggers__ico(vlSelf);
+    __VicoExecute = vlSelfRef.__VicoTriggered.any();
+    if (__VicoExecute) {
+        Vvideo___024root___eval_ico(vlSelf);
+    }
+    return (__VicoExecute);
+}
+
 void Vvideo___024root___eval_act(Vvideo___024root* vlSelf) {
     VL_DEBUG_IF(VL_DBG_MSGF("+    Vvideo___024root___eval_act\n"); );
     Vvideo__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
@@ -15,6 +68,9 @@ void Vvideo___024root___nba_sequent__TOP__0(Vvideo___024root* vlSelf);
 void Vvideo___024root___nba_sequent__TOP__1(Vvideo___024root* vlSelf);
 void Vvideo___024root___nba_sequent__TOP__2(Vvideo___024root* vlSelf);
 void Vvideo___024root___nba_sequent__TOP__3(Vvideo___024root* vlSelf);
+void Vvideo___024root___nba_sequent__TOP__4(Vvideo___024root* vlSelf);
+void Vvideo___024root___nba_sequent__TOP__5(Vvideo___024root* vlSelf);
+void Vvideo___024root___nba_sequent__TOP__6(Vvideo___024root* vlSelf);
 
 void Vvideo___024root___eval_nba(Vvideo___024root* vlSelf) {
     VL_DEBUG_IF(VL_DBG_MSGF("+    Vvideo___024root___eval_nba\n"); );
@@ -24,14 +80,23 @@ void Vvideo___024root___eval_nba(Vvideo___024root* vlSelf) {
     if ((1ULL & vlSelfRef.__VnbaTriggered.word(0U))) {
         Vvideo___024root___nba_sequent__TOP__0(vlSelf);
     }
-    if ((6ULL & vlSelfRef.__VnbaTriggered.word(0U))) {
+    if ((2ULL & vlSelfRef.__VnbaTriggered.word(0U))) {
         Vvideo___024root___nba_sequent__TOP__1(vlSelf);
     }
-    if ((4ULL & vlSelfRef.__VnbaTriggered.word(0U))) {
+    if ((0xcULL & vlSelfRef.__VnbaTriggered.word(0U))) {
         Vvideo___024root___nba_sequent__TOP__2(vlSelf);
     }
-    if ((6ULL & vlSelfRef.__VnbaTriggered.word(0U))) {
+    if ((8ULL & vlSelfRef.__VnbaTriggered.word(0U))) {
         Vvideo___024root___nba_sequent__TOP__3(vlSelf);
+    }
+    if ((1ULL & vlSelfRef.__VnbaTriggered.word(0U))) {
+        Vvideo___024root___nba_sequent__TOP__4(vlSelf);
+    }
+    if ((2ULL & vlSelfRef.__VnbaTriggered.word(0U))) {
+        Vvideo___024root___nba_sequent__TOP__5(vlSelf);
+    }
+    if ((0xcULL & vlSelfRef.__VnbaTriggered.word(0U))) {
+        Vvideo___024root___nba_sequent__TOP__6(vlSelf);
     }
 }
 
@@ -39,11 +104,658 @@ VL_INLINE_OPT void Vvideo___024root___nba_sequent__TOP__0(Vvideo___024root* vlSe
     VL_DEBUG_IF(VL_DBG_MSGF("+    Vvideo___024root___nba_sequent__TOP__0\n"); );
     Vvideo__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     auto& vlSelfRef = std::ref(*vlSelf).get();
+    // Body
+    vlSelfRef.__Vdly__video__DOT__vsyncctr = vlSelfRef.video__DOT__vsyncctr;
+    vlSelfRef.__Vdly__video__DOT__vsyncctr = (1U & 
+                                              (~ (IData)(vlSelfRef.video__DOT__vsyncctr)));
+}
+
+VL_INLINE_OPT void Vvideo___024root___nba_sequent__TOP__1(Vvideo___024root* vlSelf) {
+    VL_DEBUG_IF(VL_DBG_MSGF("+    Vvideo___024root___nba_sequent__TOP__1\n"); );
+    Vvideo__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
+    auto& vlSelfRef = std::ref(*vlSelf).get();
     // Init
+    CData/*0:0*/ video__DOT__isathing__DOT____VdfgRegularize_h12aca4bb_0_1;
+    video__DOT__isathing__DOT____VdfgRegularize_h12aca4bb_0_1 = 0;
+    CData/*7:0*/ __Vdly__video__DOT__statusRegister;
+    __Vdly__video__DOT__statusRegister = 0;
+    CData/*7:0*/ __Vdly__video__DOT__alreadyWrote;
+    __Vdly__video__DOT__alreadyWrote = 0;
+    IData/*23:0*/ __Vdly__video__DOT__addressComReg;
+    __Vdly__video__DOT__addressComReg = 0;
+    CData/*0:0*/ __Vdly__video__DOT__doData;
+    __Vdly__video__DOT__doData = 0;
     IData/*27:0*/ __Vdly__video__DOT__cdd__DOT__counter;
     __Vdly__video__DOT__cdd__DOT__counter = 0;
+    CData/*7:0*/ __Vdly__video__DOT__wbv__DOT__dataFifo__DOT__w_ptr;
+    __Vdly__video__DOT__wbv__DOT__dataFifo__DOT__w_ptr = 0;
+    CData/*7:0*/ __Vdly__video__DOT__wbv__DOT__dataFifo__DOT__r_ptr;
+    __Vdly__video__DOT__wbv__DOT__dataFifo__DOT__r_ptr = 0;
+    CData/*7:0*/ __Vdly__video__DOT__wbv__DOT__addressFifo__DOT__w_ptr;
+    __Vdly__video__DOT__wbv__DOT__addressFifo__DOT__w_ptr = 0;
+    CData/*7:0*/ __Vdly__video__DOT__wbv__DOT__addressFifo__DOT__r_ptr;
+    __Vdly__video__DOT__wbv__DOT__addressFifo__DOT__r_ptr = 0;
+    CData/*0:0*/ __Vdly__video__DOT__isathing__DOT__actualBusCycle;
+    __Vdly__video__DOT__isathing__DOT__actualBusCycle = 0;
+    CData/*2:0*/ __Vdly__video__DOT__isathing__DOT__isahighctr;
+    __Vdly__video__DOT__isathing__DOT__isahighctr = 0;
+    IData/*19:0*/ __Vdly__video__DOT__isathing__DOT__lastAdsRequest;
+    __Vdly__video__DOT__isathing__DOT__lastAdsRequest = 0;
+    CData/*2:0*/ __Vdly__video__DOT__isathing__DOT__isacyclessincebale;
+    __Vdly__video__DOT__isathing__DOT__isacyclessincebale = 0;
+    CData/*0:0*/ __Vdly__video__DOT__isathing__DOT__ISACLKSTATE;
+    __Vdly__video__DOT__isathing__DOT__ISACLKSTATE = 0;
+    CData/*2:0*/ __Vdly__video__DOT__testramthingy__DOT__delayBeforeWriteAgain;
+    __Vdly__video__DOT__testramthingy__DOT__delayBeforeWriteAgain = 0;
+    IData/*19:0*/ __Vdly__video__DOT__testramthingy__DOT__iNextVramAddress;
+    __Vdly__video__DOT__testramthingy__DOT__iNextVramAddress = 0;
+    SData/*9:0*/ __Vdly__video__DOT__testramthingy__DOT__waddr;
+    __Vdly__video__DOT__testramthingy__DOT__waddr = 0;
+    CData/*0:0*/ __Vdly__video__DOT__testramthingy__DOT__alreadySubtracted;
+    __Vdly__video__DOT__testramthingy__DOT__alreadySubtracted = 0;
+    SData/*15:0*/ __VdlyVal__video__DOT__wbv__DOT__dataFifo__DOT__theBlock__DOT__mem__v0;
+    __VdlyVal__video__DOT__wbv__DOT__dataFifo__DOT__theBlock__DOT__mem__v0 = 0;
+    CData/*7:0*/ __VdlyDim0__video__DOT__wbv__DOT__dataFifo__DOT__theBlock__DOT__mem__v0;
+    __VdlyDim0__video__DOT__wbv__DOT__dataFifo__DOT__theBlock__DOT__mem__v0 = 0;
+    CData/*0:0*/ __VdlySet__video__DOT__wbv__DOT__dataFifo__DOT__theBlock__DOT__mem__v0;
+    __VdlySet__video__DOT__wbv__DOT__dataFifo__DOT__theBlock__DOT__mem__v0 = 0;
+    IData/*19:0*/ __VdlyVal__video__DOT__wbv__DOT__addressFifo__DOT__theBlock__DOT__mem__v0;
+    __VdlyVal__video__DOT__wbv__DOT__addressFifo__DOT__theBlock__DOT__mem__v0 = 0;
+    CData/*7:0*/ __VdlyDim0__video__DOT__wbv__DOT__addressFifo__DOT__theBlock__DOT__mem__v0;
+    __VdlyDim0__video__DOT__wbv__DOT__addressFifo__DOT__theBlock__DOT__mem__v0 = 0;
+    CData/*0:0*/ __VdlySet__video__DOT__wbv__DOT__addressFifo__DOT__theBlock__DOT__mem__v0;
+    __VdlySet__video__DOT__wbv__DOT__addressFifo__DOT__theBlock__DOT__mem__v0 = 0;
     // Body
     __Vdly__video__DOT__cdd__DOT__counter = vlSelfRef.video__DOT__cdd__DOT__counter;
+    __Vdly__video__DOT__wbv__DOT__addressFifo__DOT__w_ptr 
+        = vlSelfRef.video__DOT__wbv__DOT__addressFifo__DOT__w_ptr;
+    __Vdly__video__DOT__wbv__DOT__addressFifo__DOT__r_ptr 
+        = vlSelfRef.video__DOT__wbv__DOT__addressFifo__DOT__r_ptr;
+    __Vdly__video__DOT__wbv__DOT__dataFifo__DOT__r_ptr 
+        = vlSelfRef.video__DOT__wbv__DOT__dataFifo__DOT__r_ptr;
+    __Vdly__video__DOT__wbv__DOT__dataFifo__DOT__w_ptr 
+        = vlSelfRef.video__DOT__wbv__DOT__dataFifo__DOT__w_ptr;
+    __VdlySet__video__DOT__wbv__DOT__addressFifo__DOT__theBlock__DOT__mem__v0 = 0U;
+    __VdlySet__video__DOT__wbv__DOT__dataFifo__DOT__theBlock__DOT__mem__v0 = 0U;
+    __Vdly__video__DOT__isathing__DOT__isahighctr = vlSelfRef.video__DOT__isathing__DOT__isahighctr;
+    __Vdly__video__DOT__isathing__DOT__lastAdsRequest 
+        = vlSelfRef.video__DOT__isathing__DOT__lastAdsRequest;
+    __Vdly__video__DOT__isathing__DOT__isacyclessincebale 
+        = vlSelfRef.video__DOT__isathing__DOT__isacyclessincebale;
+    __Vdly__video__DOT__isathing__DOT__ISACLKSTATE 
+        = vlSelfRef.video__DOT__isathing__DOT__ISACLKSTATE;
+    __Vdly__video__DOT__isathing__DOT__actualBusCycle 
+        = vlSelfRef.video__DOT__isathing__DOT__actualBusCycle;
+    __Vdly__video__DOT__statusRegister = vlSelfRef.video__DOT__statusRegister;
+    __Vdly__video__DOT__alreadyWrote = vlSelfRef.video__DOT__alreadyWrote;
+    __Vdly__video__DOT__addressComReg = vlSelfRef.video__DOT__addressComReg;
+    __Vdly__video__DOT__doData = vlSelfRef.video__DOT__doData;
+    __Vdly__video__DOT__testramthingy__DOT__delayBeforeWriteAgain 
+        = vlSelfRef.video__DOT__testramthingy__DOT__delayBeforeWriteAgain;
+    __Vdly__video__DOT__testramthingy__DOT__iNextVramAddress 
+        = vlSelfRef.video__DOT__testramthingy__DOT__iNextVramAddress;
+    __Vdly__video__DOT__testramthingy__DOT__alreadySubtracted 
+        = vlSelfRef.video__DOT__testramthingy__DOT__alreadySubtracted;
+    __Vdly__video__DOT__testramthingy__DOT__waddr = vlSelfRef.video__DOT__testramthingy__DOT__waddr;
+    vlSelfRef.__VdlySet__video__DOT__testramthingy__DOT__b1__DOT__mem__v0 = 0U;
+    vlSelfRef.__VdlySet__video__DOT__testramthingy__DOT__b2__DOT__mem__v0 = 0U;
+    if (vlSelfRef.video__DOT__wbv__DOT__addressFifo__DOT__iwrite_en) {
+        __VdlyVal__video__DOT__wbv__DOT__addressFifo__DOT__theBlock__DOT__mem__v0 
+            = (0xfffffU & vlSelfRef.video__DOT__addressComReg);
+        __VdlyDim0__video__DOT__wbv__DOT__addressFifo__DOT__theBlock__DOT__mem__v0 
+            = vlSelfRef.video__DOT__wbv__DOT__addressFifo__DOT__w_ptr;
+        __VdlySet__video__DOT__wbv__DOT__addressFifo__DOT__theBlock__DOT__mem__v0 = 1U;
+    }
+    if (vlSelfRef.video__DOT__wbv__DOT__dataFifo__DOT__iwrite_en) {
+        __VdlyVal__video__DOT__wbv__DOT__dataFifo__DOT__theBlock__DOT__mem__v0 
+            = vlSelfRef.video__DOT__nextThingToWrite;
+        __VdlyDim0__video__DOT__wbv__DOT__dataFifo__DOT__theBlock__DOT__mem__v0 
+            = vlSelfRef.video__DOT__wbv__DOT__dataFifo__DOT__w_ptr;
+        __VdlySet__video__DOT__wbv__DOT__dataFifo__DOT__theBlock__DOT__mem__v0 = 1U;
+    }
+    if (((~ (IData)(vlSelfRef.video__DOT__testramthingy__DOT__fastEvenOrOdd)) 
+         & (IData)(vlSelfRef.video__DOT__testramthingy__DOT__ififoWrite))) {
+        vlSelfRef.__VdlyVal__video__DOT__testramthingy__DOT__b1__DOT__mem__v0 
+            = vlSelfRef.data_in;
+        vlSelfRef.__VdlyDim0__video__DOT__testramthingy__DOT__b1__DOT__mem__v0 
+            = vlSelfRef.video__DOT__testramthingy__DOT__waddr;
+        vlSelfRef.__VdlySet__video__DOT__testramthingy__DOT__b1__DOT__mem__v0 = 1U;
+    }
+    if (((IData)(vlSelfRef.video__DOT__testramthingy__DOT__fastEvenOrOdd) 
+         & (IData)(vlSelfRef.video__DOT__testramthingy__DOT__ififoWrite))) {
+        vlSelfRef.__VdlyVal__video__DOT__testramthingy__DOT__b2__DOT__mem__v0 
+            = vlSelfRef.data_in;
+        vlSelfRef.__VdlyDim0__video__DOT__testramthingy__DOT__b2__DOT__mem__v0 
+            = vlSelfRef.video__DOT__testramthingy__DOT__waddr;
+        vlSelfRef.__VdlySet__video__DOT__testramthingy__DOT__b2__DOT__mem__v0 = 1U;
+    }
+    if ((0x10U & (IData)(vlSelfRef.video__DOT__settingsRegister))) {
+        if (vlSelfRef.video__DOT__wbv__DOT__iWRITEBUF_IO_EN) {
+            vlSelfRef.video__DOT__AVi = vlSelfRef.video__DOT__writeBufferVramAddress;
+            vlSelfRef.video__DOT__data_outi = vlSelfRef.video__DOT__writeBufferVramData;
+        } else {
+            vlSelfRef.video__DOT__AVi = vlSelfRef.video__DOT__testramthingy__DOT__iNextVramAddress;
+            vlSelfRef.video__DOT__data_outi = vlSelfRef.video__DOT__DStxresult;
+        }
+        vlSelfRef.video__DOT__iBlue = (0x1fU & (IData)(vlSelfRef.video__DOT__testramthingy__DOT__ipixelOutput));
+        vlSelfRef.video__DOT__iGreen = (0x3fU & ((IData)(vlSelfRef.video__DOT__testramthingy__DOT__ipixelOutput) 
+                                                 >> 5U));
+        vlSelfRef.video__DOT__iRed = (0x1fU & ((IData)(vlSelfRef.video__DOT__testramthingy__DOT__ipixelOutput) 
+                                               >> 0xbU));
+    } else {
+        vlSelfRef.video__DOT__data_outi = vlSelfRef.video__DOT__DStxresult;
+        vlSelfRef.video__DOT__iBlue = (0x1fU & (IData)(vlSelfRef.video__DOT__Bt));
+        vlSelfRef.video__DOT__iGreen = (0x3fU & (IData)(vlSelfRef.video__DOT__Gt));
+        vlSelfRef.video__DOT__iRed = (0x1fU & (IData)(vlSelfRef.video__DOT__Rt));
+    }
+    vlSelfRef.video__DOT__iwrite_cmd = ((1U & (~ ((IData)(vlSelfRef.video__DOT__settingsRegister) 
+                                                  >> 4U))) 
+                                        || ((1U & (~ (IData)(vlSelfRef.video__DOT__wbv__DOT__iWRITEBUF_IO_EN))) 
+                                            || (IData)(vlSelfRef.video__DOT__wbv__DOT__iwrite_cmd)));
+    vlSelfRef.video__DOT__iread_cmd = ((1U & (~ ((IData)(vlSelfRef.video__DOT__settingsRegister) 
+                                                 >> 4U))) 
+                                       || ((IData)(vlSelfRef.video__DOT__wbv__DOT__iWRITEBUF_IO_EN) 
+                                           || ((1U 
+                                                & (~ 
+                                                   ((~ (IData)(vlSelfRef.video__DOT__isathing__DOT__iFPGA_IO_EN)) 
+                                                    & (~ (IData)(vlSelfRef.video__DOT__isathing__DOT__i_undedicedIsaCycle))))) 
+                                               || (IData)(vlSelfRef.video__DOT__testramthingy__DOT__ireadSignal))));
+    vlSelfRef.video__DOT__iVRAM_en = ((1U & (~ ((IData)(vlSelfRef.video__DOT__settingsRegister) 
+                                                >> 4U))) 
+                                      || ((IData)(vlSelfRef.video__DOT__wbv__DOT__iWRITEBUF_IO_EN)
+                                           ? (IData)(vlSelfRef.video__DOT__wbv__DOT__ichip_select)
+                                           : ((1U & 
+                                               (~ (
+                                                   (~ (IData)(vlSelfRef.video__DOT__isathing__DOT__iFPGA_IO_EN)) 
+                                                   & (~ (IData)(vlSelfRef.video__DOT__isathing__DOT__i_undedicedIsaCycle))))) 
+                                              || (IData)(vlSelfRef.video__DOT__testramthingy__DOT__ichipEnable))));
+    if (vlSelfRef.RESET) {
+        if (((IData)(vlSelfRef.video__DOT__wbv__DOT__ififoRead) 
+             & (~ (IData)(vlSelfRef.video__DOT__wbv__DOT__aEmpty)))) {
+            __Vdly__video__DOT__wbv__DOT__addressFifo__DOT__r_ptr 
+                = (0xffU & ((IData)(1U) + (IData)(vlSelfRef.video__DOT__wbv__DOT__addressFifo__DOT__r_ptr)));
+        }
+        if (((IData)(vlSelfRef.video__DOT__wbv__DOT__ififoRead) 
+             & (~ (IData)(vlSelfRef.video__DOT__writeBufferEmpty)))) {
+            __Vdly__video__DOT__wbv__DOT__dataFifo__DOT__r_ptr 
+                = (0xffU & ((IData)(1U) + (IData)(vlSelfRef.video__DOT__wbv__DOT__dataFifo__DOT__r_ptr)));
+        }
+    } else {
+        __Vdly__video__DOT__wbv__DOT__addressFifo__DOT__r_ptr = 0U;
+        __Vdly__video__DOT__wbv__DOT__dataFifo__DOT__r_ptr = 0U;
+    }
+    vlSelfRef.video__DOT__wbv__DOT__ififoRead = ((IData)(vlSelfRef.video__DOT____Vcellinp__wbv____pinNumber9) 
+                                                 & (~ (IData)(vlSelfRef.video__DOT__writeBufferEmpty)));
+    if (vlSelfRef.RESET) {
+        if (((IData)(vlSelfRef.video__DOT__doData) 
+             & (~ (IData)(vlSelfRef.video__DOT__wbv__DOT__addressFifo__DOT__ifull)))) {
+            __Vdly__video__DOT__wbv__DOT__addressFifo__DOT__w_ptr 
+                = (0xffU & ((IData)(1U) + (IData)(vlSelfRef.video__DOT__wbv__DOT__addressFifo__DOT__w_ptr)));
+            vlSelfRef.video__DOT__wbv__DOT__addressFifo__DOT__iwrite_en = 1U;
+        } else {
+            vlSelfRef.video__DOT__wbv__DOT__addressFifo__DOT__iwrite_en = 0U;
+        }
+    } else {
+        __Vdly__video__DOT__wbv__DOT__addressFifo__DOT__w_ptr = 0U;
+        vlSelfRef.video__DOT__wbv__DOT__addressFifo__DOT__iwrite_en = 0U;
+    }
+    vlSelfRef.video__DOT__wbv__DOT__addressFifo__DOT__ifull 
+        = ((0xffU & ((IData)(1U) + (IData)(vlSelfRef.video__DOT__wbv__DOT__addressFifo__DOT__w_ptr))) 
+           == (IData)(vlSelfRef.video__DOT__wbv__DOT__addressFifo__DOT__r_ptr));
+    vlSelfRef.AV = vlSelfRef.video__DOT__AVi;
+    vlSelfRef.video__DOT__writeBufferVramAddress = 
+        vlSelfRef.video__DOT__wbv__DOT__addressFifo__DOT__theBlock__DOT__mem
+        [vlSelfRef.video__DOT__wbv__DOT__addressFifo__DOT__r_ptr];
+    vlSelfRef.write_cmd = vlSelfRef.video__DOT__iwrite_cmd;
+    vlSelfRef.video__DOT__wbv__DOT__iwrite_cmd = (1U 
+                                                  & (~ 
+                                                     ((IData)(vlSelfRef.video__DOT____Vcellinp__wbv____pinNumber9) 
+                                                      & (~ (IData)(vlSelfRef.video__DOT__writeBufferEmpty)))));
+    vlSelfRef.data_out = vlSelfRef.video__DOT__data_outi;
+    vlSelfRef.video__DOT__writeBufferVramData = vlSelfRef.video__DOT__wbv__DOT__dataFifo__DOT__theBlock__DOT__mem
+        [vlSelfRef.video__DOT__wbv__DOT__dataFifo__DOT__r_ptr];
+    __Vdly__video__DOT__statusRegister = ((0xfU & (IData)(__Vdly__video__DOT__statusRegister)) 
+                                          | ((((IData)(vlSelfRef.video__DOT__ivblank) 
+                                               << 7U) 
+                                              | ((0x27fU 
+                                                  <= (IData)(vlSelfRef.video__DOT__testramthingy__DOT__waddr)) 
+                                                 << 6U)) 
+                                             | (((IData)(vlSelfRef.video__DOT__wbv__DOT__dataFifo__DOT__ifull) 
+                                                 << 5U) 
+                                                | ((IData)(vlSelfRef.video__DOT__wbv__DOT__dataFifo__DOT__ialmostFull) 
+                                                   << 4U))));
+    if (vlSelfRef.RESET) {
+        if (((((~ (IData)(vlSelfRef.IOR)) | (~ (IData)(vlSelfRef.IOW))) 
+              & (IData)(vlSelfRef.video__DOT__isathing__DOT__actualBusCycle)) 
+             & (0x14U > (IData)(vlSelfRef.video__DOT__alreadyWrote)))) {
+            if ((0x422U == vlSelfRef.video__DOT__lastAdsRequest)) {
+                if (vlSelfRef.FPGA_WR) {
+                    vlSelfRef.video__DOT__DStxresult 
+                        = ((0xff00U & (IData)(vlSelfRef.video__DOT__DStxresult)) 
+                           | (IData)(vlSelfRef.video__DOT__videoDisplayRegister));
+                } else {
+                    __Vdly__video__DOT__alreadyWrote 
+                        = (0xffU & ((IData)(1U) + (IData)(vlSelfRef.video__DOT__alreadyWrote)));
+                    vlSelfRef.video__DOT__videoDisplayRegister 
+                        = (0xffU & (IData)(vlSelfRef.data_in));
+                }
+            } else if ((0x423U == vlSelfRef.video__DOT__lastAdsRequest)) {
+                if (vlSelfRef.FPGA_WR) {
+                    vlSelfRef.video__DOT__DStxresult 
+                        = ((0xff00U & (IData)(vlSelfRef.video__DOT__DStxresult)) 
+                           | (IData)(vlSelfRef.video__DOT__settingsRegister));
+                } else {
+                    __Vdly__video__DOT__alreadyWrote 
+                        = (0xffU & ((IData)(1U) + (IData)(vlSelfRef.video__DOT__alreadyWrote)));
+                    vlSelfRef.video__DOT__settingsRegister 
+                        = (0xffU & (IData)(vlSelfRef.data_in));
+                }
+            } else if ((0x426U == vlSelfRef.video__DOT__lastAdsRequest)) {
+                if (vlSelfRef.FPGA_WR) {
+                    vlSelfRef.video__DOT__DStxresult 
+                        = ((0xff00U & (IData)(vlSelfRef.video__DOT__DStxresult)) 
+                           | (IData)(vlSelfRef.video__DOT__statusRegister));
+                } else {
+                    __Vdly__video__DOT__alreadyWrote 
+                        = (0xffU & ((IData)(1U) + (IData)(vlSelfRef.video__DOT__alreadyWrote)));
+                    __Vdly__video__DOT__statusRegister 
+                        = (0xffU & (IData)(vlSelfRef.data_in));
+                }
+            } else if ((0x428U == vlSelfRef.video__DOT__lastAdsRequest)) {
+                if (vlSelfRef.FPGA_WR) {
+                    vlSelfRef.video__DOT__DStxresult 
+                        = ((0xff00U & (IData)(vlSelfRef.video__DOT__DStxresult)) 
+                           | (0xffU & vlSelfRef.video__DOT__addressComReg));
+                } else {
+                    __Vdly__video__DOT__alreadyWrote 
+                        = (0xffU & ((IData)(1U) + (IData)(vlSelfRef.video__DOT__alreadyWrote)));
+                    __Vdly__video__DOT__addressComReg 
+                        = ((0xfe0000U & __Vdly__video__DOT__addressComReg) 
+                           | ((0x1fe00U & ((IData)(vlSelfRef.data_in) 
+                                           << 1U)) 
+                              | (0x1feU & ((IData)(vlSelfRef.data_in) 
+                                           << 1U))));
+                }
+            } else if ((0x429U == vlSelfRef.video__DOT__lastAdsRequest)) {
+                if (vlSelfRef.FPGA_WR) {
+                    vlSelfRef.video__DOT__DStxresult 
+                        = ((0xff00U & (IData)(vlSelfRef.video__DOT__DStxresult)) 
+                           | (0xffU & (vlSelfRef.video__DOT__addressComReg 
+                                       >> 8U)));
+                } else {
+                    __Vdly__video__DOT__alreadyWrote 
+                        = (0xffU & ((IData)(1U) + (IData)(vlSelfRef.video__DOT__alreadyWrote)));
+                    __Vdly__video__DOT__addressComReg 
+                        = ((0xfe01ffU & __Vdly__video__DOT__addressComReg) 
+                           | (0x1fe00U & ((IData)(vlSelfRef.data_in) 
+                                          << 1U)));
+                }
+            } else if ((0x42aU == vlSelfRef.video__DOT__lastAdsRequest)) {
+                if (vlSelfRef.FPGA_WR) {
+                    vlSelfRef.video__DOT__DStxresult 
+                        = ((0xff00U & (IData)(vlSelfRef.video__DOT__DStxresult)) 
+                           | (0xffU & (vlSelfRef.video__DOT__addressComReg 
+                                       >> 0x10U)));
+                } else {
+                    __Vdly__video__DOT__alreadyWrote 
+                        = (0xffU & ((IData)(1U) + (IData)(vlSelfRef.video__DOT__alreadyWrote)));
+                    __Vdly__video__DOT__addressComReg 
+                        = ((0x1ffffU & __Vdly__video__DOT__addressComReg) 
+                           | (0xfe0000U & ((IData)(vlSelfRef.data_in) 
+                                           << 0x11U)));
+                }
+            } else if ((0x42cU == vlSelfRef.video__DOT__lastAdsRequest)) {
+                if (vlSelfRef.FPGA_WR) {
+                    vlSelfRef.video__DOT__DStxresult 
+                        = ((0xff00U & (IData)(vlSelfRef.video__DOT__DStxresult)) 
+                           | (0xffU & (IData)(vlSelfRef.video__DOT__nextThingToWrite)));
+                } else {
+                    __Vdly__video__DOT__alreadyWrote 
+                        = (0xffU & ((IData)(1U) + (IData)(vlSelfRef.video__DOT__alreadyWrote)));
+                    vlSelfRef.video__DOT__nextThingToWrite 
+                        = vlSelfRef.data_in;
+                    if ((1U & (~ (IData)(vlSelfRef.video__DOT__alreadyIncrementedAdsPtr)))) {
+                        __Vdly__video__DOT__addressComReg 
+                            = (0xffffffU & ((IData)(2U) 
+                                            + vlSelfRef.video__DOT__addressComReg));
+                        vlSelfRef.video__DOT__alreadyIncrementedAdsPtr = 1U;
+                        __Vdly__video__DOT__doData = 1U;
+                    }
+                }
+            } else {
+                vlSelfRef.video__DOT__DStxresult = 
+                    (((0x420U <= vlSelfRef.video__DOT__lastAdsRequest) 
+                      & (0x430U >= vlSelfRef.video__DOT__lastAdsRequest))
+                      ? 0x5555U : 0U);
+            }
+        } else {
+            if (vlSelfRef.video__DOT__gtfoonnextclock) {
+                vlSelfRef.video__DOT__gtfoonnextclock = 0U;
+            }
+            vlSelfRef.video__DOT__DStxresult = 0U;
+            vlSelfRef.video__DOT__alreadyIncrementedAdsPtr = 0U;
+        }
+    } else {
+        vlSelfRef.video__DOT__gtfoonnextclock = 0U;
+        __Vdly__video__DOT__alreadyWrote = 0U;
+        vlSelfRef.video__DOT__videoDisplayRegister = 0x18U;
+        vlSelfRef.video__DOT__settingsRegister = 0x70U;
+        __Vdly__video__DOT__statusRegister = 0U;
+        vlSelfRef.video__DOT__alreadyIncrementedAdsPtr = 0U;
+        __Vdly__video__DOT__addressComReg = 0U;
+        __Vdly__video__DOT__doData = 0U;
+    }
+    if (vlSelfRef.video__DOT__doData) {
+        __Vdly__video__DOT__doData = 0U;
+    }
+    if ((1U & (~ (IData)(vlSelfRef.video__DOT__isathing__DOT__actualBusCycle)))) {
+        __Vdly__video__DOT__alreadyWrote = 0U;
+    }
+    vlSelfRef.Blue = vlSelfRef.video__DOT__iBlue;
+    vlSelfRef.Green = vlSelfRef.video__DOT__iGreen;
+    vlSelfRef.Red = vlSelfRef.video__DOT__iRed;
+    vlSelfRef.read_cmd = vlSelfRef.video__DOT__iread_cmd;
+    vlSelfRef.VRAM_en = vlSelfRef.video__DOT__iVRAM_en;
+    vlSelfRef.video__DOT__wbv__DOT__ichip_select = 
+        (1U & (~ ((IData)(vlSelfRef.video__DOT____Vcellinp__wbv____pinNumber9) 
+                  & (~ (IData)(vlSelfRef.video__DOT__writeBufferEmpty)))));
+    vlSelfRef.video__DOT__wbv__DOT__iWRITEBUF_IO_EN 
+        = ((IData)(vlSelfRef.video__DOT____Vcellinp__wbv____pinNumber9) 
+           & (~ (IData)(vlSelfRef.video__DOT__writeBufferEmpty)));
+    if (((~ (IData)(vlSelfRef.video__DOT__isathing__DOT__r3_Pulse)) 
+         & (IData)(vlSelfRef.video__DOT__isathing__DOT__r2_Pulse))) {
+        __Vdly__video__DOT__isathing__DOT__ISACLKSTATE = 1U;
+    } else if (((IData)(vlSelfRef.video__DOT__isathing__DOT__r3_Pulse) 
+                & (~ (IData)(vlSelfRef.video__DOT__isathing__DOT__r2_Pulse)))) {
+        __Vdly__video__DOT__isathing__DOT__ISACLKSTATE = 0U;
+    }
+    if ((1U & (~ (IData)(vlSelfRef.RESET)))) {
+        __Vdly__video__DOT__isathing__DOT__actualBusCycle = 0U;
+        vlSelfRef.video__DOT__isathing__DOT__iFPGA_IO_EN = 0U;
+        vlSelfRef.video__DOT__isathing__DOT__iADS_OE = 1U;
+        __Vdly__video__DOT__isathing__DOT__isahighctr = 3U;
+        __Vdly__video__DOT__isathing__DOT__lastAdsRequest = 0U;
+        __Vdly__video__DOT__isathing__DOT__isacyclessincebale = 0U;
+    }
+    if ((1U & (~ ((1U > (IData)(vlSelfRef.video__DOT__isathing__DOT__isahighctr)) 
+                  & (IData)(vlSelfRef.video__DOT__isathing__DOT__ISACLKSTATE))))) {
+        __Vdly__video__DOT__isathing__DOT__isahighctr 
+            = ((IData)(vlSelfRef.video__DOT__isathing__DOT__ISACLKSTATE)
+                ? (7U & ((IData)(vlSelfRef.video__DOT__isathing__DOT__isahighctr) 
+                         - (IData)(1U))) : 3U);
+    }
+    if (vlSelfRef.video__DOT__isathing__DOT__fastBALE) {
+        vlSelfRef.video__DOT__isathing__DOT__iADS_OE = 0U;
+        __Vdly__video__DOT__isathing__DOT__lastAdsRequest 
+            = vlSelfRef.AV_in;
+        __Vdly__video__DOT__isathing__DOT__isacyclessincebale = 0U;
+    } else {
+        vlSelfRef.video__DOT__isathing__DOT__iADS_OE = 1U;
+        if ((((~ (IData)(vlSelfRef.video__DOT__isathing__DOT__fastBALE)) 
+              & (((~ (IData)(vlSelfRef.video__DOT__isathing__DOT__r3_Pulse)) 
+                  & (IData)(vlSelfRef.video__DOT__isathing__DOT__r2_Pulse)) 
+                 | ((IData)(vlSelfRef.video__DOT__isathing__DOT__r3_Pulse) 
+                    & (~ (IData)(vlSelfRef.video__DOT__isathing__DOT__r2_Pulse))))) 
+             & (6U > (IData)(vlSelfRef.video__DOT__isathing__DOT__isacyclessincebale)))) {
+            __Vdly__video__DOT__isathing__DOT__isacyclessincebale 
+                = (7U & ((IData)(1U) + (IData)(vlSelfRef.video__DOT__isathing__DOT__isacyclessincebale)));
+        }
+    }
+    if (((((0x420U <= vlSelfRef.video__DOT__isathing__DOT__lastAdsRequest) 
+           & (0x430U >= vlSelfRef.video__DOT__isathing__DOT__lastAdsRequest)) 
+          & ((~ (IData)(vlSelfRef.video__DOT__isathing__DOT__absIOR)) 
+             | (~ (IData)(vlSelfRef.video__DOT__isathing__DOT__absIOW)))) 
+         & (~ (IData)(vlSelfRef.video__DOT__isathing__DOT__fastBALE)))) {
+        __Vdly__video__DOT__isathing__DOT__actualBusCycle = 1U;
+        vlSelfRef.video__DOT__isathing__DOT__iFPGA_IO_EN = 1U;
+        vlSelfRef.video__DOT__isathing__DOT__i_undedicedIsaCycle = 0U;
+    } else {
+        vlSelfRef.video__DOT__isathing__DOT__iFPGA_IO_EN = 0U;
+        __Vdly__video__DOT__isathing__DOT__actualBusCycle = 0U;
+        if (((~ (IData)(vlSelfRef.video__DOT__isathing__DOT__ISACLKSTATE)) 
+             & (1U < (IData)(vlSelfRef.video__DOT__isathing__DOT__isacyclessincebale)))) {
+            vlSelfRef.video__DOT__isathing__DOT__i_undedicedIsaCycle = 0U;
+        }
+    }
+    if ((1U & (((~ (IData)(vlSelfRef.video__DOT__isathing__DOT__fastBALE)) 
+                & (~ (IData)(vlSelfRef.IOR))) | ((~ (IData)(vlSelfRef.video__DOT__isathing__DOT__fastBALE)) 
+                                                 & (~ (IData)(vlSelfRef.IOW)))))) {
+        if (vlSelfRef.video__DOT__isathing__DOT__actualBusCycle) {
+            if (vlSelfRef.SBHE) {
+                if ((1U & vlSelfRef.video__DOT__isathing__DOT__lastAdsRequest)) {
+                    vlSelfRef.video__DOT__isathing__DOT__TE0i = 0U;
+                } else {
+                    vlSelfRef.video__DOT__isathing__DOT__TE0i = 0U;
+                    vlSelfRef.video__DOT__isathing__DOT__TE1i = 0U;
+                }
+            } else if ((1U & vlSelfRef.video__DOT__isathing__DOT__lastAdsRequest)) {
+                vlSelfRef.video__DOT__isathing__DOT__TE0i = 0U;
+            } else {
+                vlSelfRef.video__DOT__isathing__DOT__TE0i = 0U;
+                vlSelfRef.video__DOT__isathing__DOT__TE1i = 0U;
+            }
+        } else {
+            vlSelfRef.video__DOT__isathing__DOT__TE0i = 1U;
+            vlSelfRef.video__DOT__isathing__DOT__TE1i = 1U;
+            vlSelfRef.video__DOT__isathing__DOT__TE2i = 1U;
+            vlSelfRef.video__DOT__isathing__DOT__TE3i = 1U;
+        }
+    } else {
+        vlSelfRef.video__DOT__isathing__DOT__TE0i = 1U;
+        vlSelfRef.video__DOT__isathing__DOT__TE1i = 1U;
+        vlSelfRef.video__DOT__isathing__DOT__TE2i = 1U;
+        vlSelfRef.video__DOT__isathing__DOT__TE3i = 1U;
+    }
+    if ((1U & (~ (IData)(vlSelfRef.RESET)))) {
+        vlSelfRef.video__DOT__isathing__DOT__fastBALE = 0U;
+        vlSelfRef.video__DOT__isathing__DOT__absIOW = 1U;
+        vlSelfRef.video__DOT__isathing__DOT__absIOR = 1U;
+    }
+    vlSelfRef.video__DOT__isathing__DOT__r3_Pulse = vlSelfRef.video__DOT__isathing__DOT__r2_Pulse;
+    if (((0U < (IData)(vlSelfRef.video__DOT__testramthingy__DOT__delayBeforeWriteAgain)) 
+         & (~ (IData)(vlSelfRef.video__DOT____Vcellinp__testramthingy____pinNumber8)))) {
+        __Vdly__video__DOT__testramthingy__DOT__delayBeforeWriteAgain 
+            = (7U & ((IData)(vlSelfRef.video__DOT__testramthingy__DOT__delayBeforeWriteAgain) 
+                     - (IData)(1U)));
+    }
+    if (vlSelfRef.RESET) {
+        if (vlSelfRef.video__DOT__testramthingy__DOT__fastFrameEnd) {
+            vlSelfRef.video__DOT__testramthingy__DOT__ireadSignal = 1U;
+            vlSelfRef.video__DOT__testramthingy__DOT__ichipEnable = 1U;
+            vlSelfRef.video__DOT__testramthingy__DOT__ififoWrite = 1U;
+            __Vdly__video__DOT__testramthingy__DOT__iNextVramAddress = 0U;
+            __Vdly__video__DOT__testramthingy__DOT__waddr = 0U;
+            __Vdly__video__DOT__testramthingy__DOT__delayBeforeWriteAgain = 2U;
+            __Vdly__video__DOT__testramthingy__DOT__alreadySubtracted = 1U;
+        } else if (vlSelfRef.video__DOT__ivblank) {
+            if ((1U & ((~ (IData)(vlSelfRef.video__DOT__full)) 
+                       & (~ (IData)(vlSelfRef.video__DOT____Vcellinp__testramthingy____pinNumber8))))) {
+                if ((1U < (IData)(vlSelfRef.video__DOT__testramthingy__DOT__delayBeforeWriteAgain))) {
+                    vlSelfRef.video__DOT__testramthingy__DOT__ireadSignal = 1U;
+                    vlSelfRef.video__DOT__testramthingy__DOT__ichipEnable = 1U;
+                    vlSelfRef.video__DOT__testramthingy__DOT__ififoWrite = 0U;
+                } else {
+                    vlSelfRef.video__DOT__testramthingy__DOT__ireadSignal = 0U;
+                    vlSelfRef.video__DOT__testramthingy__DOT__ichipEnable = 0U;
+                    vlSelfRef.video__DOT__testramthingy__DOT__ififoWrite = 1U;
+                }
+                if ((1U > (IData)(vlSelfRef.video__DOT__testramthingy__DOT__delayBeforeWriteAgain))) {
+                    __Vdly__video__DOT__testramthingy__DOT__iNextVramAddress 
+                        = (0xfffffU & ((IData)(2U) 
+                                       + vlSelfRef.video__DOT__testramthingy__DOT__iNextVramAddress));
+                    __Vdly__video__DOT__testramthingy__DOT__waddr 
+                        = (0x3ffU & ((IData)(1U) + (IData)(vlSelfRef.video__DOT__testramthingy__DOT__waddr)));
+                    __Vdly__video__DOT__testramthingy__DOT__alreadySubtracted = 0U;
+                }
+            } else {
+                vlSelfRef.video__DOT__testramthingy__DOT__ireadSignal = 1U;
+                vlSelfRef.video__DOT__testramthingy__DOT__ichipEnable = 1U;
+                vlSelfRef.video__DOT__testramthingy__DOT__ififoWrite = 0U;
+                __Vdly__video__DOT__testramthingy__DOT__delayBeforeWriteAgain = 4U;
+            }
+        } else {
+            if ((1U & (~ (IData)(vlSelfRef.video__DOT__testramthingy__DOT__alreadySubtracted)))) {
+                __Vdly__video__DOT__testramthingy__DOT__iNextVramAddress 
+                    = (0xfffffU & ((IData)(2U) + vlSelfRef.video__DOT__testramthingy__DOT__iNextVramAddress));
+                __Vdly__video__DOT__testramthingy__DOT__alreadySubtracted = 1U;
+            }
+            vlSelfRef.video__DOT__testramthingy__DOT__ireadSignal = 1U;
+            vlSelfRef.video__DOT__testramthingy__DOT__ichipEnable = 1U;
+            vlSelfRef.video__DOT__testramthingy__DOT__ififoWrite = 1U;
+            __Vdly__video__DOT__testramthingy__DOT__waddr = 0U;
+            __Vdly__video__DOT__testramthingy__DOT__delayBeforeWriteAgain = 2U;
+        }
+        if (((IData)(vlSelfRef.video__DOT__doData) 
+             & (~ (IData)(vlSelfRef.video__DOT__wbv__DOT__dataFifo__DOT__ifull)))) {
+            __Vdly__video__DOT__wbv__DOT__dataFifo__DOT__w_ptr 
+                = (0xffU & ((IData)(1U) + (IData)(vlSelfRef.video__DOT__wbv__DOT__dataFifo__DOT__w_ptr)));
+            vlSelfRef.video__DOT__wbv__DOT__dataFifo__DOT__iwrite_en = 1U;
+        } else {
+            vlSelfRef.video__DOT__wbv__DOT__dataFifo__DOT__iwrite_en = 0U;
+        }
+    } else {
+        __Vdly__video__DOT__testramthingy__DOT__alreadySubtracted = 1U;
+        __Vdly__video__DOT__testramthingy__DOT__delayBeforeWriteAgain = 0U;
+        __Vdly__video__DOT__testramthingy__DOT__iNextVramAddress = 0U;
+        vlSelfRef.video__DOT__testramthingy__DOT__ireadSignal = 1U;
+        vlSelfRef.video__DOT__testramthingy__DOT__ichipEnable = 1U;
+        vlSelfRef.video__DOT__testramthingy__DOT__ififoWrite = 1U;
+        __Vdly__video__DOT__testramthingy__DOT__waddr = 0U;
+        __Vdly__video__DOT__wbv__DOT__dataFifo__DOT__w_ptr = 0U;
+        vlSelfRef.video__DOT__wbv__DOT__dataFifo__DOT__iwrite_en = 0U;
+    }
+    vlSelfRef.video__DOT__wbv__DOT__addressFifo__DOT__w_ptr 
+        = __Vdly__video__DOT__wbv__DOT__addressFifo__DOT__w_ptr;
+    if (__VdlySet__video__DOT__wbv__DOT__addressFifo__DOT__theBlock__DOT__mem__v0) {
+        vlSelfRef.video__DOT__wbv__DOT__addressFifo__DOT__theBlock__DOT__mem[__VdlyDim0__video__DOT__wbv__DOT__addressFifo__DOT__theBlock__DOT__mem__v0] 
+            = __VdlyVal__video__DOT__wbv__DOT__addressFifo__DOT__theBlock__DOT__mem__v0;
+    }
+    vlSelfRef.video__DOT__wbv__DOT__addressFifo__DOT__r_ptr 
+        = __Vdly__video__DOT__wbv__DOT__addressFifo__DOT__r_ptr;
+    if (__VdlySet__video__DOT__wbv__DOT__dataFifo__DOT__theBlock__DOT__mem__v0) {
+        vlSelfRef.video__DOT__wbv__DOT__dataFifo__DOT__theBlock__DOT__mem[__VdlyDim0__video__DOT__wbv__DOT__dataFifo__DOT__theBlock__DOT__mem__v0] 
+            = __VdlyVal__video__DOT__wbv__DOT__dataFifo__DOT__theBlock__DOT__mem__v0;
+    }
+    vlSelfRef.video__DOT__statusRegister = __Vdly__video__DOT__statusRegister;
+    vlSelfRef.video__DOT__alreadyWrote = __Vdly__video__DOT__alreadyWrote;
+    vlSelfRef.video__DOT__addressComReg = __Vdly__video__DOT__addressComReg;
+    vlSelfRef.video__DOT__isathing__DOT__isahighctr 
+        = __Vdly__video__DOT__isathing__DOT__isahighctr;
+    vlSelfRef.video__DOT__isathing__DOT__lastAdsRequest 
+        = __Vdly__video__DOT__isathing__DOT__lastAdsRequest;
+    vlSelfRef.video__DOT__isathing__DOT__isacyclessincebale 
+        = __Vdly__video__DOT__isathing__DOT__isacyclessincebale;
+    vlSelfRef.video__DOT__isathing__DOT__ISACLKSTATE 
+        = __Vdly__video__DOT__isathing__DOT__ISACLKSTATE;
+    vlSelfRef.video__DOT__isathing__DOT__actualBusCycle 
+        = __Vdly__video__DOT__isathing__DOT__actualBusCycle;
+    vlSelfRef.video__DOT__testramthingy__DOT__delayBeforeWriteAgain 
+        = __Vdly__video__DOT__testramthingy__DOT__delayBeforeWriteAgain;
+    vlSelfRef.video__DOT__testramthingy__DOT__alreadySubtracted 
+        = __Vdly__video__DOT__testramthingy__DOT__alreadySubtracted;
+    vlSelfRef.video__DOT__testramthingy__DOT__iNextVramAddress 
+        = __Vdly__video__DOT__testramthingy__DOT__iNextVramAddress;
+    vlSelfRef.video__DOT__testramthingy__DOT__waddr 
+        = __Vdly__video__DOT__testramthingy__DOT__waddr;
+    vlSelfRef.video__DOT__wbv__DOT__aEmpty = ((~ (IData)(vlSelfRef.video__DOT__wbv__DOT__addressFifo__DOT__ifull)) 
+                                              & ((IData)(vlSelfRef.video__DOT__wbv__DOT__addressFifo__DOT__r_ptr) 
+                                                 == (IData)(vlSelfRef.video__DOT__wbv__DOT__addressFifo__DOT__w_ptr)));
+    if ((1U & (~ (IData)(vlSelfRef.ADS_OE)))) {
+        vlSelfRef.video__DOT__lastAdsRequest = vlSelfRef.AV_in;
+    }
+    vlSelfRef.video__DOT__wbv__DOT__dataFifo__DOT__ialmostFull 
+        = ((8U > (0xffU & ((IData)(vlSelfRef.video__DOT__wbv__DOT__dataFifo__DOT__w_ptr) 
+                           - (IData)(vlSelfRef.video__DOT__wbv__DOT__dataFifo__DOT__r_ptr)))) 
+           & (~ (IData)(vlSelfRef.video__DOT__writeBufferEmpty)));
+    vlSelfRef.video__DOT__wbv__DOT__dataFifo__DOT__ifull 
+        = ((0xffU & ((IData)(1U) + (IData)(vlSelfRef.video__DOT__wbv__DOT__dataFifo__DOT__w_ptr))) 
+           == (IData)(vlSelfRef.video__DOT__wbv__DOT__dataFifo__DOT__r_ptr));
+    vlSelfRef.video__DOT____Vcellinp__testramthingy____pinNumber8 
+        = (1U & ((IData)(vlSelfRef.video__DOT__isathing__DOT__actualBusCycle) 
+                 | ((~ (IData)(vlSelfRef.video__DOT__isathing__DOT__iADS_OE)) 
+                    | (IData)(vlSelfRef.video__DOT__isathing__DOT__i_undedicedIsaCycle))));
+    video__DOT__isathing__DOT____VdfgRegularize_h12aca4bb_0_1 
+        = (1U & (~ ((((~ (IData)(vlSelfRef.IOR)) | 
+                      (~ (IData)(vlSelfRef.IOW))) & 
+                     (~ (IData)(vlSelfRef.BALE))) & (IData)(vlSelfRef.video__DOT__isathing__DOT__actualBusCycle))));
+    vlSelfRef.video__DOT__isathing__DOT__r2_Pulse = vlSelfRef.video__DOT__isathing__DOT__r1_Pulse;
+    if (((~ (IData)(vlSelfRef.video__DOT__isathing__DOT__BALE3_Pulse)) 
+         & (IData)(vlSelfRef.video__DOT__isathing__DOT__BALE2_Pulse))) {
+        vlSelfRef.video__DOT__isathing__DOT__fastBALE = 1U;
+    } else if (((IData)(vlSelfRef.video__DOT__isathing__DOT__BALE3_Pulse) 
+                & (~ (IData)(vlSelfRef.video__DOT__isathing__DOT__BALE2_Pulse)))) {
+        vlSelfRef.video__DOT__isathing__DOT__fastBALE = 0U;
+    }
+    vlSelfRef.video__DOT__isathing__DOT__BALE3_Pulse 
+        = vlSelfRef.video__DOT__isathing__DOT__BALE2_Pulse;
+    if (((~ (IData)(vlSelfRef.video__DOT__isathing__DOT__IOW3_Pulse)) 
+         & (IData)(vlSelfRef.video__DOT__isathing__DOT__IOW2_Pulse))) {
+        vlSelfRef.video__DOT__isathing__DOT__absIOW = 1U;
+    } else if (((IData)(vlSelfRef.video__DOT__isathing__DOT__IOW3_Pulse) 
+                & (~ (IData)(vlSelfRef.video__DOT__isathing__DOT__IOW2_Pulse)))) {
+        vlSelfRef.video__DOT__isathing__DOT__absIOW = 0U;
+    }
+    vlSelfRef.video__DOT__isathing__DOT__IOW3_Pulse 
+        = vlSelfRef.video__DOT__isathing__DOT__IOW2_Pulse;
+    if (((~ (IData)(vlSelfRef.video__DOT__isathing__DOT__IOR3_Pulse)) 
+         & (IData)(vlSelfRef.video__DOT__isathing__DOT__IOR2_Pulse))) {
+        vlSelfRef.video__DOT__isathing__DOT__absIOR = 1U;
+    } else if (((IData)(vlSelfRef.video__DOT__isathing__DOT__IOR3_Pulse) 
+                & (~ (IData)(vlSelfRef.video__DOT__isathing__DOT__IOR2_Pulse)))) {
+        vlSelfRef.video__DOT__isathing__DOT__absIOR = 0U;
+    }
+    vlSelfRef.video__DOT__isathing__DOT__IOR3_Pulse 
+        = vlSelfRef.video__DOT__isathing__DOT__IOR2_Pulse;
+    vlSelfRef.video__DOT__full = (0x27fU <= (IData)(vlSelfRef.video__DOT__testramthingy__DOT__waddr));
+    vlSelfRef.video__DOT____Vcellinp__wbv____pinNumber9 
+        = ((~ ((IData)(vlSelfRef.video__DOT__isathing__DOT__iFPGA_IO_EN) 
+               | (IData)(vlSelfRef.video__DOT__isathing__DOT__i_undedicedIsaCycle))) 
+           & (0x27fU <= (IData)(vlSelfRef.video__DOT__testramthingy__DOT__waddr)));
+    vlSelfRef.video__DOT__ivblank = vlSelfRef.VALID_PIXELS;
+    if (((~ (IData)(vlSelfRef.video__DOT__testramthingy__DOT__r3_Pulse)) 
+         & (IData)(vlSelfRef.video__DOT__testramthingy__DOT__r2_Pulse))) {
+        vlSelfRef.video__DOT__testramthingy__DOT__fastEvenOrOdd 
+            = vlSelfRef.video__DOT__vsyncctr;
+        vlSelfRef.video__DOT__testramthingy__DOT__fastFrameEnd 
+            = vlSelfRef.video__DOT__testramthingy__DOT__iframeEnd;
+    }
+    vlSelfRef.video__DOT__testramthingy__DOT__r3_Pulse 
+        = vlSelfRef.video__DOT__testramthingy__DOT__r2_Pulse;
+    vlSelfRef.ADS_OE = vlSelfRef.video__DOT__isathing__DOT__iADS_OE;
+    vlSelfRef.video__DOT__doData = __Vdly__video__DOT__doData;
+    vlSelfRef.video__DOT__wbv__DOT__dataFifo__DOT__w_ptr 
+        = __Vdly__video__DOT__wbv__DOT__dataFifo__DOT__w_ptr;
+    vlSelfRef.video__DOT__wbv__DOT__dataFifo__DOT__r_ptr 
+        = __Vdly__video__DOT__wbv__DOT__dataFifo__DOT__r_ptr;
+    vlSelfRef.TE0 = ((IData)(video__DOT__isathing__DOT____VdfgRegularize_h12aca4bb_0_1) 
+                     | (IData)(vlSelfRef.video__DOT__isathing__DOT__TE0i));
+    vlSelfRef.TE1 = ((IData)(video__DOT__isathing__DOT____VdfgRegularize_h12aca4bb_0_1) 
+                     | (IData)(vlSelfRef.video__DOT__isathing__DOT__TE1i));
+    vlSelfRef.TE2 = ((IData)(video__DOT__isathing__DOT____VdfgRegularize_h12aca4bb_0_1) 
+                     | (IData)(vlSelfRef.video__DOT__isathing__DOT__TE2i));
+    vlSelfRef.TE3 = ((IData)(video__DOT__isathing__DOT____VdfgRegularize_h12aca4bb_0_1) 
+                     | (IData)(vlSelfRef.video__DOT__isathing__DOT__TE3i));
+    vlSelfRef.video__DOT__writeBufferEmpty = ((~ (IData)(vlSelfRef.video__DOT__wbv__DOT__dataFifo__DOT__ifull)) 
+                                              & ((IData)(vlSelfRef.video__DOT__wbv__DOT__dataFifo__DOT__r_ptr) 
+                                                 == (IData)(vlSelfRef.video__DOT__wbv__DOT__dataFifo__DOT__w_ptr)));
+    vlSelfRef.video__DOT__isathing__DOT__r1_Pulse = vlSelfRef.ISACLK;
+    vlSelfRef.video__DOT__isathing__DOT__BALE2_Pulse 
+        = vlSelfRef.video__DOT__isathing__DOT__BALE1_Pulse;
+    vlSelfRef.video__DOT__isathing__DOT__IOW2_Pulse 
+        = vlSelfRef.video__DOT__isathing__DOT__IOW1_Pulse;
+    vlSelfRef.FPGA_WR = (1U & (~ (IData)(vlSelfRef.video__DOT__isathing__DOT__absIOR)));
+    vlSelfRef.video__DOT__isathing__DOT__IOR2_Pulse 
+        = vlSelfRef.video__DOT__isathing__DOT__IOR1_Pulse;
+    vlSelfRef.video__DOT__testramthingy__DOT__r2_Pulse 
+        = vlSelfRef.video__DOT__testramthingy__DOT__r1_Pulse;
+    vlSelfRef.video__DOT__isathing__DOT__BALE1_Pulse 
+        = vlSelfRef.BALE;
+    vlSelfRef.video__DOT__isathing__DOT__IOW1_Pulse 
+        = vlSelfRef.IOW;
+    vlSelfRef.video__DOT__isathing__DOT__IOR1_Pulse 
+        = vlSelfRef.IOR;
+    vlSelfRef.video__DOT__testramthingy__DOT__r1_Pulse 
+        = vlSelfRef.pixelClock;
     __Vdly__video__DOT__cdd__DOT__counter = (0xfffffffU 
                                              & ((IData)(1U) 
                                                 + vlSelfRef.video__DOT__cdd__DOT__counter));
@@ -54,8 +766,8 @@ VL_INLINE_OPT void Vvideo___024root___nba_sequent__TOP__0(Vvideo___024root* vlSe
     vlSelfRef.video__DOT__cdd__DOT__counter = __Vdly__video__DOT__cdd__DOT__counter;
 }
 
-VL_INLINE_OPT void Vvideo___024root___nba_sequent__TOP__1(Vvideo___024root* vlSelf) {
-    VL_DEBUG_IF(VL_DBG_MSGF("+    Vvideo___024root___nba_sequent__TOP__1\n"); );
+VL_INLINE_OPT void Vvideo___024root___nba_sequent__TOP__2(Vvideo___024root* vlSelf) {
+    VL_DEBUG_IF(VL_DBG_MSGF("+    Vvideo___024root___nba_sequent__TOP__2\n"); );
     Vvideo__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
@@ -63,84 +775,161 @@ VL_INLINE_OPT void Vvideo___024root___nba_sequent__TOP__1(Vvideo___024root* vlSe
     vlSelfRef.__Vdly__verticalCount = vlSelfRef.verticalCount;
 }
 
-VL_INLINE_OPT void Vvideo___024root___nba_sequent__TOP__2(Vvideo___024root* vlSelf) {
-    VL_DEBUG_IF(VL_DBG_MSGF("+    Vvideo___024root___nba_sequent__TOP__2\n"); );
+VL_INLINE_OPT void Vvideo___024root___nba_sequent__TOP__3(Vvideo___024root* vlSelf) {
+    VL_DEBUG_IF(VL_DBG_MSGF("+    Vvideo___024root___nba_sequent__TOP__3\n"); );
     Vvideo__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     auto& vlSelfRef = std::ref(*vlSelf).get();
+    // Init
+    SData/*9:0*/ __Vdly__video__DOT__testramthingy__DOT__raddr;
+    __Vdly__video__DOT__testramthingy__DOT__raddr = 0;
     // Body
+    __Vdly__video__DOT__testramthingy__DOT__raddr = vlSelfRef.video__DOT__testramthingy__DOT__raddr;
+    if (vlSelfRef.RESET) {
+        if (vlSelfRef.VALID_PIXELS) {
+            __Vdly__video__DOT__testramthingy__DOT__raddr 
+                = (0x3ffU & ((IData)(1U) + (IData)(vlSelfRef.video__DOT__testramthingy__DOT__raddr)));
+            vlSelfRef.video__DOT__testramthingy__DOT__ipixelOutput 
+                = ((IData)(vlSelfRef.video__DOT__vsyncctr)
+                    ? (IData)(vlSelfRef.video__DOT__testramthingy__DOT__b1dout)
+                    : (IData)(vlSelfRef.video__DOT__testramthingy__DOT__b2dout));
+            vlSelfRef.video__DOT__testramthingy__DOT__iframeEnd = 0U;
+        } else {
+            __Vdly__video__DOT__testramthingy__DOT__raddr = 0U;
+            vlSelfRef.video__DOT__testramthingy__DOT__ipixelOutput = 0U;
+            if ((1U & (~ (IData)(vlSelfRef.VSYNC)))) {
+                vlSelfRef.video__DOT__testramthingy__DOT__iframeEnd = 1U;
+            }
+        }
+    } else {
+        __Vdly__video__DOT__testramthingy__DOT__raddr = 0U;
+        vlSelfRef.video__DOT__testramthingy__DOT__ipixelOutput = 0U;
+        vlSelfRef.video__DOT__testramthingy__DOT__iframeEnd = 0U;
+    }
     if (vlSelfRef.VALID_PIXELS) {
         if ((0x7d000U < vlSelfRef.video__DOT__vramAddress)) {
             if (((0x200U < (IData)(vlSelfRef.horizontalCount)) 
                  & (0x240U > (IData)(vlSelfRef.horizontalCount)))) {
-                vlSelfRef.Rt = (0x1fU & 0x1fU);
-                vlSelfRef.Gt = 0x3fU;
-                vlSelfRef.Bt = (0x1fU & 0x1fU);
+                vlSelfRef.video__DOT__Bt = (0x1fU & 0x1fU);
+                vlSelfRef.video__DOT__Gt = 0x3fU;
+                vlSelfRef.video__DOT__Rt = (0x1fU & 0x1fU);
             } else {
-                vlSelfRef.Rt = (0x1fU & 0U);
-                vlSelfRef.Gt = 0U;
-                vlSelfRef.Bt = (0x1fU & ((0x23fU < (IData)(vlSelfRef.horizontalCount))
-                                          ? 0U : ((IData)(vlSelfRef.horizontalCount) 
-                                                  >> 4U)));
+                vlSelfRef.video__DOT__Bt = (0x1fU & 
+                                            ((0x23fU 
+                                              < (IData)(vlSelfRef.horizontalCount))
+                                              ? 0U : 
+                                             ((IData)(vlSelfRef.horizontalCount) 
+                                              >> 4U)));
+                vlSelfRef.video__DOT__Gt = 0U;
+                vlSelfRef.video__DOT__Rt = (0x1fU & 0U);
             }
         } else if ((0x64000U < vlSelfRef.video__DOT__vramAddress)) {
             if (((0x200U < (IData)(vlSelfRef.horizontalCount)) 
                  & (0x280U > (IData)(vlSelfRef.horizontalCount)))) {
-                vlSelfRef.Rt = (0x1fU & ((IData)(vlSelfRef.horizontalCount) 
-                                         >> 2U));
-                vlSelfRef.Gt = ((0x38U & (IData)(vlSelfRef.Gt)) 
-                                | ((4U & ((IData)(vlSelfRef.horizontalCount) 
-                                          >> 1U)) | 
-                                   (2U & ((IData)(vlSelfRef.horizontalCount) 
-                                          >> 1U))));
-                vlSelfRef.Gt = ((7U & (IData)(vlSelfRef.Gt)) 
-                                | (0x38U & ((IData)(vlSelfRef.horizontalCount) 
-                                            >> 1U)));
-                vlSelfRef.Bt = (0x1fU & ((IData)(vlSelfRef.horizontalCount) 
-                                         >> 2U));
+                vlSelfRef.video__DOT__Bt = (0x1fU & 
+                                            ((IData)(vlSelfRef.horizontalCount) 
+                                             >> 2U));
+                vlSelfRef.video__DOT__Gt = ((0x38U 
+                                             & (IData)(vlSelfRef.video__DOT__Gt)) 
+                                            | ((4U 
+                                                & ((IData)(vlSelfRef.horizontalCount) 
+                                                   >> 1U)) 
+                                               | (2U 
+                                                  & ((IData)(vlSelfRef.horizontalCount) 
+                                                     >> 1U))));
+                vlSelfRef.video__DOT__Gt = ((7U & (IData)(vlSelfRef.video__DOT__Gt)) 
+                                            | (0x38U 
+                                               & ((IData)(vlSelfRef.horizontalCount) 
+                                                  >> 1U)));
+                vlSelfRef.video__DOT__Rt = (0x1fU & 
+                                            ((IData)(vlSelfRef.horizontalCount) 
+                                             >> 2U));
             } else {
-                vlSelfRef.Rt = (0x1fU & 0U);
-                vlSelfRef.Gt = (0x3fU & ((IData)(vlSelfRef.horizontalCount) 
-                                         >> 3U));
-                vlSelfRef.Bt = (0x1fU & 0U);
+                vlSelfRef.video__DOT__Bt = (0x1fU & 0U);
+                vlSelfRef.video__DOT__Gt = (0x3fU & 
+                                            ((IData)(vlSelfRef.horizontalCount) 
+                                             >> 3U));
+                vlSelfRef.video__DOT__Rt = (0x1fU & 0U);
             }
         } else if ((0x4b000U < vlSelfRef.video__DOT__vramAddress)) {
             if (((0x200U < (IData)(vlSelfRef.horizontalCount)) 
                  & (0x280U > (IData)(vlSelfRef.horizontalCount)))) {
-                vlSelfRef.Rt = (0x1fU & ((IData)(vlSelfRef.horizontalCount) 
-                                         >> 2U));
-                vlSelfRef.Gt = ((0x38U & (IData)(vlSelfRef.Gt)) 
-                                | ((4U & ((IData)(vlSelfRef.horizontalCount) 
-                                          >> 1U)) | 
-                                   (2U & ((IData)(vlSelfRef.horizontalCount) 
-                                          >> 1U))));
-                vlSelfRef.Gt = ((7U & (IData)(vlSelfRef.Gt)) 
-                                | (0x38U & ((IData)(vlSelfRef.horizontalCount) 
-                                            >> 1U)));
-                vlSelfRef.Bt = (0x1fU & ((IData)(vlSelfRef.horizontalCount) 
-                                         >> 2U));
+                vlSelfRef.video__DOT__Bt = (0x1fU & 
+                                            ((IData)(vlSelfRef.horizontalCount) 
+                                             >> 2U));
+                vlSelfRef.video__DOT__Gt = ((0x38U 
+                                             & (IData)(vlSelfRef.video__DOT__Gt)) 
+                                            | ((4U 
+                                                & ((IData)(vlSelfRef.horizontalCount) 
+                                                   >> 1U)) 
+                                               | (2U 
+                                                  & ((IData)(vlSelfRef.horizontalCount) 
+                                                     >> 1U))));
+                vlSelfRef.video__DOT__Gt = ((7U & (IData)(vlSelfRef.video__DOT__Gt)) 
+                                            | (0x38U 
+                                               & ((IData)(vlSelfRef.horizontalCount) 
+                                                  >> 1U)));
+                vlSelfRef.video__DOT__Rt = (0x1fU & 
+                                            ((IData)(vlSelfRef.horizontalCount) 
+                                             >> 2U));
             } else {
-                vlSelfRef.Rt = (0x1fU & ((IData)(vlSelfRef.horizontalCount) 
-                                         >> 4U));
-                vlSelfRef.Gt = 0U;
-                vlSelfRef.Bt = (0x1fU & 0U);
+                vlSelfRef.video__DOT__Bt = (0x1fU & 0U);
+                vlSelfRef.video__DOT__Gt = 0U;
+                vlSelfRef.video__DOT__Rt = (0x1fU & 
+                                            ((IData)(vlSelfRef.horizontalCount) 
+                                             >> 4U));
             }
         } else {
-            vlSelfRef.Rt = (0x1fU & (vlSelfRef.video__DOT__vramAddress 
-                                     >> 1U));
-            vlSelfRef.Gt = (0x3fU & (vlSelfRef.video__DOT__vramAddress 
-                                     >> 6U));
-            vlSelfRef.Bt = (0x1fU & (vlSelfRef.video__DOT__vramAddress 
-                                     >> 0xcU));
+            vlSelfRef.video__DOT__Bt = (0x1fU & (vlSelfRef.video__DOT__vramAddress 
+                                                 >> 0xcU));
+            vlSelfRef.video__DOT__Gt = (0x3fU & (vlSelfRef.video__DOT__vramAddress 
+                                                 >> 6U));
+            vlSelfRef.video__DOT__Rt = (0x1fU & (vlSelfRef.video__DOT__vramAddress 
+                                                 >> 1U));
         }
     } else {
-        vlSelfRef.Rt = 0U;
-        vlSelfRef.Gt = 0U;
-        vlSelfRef.Bt = 0U;
+        vlSelfRef.video__DOT__Bt = 0U;
+        vlSelfRef.video__DOT__Gt = 0U;
+        vlSelfRef.video__DOT__Rt = 0U;
+    }
+    if (vlSelfRef.video__DOT__testramthingy__DOT__ififoRead) {
+        vlSelfRef.video__DOT__testramthingy__DOT__b1dout 
+            = vlSelfRef.video__DOT__testramthingy__DOT__b1__DOT__mem
+            [vlSelfRef.video__DOT__testramthingy__DOT__raddr];
+        vlSelfRef.video__DOT__testramthingy__DOT__b2dout 
+            = vlSelfRef.video__DOT__testramthingy__DOT__b2__DOT__mem
+            [vlSelfRef.video__DOT__testramthingy__DOT__raddr];
+    }
+    vlSelfRef.video__DOT__testramthingy__DOT__raddr 
+        = __Vdly__video__DOT__testramthingy__DOT__raddr;
+    vlSelfRef.video__DOT__testramthingy__DOT__ififoRead 
+        = ((IData)(vlSelfRef.RESET) && (IData)(vlSelfRef.VALID_PIXELS));
+}
+
+VL_INLINE_OPT void Vvideo___024root___nba_sequent__TOP__4(Vvideo___024root* vlSelf) {
+    VL_DEBUG_IF(VL_DBG_MSGF("+    Vvideo___024root___nba_sequent__TOP__4\n"); );
+    Vvideo__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
+    auto& vlSelfRef = std::ref(*vlSelf).get();
+    // Body
+    vlSelfRef.video__DOT__vsyncctr = vlSelfRef.__Vdly__video__DOT__vsyncctr;
+}
+
+VL_INLINE_OPT void Vvideo___024root___nba_sequent__TOP__5(Vvideo___024root* vlSelf) {
+    VL_DEBUG_IF(VL_DBG_MSGF("+    Vvideo___024root___nba_sequent__TOP__5\n"); );
+    Vvideo__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
+    auto& vlSelfRef = std::ref(*vlSelf).get();
+    // Body
+    if (vlSelfRef.__VdlySet__video__DOT__testramthingy__DOT__b1__DOT__mem__v0) {
+        vlSelfRef.video__DOT__testramthingy__DOT__b1__DOT__mem[vlSelfRef.__VdlyDim0__video__DOT__testramthingy__DOT__b1__DOT__mem__v0] 
+            = vlSelfRef.__VdlyVal__video__DOT__testramthingy__DOT__b1__DOT__mem__v0;
+    }
+    if (vlSelfRef.__VdlySet__video__DOT__testramthingy__DOT__b2__DOT__mem__v0) {
+        vlSelfRef.video__DOT__testramthingy__DOT__b2__DOT__mem[vlSelfRef.__VdlyDim0__video__DOT__testramthingy__DOT__b2__DOT__mem__v0] 
+            = vlSelfRef.__VdlyVal__video__DOT__testramthingy__DOT__b2__DOT__mem__v0;
     }
 }
 
-VL_INLINE_OPT void Vvideo___024root___nba_sequent__TOP__3(Vvideo___024root* vlSelf) {
-    VL_DEBUG_IF(VL_DBG_MSGF("+    Vvideo___024root___nba_sequent__TOP__3\n"); );
+VL_INLINE_OPT void Vvideo___024root___nba_sequent__TOP__6(Vvideo___024root* vlSelf) {
+    VL_DEBUG_IF(VL_DBG_MSGF("+    Vvideo___024root___nba_sequent__TOP__6\n"); );
     Vvideo__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
@@ -153,49 +942,49 @@ VL_INLINE_OPT void Vvideo___024root___nba_sequent__TOP__3(Vvideo___024root* vlSe
         if (((0x280U <= (IData)(vlSelfRef.horizontalCount)) 
              & (0x290U > (IData)(vlSelfRef.horizontalCount)))) {
             vlSelfRef.video__DOT__gs__DOT__VALID_H = 0U;
-            vlSelfRef.HSYNC = 1U;
+            vlSelfRef.video__DOT__gs__DOT__HSYNC = 1U;
         } else if (((0x290U <= (IData)(vlSelfRef.horizontalCount)) 
                     & (0x2f0U > (IData)(vlSelfRef.horizontalCount)))) {
             vlSelfRef.video__DOT__gs__DOT__VALID_H = 0U;
-            vlSelfRef.HSYNC = 0U;
+            vlSelfRef.video__DOT__gs__DOT__HSYNC = 0U;
         } else if (((0x2f0U <= (IData)(vlSelfRef.horizontalCount)) 
                     & (0x31fU > (IData)(vlSelfRef.horizontalCount)))) {
-            vlSelfRef.HSYNC = 1U;
+            vlSelfRef.video__DOT__gs__DOT__HSYNC = 1U;
             vlSelfRef.video__DOT__gs__DOT__VALID_H = 0U;
         } else if ((0x31fU <= (IData)(vlSelfRef.horizontalCount))) {
             vlSelfRef.__Vdly__verticalCount = (0x3ffU 
                                                & ((IData)(1U) 
                                                   + (IData)(vlSelfRef.verticalCount)));
             vlSelfRef.__Vdly__horizontalCount = 0U;
-            vlSelfRef.HSYNC = 1U;
+            vlSelfRef.video__DOT__gs__DOT__HSYNC = 1U;
             vlSelfRef.video__DOT__gs__DOT__VALID_H = 0U;
         } else {
             vlSelfRef.video__DOT__vramAddress = (0xfffffU 
                                                  & ((IData)(2U) 
                                                     + vlSelfRef.video__DOT__vramAddress));
-            vlSelfRef.HSYNC = 1U;
+            vlSelfRef.video__DOT__gs__DOT__HSYNC = 1U;
             vlSelfRef.video__DOT__gs__DOT__VALID_H = 1U;
         }
         if (((0x1e0U <= (IData)(vlSelfRef.verticalCount)) 
              & (0x1eaU > (IData)(vlSelfRef.verticalCount)))) {
             vlSelfRef.video__DOT__gs__DOT__VALID_V = 0U;
-            vlSelfRef.VSYNC = 1U;
+            vlSelfRef.video__DOT__gs__DOT__VSYNC = 1U;
         } else if (((0x1eaU <= (IData)(vlSelfRef.verticalCount)) 
                     & (0x1ecU > (IData)(vlSelfRef.verticalCount)))) {
             vlSelfRef.video__DOT__gs__DOT__VALID_V = 0U;
-            vlSelfRef.VSYNC = 0U;
+            vlSelfRef.video__DOT__gs__DOT__VSYNC = 0U;
         } else if (((0x1ecU <= (IData)(vlSelfRef.verticalCount)) 
                     & (0x20dU > (IData)(vlSelfRef.verticalCount)))) {
             vlSelfRef.video__DOT__gs__DOT__VALID_V = 0U;
-            vlSelfRef.VSYNC = 1U;
+            vlSelfRef.video__DOT__gs__DOT__VSYNC = 1U;
         } else if ((0x20dU <= (IData)(vlSelfRef.verticalCount))) {
             vlSelfRef.__Vdly__verticalCount = 0U;
             vlSelfRef.video__DOT__vramAddress = 0U;
             vlSelfRef.video__DOT__gs__DOT__VALID_V = 0U;
-            vlSelfRef.VSYNC = 1U;
+            vlSelfRef.video__DOT__gs__DOT__VSYNC = 1U;
         } else {
             vlSelfRef.video__DOT__gs__DOT__VALID_V = 1U;
-            vlSelfRef.VSYNC = 1U;
+            vlSelfRef.video__DOT__gs__DOT__VSYNC = 1U;
         }
     } else {
         vlSelfRef.__Vdly__verticalCount = 0U;
@@ -204,6 +993,8 @@ VL_INLINE_OPT void Vvideo___024root___nba_sequent__TOP__3(Vvideo___024root* vlSe
     }
     vlSelfRef.verticalCount = vlSelfRef.__Vdly__verticalCount;
     vlSelfRef.horizontalCount = vlSelfRef.__Vdly__horizontalCount;
+    vlSelfRef.HSYNC = vlSelfRef.video__DOT__gs__DOT__HSYNC;
+    vlSelfRef.VSYNC = vlSelfRef.video__DOT__gs__DOT__VSYNC;
 }
 
 void Vvideo___024root___eval_triggers__act(Vvideo___024root* vlSelf);
@@ -213,7 +1004,7 @@ bool Vvideo___024root___eval_phase__act(Vvideo___024root* vlSelf) {
     Vvideo__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Init
-    VlTriggerVec<3> __VpreTriggered;
+    VlTriggerVec<4> __VpreTriggered;
     CData/*0:0*/ __VactExecute;
     // Body
     Vvideo___024root___eval_triggers__act(vlSelf);
@@ -242,6 +1033,9 @@ bool Vvideo___024root___eval_phase__nba(Vvideo___024root* vlSelf) {
 }
 
 #ifdef VL_DEBUG
+VL_ATTR_COLD void Vvideo___024root___dump_triggers__ico(Vvideo___024root* vlSelf);
+#endif  // VL_DEBUG
+#ifdef VL_DEBUG
 VL_ATTR_COLD void Vvideo___024root___dump_triggers__nba(Vvideo___024root* vlSelf);
 #endif  // VL_DEBUG
 #ifdef VL_DEBUG
@@ -253,9 +1047,28 @@ void Vvideo___024root___eval(Vvideo___024root* vlSelf) {
     Vvideo__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Init
+    IData/*31:0*/ __VicoIterCount;
+    CData/*0:0*/ __VicoContinue;
     IData/*31:0*/ __VnbaIterCount;
     CData/*0:0*/ __VnbaContinue;
     // Body
+    __VicoIterCount = 0U;
+    vlSelfRef.__VicoFirstIteration = 1U;
+    __VicoContinue = 1U;
+    while (__VicoContinue) {
+        if (VL_UNLIKELY(((0x64U < __VicoIterCount)))) {
+#ifdef VL_DEBUG
+            Vvideo___024root___dump_triggers__ico(vlSelf);
+#endif
+            VL_FATAL_MT("video.v", 305, "", "Input combinational region did not converge.");
+        }
+        __VicoIterCount = ((IData)(1U) + __VicoIterCount);
+        __VicoContinue = 0U;
+        if (Vvideo___024root___eval_phase__ico(vlSelf)) {
+            __VicoContinue = 1U;
+        }
+        vlSelfRef.__VicoFirstIteration = 0U;
+    }
     __VnbaIterCount = 0U;
     __VnbaContinue = 1U;
     while (__VnbaContinue) {
@@ -263,7 +1076,7 @@ void Vvideo___024root___eval(Vvideo___024root* vlSelf) {
 #ifdef VL_DEBUG
             Vvideo___024root___dump_triggers__nba(vlSelf);
 #endif
-            VL_FATAL_MT("video.v", 298, "", "NBA region did not converge.");
+            VL_FATAL_MT("video.v", 305, "", "NBA region did not converge.");
         }
         __VnbaIterCount = ((IData)(1U) + __VnbaIterCount);
         __VnbaContinue = 0U;
@@ -274,7 +1087,7 @@ void Vvideo___024root___eval(Vvideo___024root* vlSelf) {
 #ifdef VL_DEBUG
                 Vvideo___024root___dump_triggers__act(vlSelf);
 #endif
-                VL_FATAL_MT("video.v", 298, "", "Active region did not converge.");
+                VL_FATAL_MT("video.v", 305, "", "Active region did not converge.");
             }
             vlSelfRef.__VactIterCount = ((IData)(1U) 
                                          + vlSelfRef.__VactIterCount);
@@ -295,13 +1108,29 @@ void Vvideo___024root___eval_debug_assertions(Vvideo___024root* vlSelf) {
     Vvideo__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
-    if (VL_UNLIKELY(((vlSelfRef.a & 0xfeU)))) {
-        Verilated::overWidthError("a");}
-    if (VL_UNLIKELY(((vlSelfRef.b & 0xfeU)))) {
-        Verilated::overWidthError("b");}
     if (VL_UNLIKELY(((vlSelfRef.pllclk & 0xfeU)))) {
         Verilated::overWidthError("pllclk");}
     if (VL_UNLIKELY(((vlSelfRef.RESET & 0xfeU)))) {
         Verilated::overWidthError("RESET");}
+    if (VL_UNLIKELY(((vlSelfRef.BALE & 0xfeU)))) {
+        Verilated::overWidthError("BALE");}
+    if (VL_UNLIKELY(((vlSelfRef.MEMW & 0xfeU)))) {
+        Verilated::overWidthError("MEMW");}
+    if (VL_UNLIKELY(((vlSelfRef.MEMR & 0xfeU)))) {
+        Verilated::overWidthError("MEMR");}
+    if (VL_UNLIKELY(((vlSelfRef.SMEMR & 0xfeU)))) {
+        Verilated::overWidthError("SMEMR");}
+    if (VL_UNLIKELY(((vlSelfRef.SMEMW & 0xfeU)))) {
+        Verilated::overWidthError("SMEMW");}
+    if (VL_UNLIKELY(((vlSelfRef.IOW & 0xfeU)))) {
+        Verilated::overWidthError("IOW");}
+    if (VL_UNLIKELY(((vlSelfRef.IOR & 0xfeU)))) {
+        Verilated::overWidthError("IOR");}
+    if (VL_UNLIKELY(((vlSelfRef.SBHE & 0xfeU)))) {
+        Verilated::overWidthError("SBHE");}
+    if (VL_UNLIKELY(((vlSelfRef.ISACLK & 0xfeU)))) {
+        Verilated::overWidthError("ISACLK");}
+    if (VL_UNLIKELY(((vlSelfRef.AV_in & 0xfff00000U)))) {
+        Verilated::overWidthError("AV_in");}
 }
 #endif  // VL_DEBUG

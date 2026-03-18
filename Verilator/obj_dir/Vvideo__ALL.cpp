@@ -4,5 +4,6 @@
 #include "Vvideo___024root__DepSet_hd563f1d9__0.cpp"
 #include "Vvideo___024root__DepSet_ha81248c8__0.cpp"
 #include "Vvideo___024root__Slow.cpp"
+#include "Vvideo___024root__DepSet_hd563f1d9__0__Slow.cpp"
 #include "Vvideo___024root__DepSet_ha81248c8__0__Slow.cpp"
 #include "Vvideo__Syms.cpp"

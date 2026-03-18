@@ -9,21 +9,45 @@
 Vvideo::Vvideo(VerilatedContext* _vcontextp__, const char* _vcname__)
     : VerilatedModel{*_vcontextp__}
     , vlSymsp{new Vvideo__Syms(contextp(), _vcname__, this)}
+    , HSYNC{vlSymsp->TOP.HSYNC}
     , pllclk{vlSymsp->TOP.pllclk}
     , RESET{vlSymsp->TOP.RESET}
     , pixelClock{vlSymsp->TOP.pixelClock}
-    , a{vlSymsp->TOP.a}
-    , b{vlSymsp->TOP.b}
-    , HSYNC{vlSymsp->TOP.HSYNC}
     , VSYNC{vlSymsp->TOP.VSYNC}
-    , c{vlSymsp->TOP.c}
-    , d{vlSymsp->TOP.d}
-    , Rt{vlSymsp->TOP.Rt}
-    , Gt{vlSymsp->TOP.Gt}
-    , Bt{vlSymsp->TOP.Bt}
+    , Red{vlSymsp->TOP.Red}
+    , Green{vlSymsp->TOP.Green}
+    , Blue{vlSymsp->TOP.Blue}
     , VALID_PIXELS{vlSymsp->TOP.VALID_PIXELS}
+    , BALE{vlSymsp->TOP.BALE}
+    , MEMW{vlSymsp->TOP.MEMW}
+    , MEMR{vlSymsp->TOP.MEMR}
+    , SMEMR{vlSymsp->TOP.SMEMR}
+    , SMEMW{vlSymsp->TOP.SMEMW}
+    , IOW{vlSymsp->TOP.IOW}
+    , IOR{vlSymsp->TOP.IOR}
+    , SBHE{vlSymsp->TOP.SBHE}
+    , NOWS{vlSymsp->TOP.NOWS}
+    , IOCS16{vlSymsp->TOP.IOCS16}
+    , MEMCS16{vlSymsp->TOP.MEMCS16}
+    , IO_RDY{vlSymsp->TOP.IO_RDY}
+    , IOERR{vlSymsp->TOP.IOERR}
+    , ISACLK{vlSymsp->TOP.ISACLK}
+    , TE0{vlSymsp->TOP.TE0}
+    , TE1{vlSymsp->TOP.TE1}
+    , TE2{vlSymsp->TOP.TE2}
+    , TE3{vlSymsp->TOP.TE3}
+    , FPGA_WR{vlSymsp->TOP.FPGA_WR}
+    , ADS_OE{vlSymsp->TOP.ADS_OE}
+    , ADS_LATCH{vlSymsp->TOP.ADS_LATCH}
+    , VRAM_en{vlSymsp->TOP.VRAM_en}
+    , write_cmd{vlSymsp->TOP.write_cmd}
+    , read_cmd{vlSymsp->TOP.read_cmd}
     , horizontalCount{vlSymsp->TOP.horizontalCount}
     , verticalCount{vlSymsp->TOP.verticalCount}
+    , data_out{vlSymsp->TOP.data_out}
+    , data_in{vlSymsp->TOP.data_in}
+    , AV{vlSymsp->TOP.AV}
+    , AV_in{vlSymsp->TOP.AV_in}
     , rootp{&(vlSymsp->TOP)}
 {
     // Register model with the context

@@ -28,21 +28,45 @@ class alignas(VL_CACHE_LINE_BYTES) Vvideo VL_NOT_FINAL : public VerilatedModel {
     // PORTS
     // The application code writes and reads these signals to
     // propagate new values into/out from the Verilated model.
+    VL_OUT8(&HSYNC,0,0);
     VL_IN8(&pllclk,0,0);
     VL_IN8(&RESET,0,0);
     VL_OUT8(&pixelClock,0,0);
-    VL_IN8(&a,0,0);
-    VL_IN8(&b,0,0);
-    VL_OUT8(&HSYNC,0,0);
     VL_OUT8(&VSYNC,0,0);
-    VL_OUT8(&c,0,0);
-    VL_OUT8(&d,0,0);
-    VL_OUT8(&Rt,4,0);
-    VL_OUT8(&Gt,5,0);
-    VL_OUT8(&Bt,4,0);
+    VL_OUT8(&Red,4,0);
+    VL_OUT8(&Green,5,0);
+    VL_OUT8(&Blue,4,0);
     VL_OUT8(&VALID_PIXELS,0,0);
+    VL_IN8(&BALE,0,0);
+    VL_IN8(&MEMW,0,0);
+    VL_IN8(&MEMR,0,0);
+    VL_IN8(&SMEMR,0,0);
+    VL_IN8(&SMEMW,0,0);
+    VL_IN8(&IOW,0,0);
+    VL_IN8(&IOR,0,0);
+    VL_IN8(&SBHE,0,0);
+    VL_OUT8(&NOWS,0,0);
+    VL_OUT8(&IOCS16,0,0);
+    VL_OUT8(&MEMCS16,0,0);
+    VL_OUT8(&IO_RDY,0,0);
+    VL_OUT8(&IOERR,0,0);
+    VL_IN8(&ISACLK,0,0);
+    VL_OUT8(&TE0,0,0);
+    VL_OUT8(&TE1,0,0);
+    VL_OUT8(&TE2,0,0);
+    VL_OUT8(&TE3,0,0);
+    VL_OUT8(&FPGA_WR,0,0);
+    VL_OUT8(&ADS_OE,0,0);
+    VL_OUT8(&ADS_LATCH,0,0);
+    VL_OUT8(&VRAM_en,0,0);
+    VL_OUT8(&write_cmd,0,0);
+    VL_OUT8(&read_cmd,0,0);
     VL_OUT16(&horizontalCount,10,0);
     VL_OUT16(&verticalCount,9,0);
+    VL_OUT16(&data_out,15,0);
+    VL_IN16(&data_in,15,0);
+    VL_OUT(&AV,19,0);
+    VL_IN(&AV_in,19,0);
 
     // CELLS
     // Public to allow access to /* verilator public */ items.
