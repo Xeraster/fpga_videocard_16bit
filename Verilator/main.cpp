@@ -19,6 +19,36 @@ void fillRandom(uint16_t *buf, size_t size)
     }
 }
 
+//fill the vram with a predetermined pattern because doing it via isa cycles takes forever due to slow simulation speed
+void fillPattern(uint16_t *buf, size_t size)
+{
+    int soFar = 0;
+    for (size_t i = 0; i < (1 << 19); i++) 
+    {
+        //buf[i] = rand() & 0xFFFF;
+        if (soFar < 30000)
+        {
+            buf[i] = 0x00FF;
+        }
+        else if (soFar >= 30000 && soFar < 100000)
+        {
+            buf[i] = 0xFFFF;
+        }
+        else
+        {
+            if ((soFar/8) % 2 == 1)
+            {
+                buf[i] = 0xF000;
+            }
+            else
+            {
+                buf[i] = 0x0FF0;
+            }
+        }
+        soFar++;
+    }
+}
+
 //the simulated sram chips
 uint16_t sram[1 << 19];  // 1M bytes = 512K words (16-bit)
 
@@ -60,12 +90,20 @@ void isa_io_write(Vvideo* top, uint16_t port, uint16_t data)
     top->eval();
 
     top->pllclk ^= 1; top->eval();
+    top->pllclk ^= 1; top->eval();
 
     // 2. Release BALE
     top->BALE = 0;
 
     // 3. Assert write (active low)
     top->IOW = 0;
+    top->pllclk ^= 1;
+    top->eval();
+    top->pllclk ^= 1;
+    top->eval();
+    top->pllclk ^= 1;
+    top->eval();
+    top->pllclk ^= 1;
     top->eval();
 
     top->pllclk ^= 1; top->eval();
@@ -82,6 +120,13 @@ void isa_io_write(Vvideo* top, uint16_t port, uint16_t data)
 
     // 4. Deassert write
     top->IOW = 1;
+    top->pllclk ^= 1;
+    top->eval();
+    top->pllclk ^= 1;
+    top->eval();
+    top->pllclk ^= 1;
+    top->eval();
+    top->pllclk ^= 1;
     top->eval();
 }
 
@@ -123,7 +168,8 @@ int main(int argc, char** argv)
     fillRandom(framebuffer, sizeof(framebuffer));
 
     memset(sram, 0, sizeof(sram));
-    fillRandom(sram, sizeof(sram));
+    //fillRandom(sram, sizeof(sram));
+    fillPattern(sram, sizeof(sram));
 
     SDL_Event event;
 
@@ -199,13 +245,16 @@ int main(int argc, char** argv)
             {
                 delay--;
             }
-            else if (writes_done < 100)
+            else if (writes_done < 10000)
             {
                 // pick random address + write
                 uint32_t addr = rand() % (640 * 480 * 2);
 
-                set_vram_addr(top, addr);
-                write_pixel(top, 0xFFFF);
+                //set_vram_addr(top, addr);
+                //write_pixel(top, 0xFFFF);
+
+                //simulate keyboard cycles and see if it causes glitch
+                isa_io_write(top, 0x423, 0x6060);
 
                 writes_done++;
 
