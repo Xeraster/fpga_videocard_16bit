@@ -435,7 +435,7 @@ end
 //    /*VALID_PIXELS*/ivblank, empty, full, fifovalid, write_en, read_en, bufferRequestedAddress, maxVramAddress, RESET, pixelClock, 
 //    frameEnd, HSYNC, VSYNC, vsyncctr/*verticalCount[0]*/, alreadyDidHsyncReset, VALID_PIXELS);
 
-managedVramDataBufferCompositeBankSwap testramthingy(data_in, Ri, Gi, Bi, OE, CE, pllclk/*FASTCLK*/, actualBusCycle | undecidedIsaCycle | ~ADS_OE | BALE, 
+managedVramDataBufferCompositeBankSwap testramthingy(data_in, Ri, Gi, Bi, OE, CE, pllclk/*FASTCLK*/, actualBusCycle | undecidedIsaCycle | ~ADS_OE, 
     /*VALID_PIXELS*/ivblank, empty, full, fifovalid, write_en, read_en, bufferRequestedAddress, maxVramAddress, RESET, pixelClock, 
     frameEnd, HSYNC, VSYNC, vsyncctr/*verticalCount[0]*/, alreadyDidHsyncReset, VALID_PIXELS);
 
@@ -494,7 +494,7 @@ always@(posedge pllclk) begin
             data_outi <= writeBufferVramData;
 
             //debugDataOut <= 0;
-        end else if (/*!FPGA_IO_EN & !undecidedIsaCycle*/ ~actualBusCycle & ~undecidedIsaCycle & ~BALE & ADS_OE) begin
+        end else if (!FPGA_IO_EN & !undecidedIsaCycle/*~actualBusCycle & ~undecidedIsaCycle & ~BALE & ADS_OE*/) begin
             //if there is no relevant isa bus cycle happening, relay the signals to the vram chips for copying stuff into the buffer
             //iVRAM_low_en <= CE;
             //iVRAM_high_en <= CE;

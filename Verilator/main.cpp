@@ -245,7 +245,7 @@ int main(int argc, char** argv)
             {
                 delay--;
             }
-            else if (writes_done < 10)
+            else if (writes_done < 10000)
             {
                 // pick random address + write
                 uint32_t addr = rand() % (640 * 480 * 2);
@@ -260,8 +260,8 @@ int main(int argc, char** argv)
                 writes_done++;
 
                 // random delay before next write
-                //delay = rand() % 50; // tweak this
-                delay = 10000;
+                delay = rand() % 50; // tweak this
+                //delay = 10000;
             }
 
             // reset each frame
