@@ -335,10 +335,10 @@ module managedVramDataBufferCompositeBankSwap(
                   bsCounter <= bsCounter - 1;
                 end
                 alreadySubtracted <= 0;
-            end else if (delayBeforeWriteAgain == 1 & ~full & waddr > 3) begin
+            end else if (delayBeforeWriteAgain == 1 & ~full & waddr > 0) begin
                 //DEBUGGING INFO: bypassing this else-if corrupts the pixel AFTER The Bug Pixel
-                waddr <= waddr - 4;
-                iNextVramAddress <= iNextVramAddress - 8;
+                waddr <= waddr - 1;
+                iNextVramAddress <= iNextVramAddress - 2;
             end
 
             /*if (~bugFix & ~alreadySubtracted & bus_free & ~full) begin
