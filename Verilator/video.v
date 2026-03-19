@@ -431,7 +431,11 @@ always@(negedge HSYNC) begin
     vsyncctr <= ~vsyncctr;
 end
 
-managedVramDataBufferCompositeBankSwap testramthingy(data_in, Ri, Gi, Bi, OE, CE, pllclk/*FASTCLK*/, actualBusCycle | undecidedIsaCycle | ~ADS_OE, 
+//managedVramDataBufferCompositeBankSwap testramthingy(data_in, Ri, Gi, Bi, OE, CE, pllclk/*FASTCLK*/, actualBusCycle | undecidedIsaCycle | ~ADS_OE, 
+//    /*VALID_PIXELS*/ivblank, empty, full, fifovalid, write_en, read_en, bufferRequestedAddress, maxVramAddress, RESET, pixelClock, 
+//    frameEnd, HSYNC, VSYNC, vsyncctr/*verticalCount[0]*/, alreadyDidHsyncReset, VALID_PIXELS);
+
+managedVramDataBufferCompositeBankSwap testramthingy(data_in, Ri, Gi, Bi, OE, CE, pllclk/*FASTCLK*/, actualBusCycle | undecidedIsaCycle | ~ADS_OE | BALE, 
     /*VALID_PIXELS*/ivblank, empty, full, fifovalid, write_en, read_en, bufferRequestedAddress, maxVramAddress, RESET, pixelClock, 
     frameEnd, HSYNC, VSYNC, vsyncctr/*verticalCount[0]*/, alreadyDidHsyncReset, VALID_PIXELS);
 
@@ -458,15 +462,16 @@ always@(posedge pllclk) begin
             
         //iVRAM_low_en <= 1;
         //iVRAM_high_en <= 1;
+
         iVRAM_en <= 1;
         iread_cmd <= 1;
         iwrite_cmd <= 1;
+        data_outi <= DStxresult;//fix a bug where data outputs dont work if the test pattern is enabled.        
+        
 
         iRed <= Rt;
         iGreen <= Gt;
         iBlue <= Bt;
-
-        data_outi <= DStxresult;//fix a bug where data outputs dont work if the test pattern is enabled.
     end else begin
         //Red = 4'h15;
         //Green = 5'h0;
@@ -480,37 +485,71 @@ always@(posedge pllclk) begin
             //if there is no more pixel buffer copying to do (and there is no relevant isa bus cycle happening), start processing write buffer data and writing it to the screen
             //iVRAM_low_en <= vbuf_CE;
             //iVRAM_high_en <= vbuf_CE;
+
             iVRAM_en <= vbuf_CE;
             iwrite_cmd <= vbuf_WE;
             iread_cmd <= 1;
 
             AVi <= writeBufferVramAddress;
             data_outi <= writeBufferVramData;
+
             //debugDataOut <= 0;
         end else if (!FPGA_IO_EN & !undecidedIsaCycle) begin
             //if there is no relevant isa bus cycle happening, relay the signals to the vram chips for copying stuff into the buffer
             //iVRAM_low_en <= CE;
             //iVRAM_high_en <= CE;
+
             iVRAM_en <= CE;
             iread_cmd <= OE;
             iwrite_cmd <= 1;
             AVi <= bufferRequestedAddress;
             data_outi <= DStxresult;
+
             //debugDataOut <= 1;
         end else begin
             //explicitly set this stuff to 1, disabling it all in invalid states. it didn't solve any bugs or artifacts but this seems like a good thing to do
             //iVRAM_low_en <= 1;
             //iVRAM_high_en <= 1;
+
             iVRAM_en <= 1;
             iread_cmd <= 1;
             iwrite_cmd <= 1;
             AVi <= bufferRequestedAddress;
             data_outi <= DStxresult;
+
             //debugDataOut <= 1;
         end
     end
 
 end
+
+
+/*reg [1:0] vram_owner;
+always @(*) begin
+    if (WRITEBUF_IO_EN & settingsRegister[4]) begin
+        vram_owner = 2'd0;
+        iVRAM_en = vbuf_CE;
+        iwrite_cmd = vbuf_WE;
+        iread_cmd = 1;
+
+        AVi <= writeBufferVramAddress;
+        data_outi <= writeBufferVramData;
+    end else if (!FPGA_IO_EN & !undecidedIsaCycle & settingsRegister[4]) begin
+        vram_owner = 2'd1;
+        iVRAM_en = CE;
+        iread_cmd = OE;
+        iwrite_cmd = 1;
+        AVi = bufferRequestedAddress;
+        data_outi = DStxresult;
+    end else begin
+        vram_owner = 2'd2;
+        iVRAM_en = 1;
+        iread_cmd = 1;
+        iwrite_cmd = 1;
+        AVi = bufferRequestedAddress;
+        data_outi = DStxresult;
+    end
+end*/
 
 //the other pllclk logic loop. this one is generally for things having to do with the isa bus and isa cycles
 always@(posedge pllclk) begin

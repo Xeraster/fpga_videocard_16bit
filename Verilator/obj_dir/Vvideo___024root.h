@@ -123,7 +123,7 @@ class alignas(VL_CACHE_LINE_BYTES) Vvideo___024root final : public VerilatedModu
         CData/*0:0*/ video__DOT__testramthingy__DOT__ififoRead;
         CData/*0:0*/ video__DOT__testramthingy__DOT__iframeEnd;
         CData/*0:0*/ video__DOT__testramthingy__DOT__fastFrameEnd;
-        CData/*2:0*/ video__DOT__testramthingy__DOT__delayBeforeWriteAgain;
+        CData/*4:0*/ video__DOT__testramthingy__DOT__delayBeforeWriteAgain;
         CData/*0:0*/ video__DOT__testramthingy__DOT__fastEvenOrOdd;
         CData/*0:0*/ video__DOT__testramthingy__DOT__r1_Pulse;
         CData/*0:0*/ video__DOT__testramthingy__DOT__r2_Pulse;

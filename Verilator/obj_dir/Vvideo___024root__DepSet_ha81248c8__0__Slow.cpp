@@ -141,16 +141,17 @@ VL_ATTR_COLD void Vvideo___024root___stl_sequent__TOP__0(Vvideo___024root* vlSel
         = ((~ ((IData)(vlSelfRef.video__DOT__isathing__DOT__iFPGA_IO_EN) 
                | (IData)(vlSelfRef.video__DOT__isathing__DOT__i_undedicedIsaCycle))) 
            & (0x27fU <= (IData)(vlSelfRef.video__DOT__testramthingy__DOT__waddr)));
-    vlSelfRef.video__DOT____Vcellinp__testramthingy____pinNumber8 
-        = (1U & ((IData)(vlSelfRef.video__DOT__isathing__DOT__actualBusCycle) 
-                 | ((~ (IData)(vlSelfRef.video__DOT__isathing__DOT__iADS_OE)) 
-                    | (IData)(vlSelfRef.video__DOT__isathing__DOT__i_undedicedIsaCycle))));
     vlSelfRef.video__DOT__writeBufferEmpty = ((~ (IData)(vlSelfRef.video__DOT__wbv__DOT__dataFifo__DOT__ifull)) 
                                               & ((IData)(vlSelfRef.video__DOT__wbv__DOT__dataFifo__DOT__r_ptr) 
                                                  == (IData)(vlSelfRef.video__DOT__wbv__DOT__dataFifo__DOT__w_ptr)));
     vlSelfRef.video__DOT__wbv__DOT__aEmpty = ((~ (IData)(vlSelfRef.video__DOT__wbv__DOT__addressFifo__DOT__ifull)) 
                                               & ((IData)(vlSelfRef.video__DOT__wbv__DOT__addressFifo__DOT__r_ptr) 
                                                  == (IData)(vlSelfRef.video__DOT__wbv__DOT__addressFifo__DOT__w_ptr)));
+    vlSelfRef.video__DOT____Vcellinp__testramthingy____pinNumber8 
+        = (1U & ((IData)(vlSelfRef.video__DOT__isathing__DOT__actualBusCycle) 
+                 | ((IData)(vlSelfRef.video__DOT__isathing__DOT__i_undedicedIsaCycle) 
+                    | ((~ (IData)(vlSelfRef.video__DOT__isathing__DOT__iADS_OE)) 
+                       | (IData)(vlSelfRef.BALE)))));
     video__DOT__isathing__DOT____VdfgRegularize_h12aca4bb_0_1 
         = (1U & (~ ((((~ (IData)(vlSelfRef.IOR)) | 
                       (~ (IData)(vlSelfRef.IOW))) & 
@@ -382,7 +383,7 @@ VL_ATTR_COLD void Vvideo___024root___ctor_var_reset(Vvideo___024root* vlSelf) {
     vlSelf->video__DOT__testramthingy__DOT__fastFrameEnd = VL_RAND_RESET_I(1);
     vlSelf->video__DOT__testramthingy__DOT__waddr = VL_RAND_RESET_I(10);
     vlSelf->video__DOT__testramthingy__DOT__raddr = VL_RAND_RESET_I(10);
-    vlSelf->video__DOT__testramthingy__DOT__delayBeforeWriteAgain = VL_RAND_RESET_I(3);
+    vlSelf->video__DOT__testramthingy__DOT__delayBeforeWriteAgain = VL_RAND_RESET_I(5);
     vlSelf->video__DOT__testramthingy__DOT__fastEvenOrOdd = VL_RAND_RESET_I(1);
     vlSelf->video__DOT__testramthingy__DOT__r1_Pulse = VL_RAND_RESET_I(1);
     vlSelf->video__DOT__testramthingy__DOT__r2_Pulse = VL_RAND_RESET_I(1);

@@ -220,7 +220,7 @@ module managedVramDataBufferCompositeBankSwap(
     end*/
 
     //reg alreadyDidHsyncReset;
-    reg[2:0] delayBeforeWriteAgain;//maybe if I insert a bit of a delay before writing after non-writeable cycles, it will eliminate the wobble
+    reg[4:0] delayBeforeWriteAgain;//maybe if I insert a bit of a delay before writing after non-writeable cycles, it will eliminate the wobble
     assign full = waddr >= 639;//it copies 2 bytes per clock cycle but it displays 2 bytes per pixel so it cancels out
     reg fastEvenOrOdd, fastVblank;
     reg r1_Pulse, r2_Pulse, r3_Pulse;
@@ -301,9 +301,23 @@ module managedVramDataBufferCompositeBankSwap(
             //ichipEnable <= 0;           //DO NOT TOUCH THIS
             //ififoWrite <= 1;
 
+            /*if (delayBeforeWriteAgain > 0) begin
+                ireadSignal <= 1;           //DO NOT TOUCH THIS
+                ichipEnable <= 1;           //DO NOT TOUCH THIS
+                ififoWrite <= 0;
+            end else begin
+                ireadSignal <= 0;           //DO NOT TOUCH THIS
+                ichipEnable <= 0;           //DO NOT TOUCH THIS
+                ififoWrite <= 1;
+            end*/
+
             if (delayBeforeWriteAgain > 1) begin
                 ireadSignal <= 1;           //DO NOT TOUCH THIS
                 ichipEnable <= 1;           //DO NOT TOUCH THIS
+                ififoWrite <= 0;
+            end else if (delayBeforeWriteAgain > 0) begin
+                ireadSignal <= 0;           //DO NOT TOUCH THIS
+                ichipEnable <= 0;           //DO NOT TOUCH THIS
                 ififoWrite <= 0;
             end else begin
                 ireadSignal <= 0;           //DO NOT TOUCH THIS
@@ -315,7 +329,19 @@ module managedVramDataBufferCompositeBankSwap(
                 iNextVramAddress <= iNextVramAddress + 2;
                 waddr <= waddr + 1;
                 alreadySubtracted <= 0;
-            end
+            end //else if (delayBeforeWriteAgain == 1 /*& ~full */& waddr > 1) begin
+                //waddr <= waddr - 2;
+                //iNextVramAddress <= iNextVramAddress - 4;
+            //end
+
+            /*if (~bugFix & ~alreadySubtracted & bus_free & ~full) begin
+                bugFix <= 1;
+                if (waddr > 1 & ~full) begin    //don't bother with the stupid bugfix if it will result in waddr rolling over
+                    waddr <= waddr - 1;
+                    iNextVramAddress <= iNextVramAddress - 2;
+                    alreadySubtracted <= 1;
+                end
+            end*/
 
             /*if (iNextVramAddress >= maxVramAddress) begin
                 iNextVramAddress <= 0;

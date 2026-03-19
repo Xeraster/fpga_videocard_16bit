@@ -254,7 +254,8 @@ int main(int argc, char** argv)
                 //write_pixel(top, 0xFFFF);
 
                 //simulate keyboard cycles and see if it causes glitch
-                isa_io_write(top, 0x423, 0x6060);
+                //isa_io_write(top, 0x423, 0x6060);
+                isa_io_write(top, 0x60, 0x6060);
 
                 writes_done++;
 
