@@ -262,8 +262,10 @@ VL_INLINE_OPT void Vvideo___024root___nba_sequent__TOP__1(Vvideo___024root* vlSe
                                        || ((IData)(vlSelfRef.video__DOT__wbv__DOT__iWRITEBUF_IO_EN) 
                                            || ((1U 
                                                 & (~ 
-                                                   ((~ (IData)(vlSelfRef.video__DOT__isathing__DOT__iFPGA_IO_EN)) 
-                                                    & (~ (IData)(vlSelfRef.video__DOT__isathing__DOT__i_undedicedIsaCycle))))) 
+                                                   ((((~ (IData)(vlSelfRef.video__DOT__isathing__DOT__actualBusCycle)) 
+                                                      & (~ (IData)(vlSelfRef.video__DOT__isathing__DOT__i_undedicedIsaCycle))) 
+                                                     & (~ (IData)(vlSelfRef.BALE))) 
+                                                    & (IData)(vlSelfRef.ADS_OE)))) 
                                                || (IData)(vlSelfRef.video__DOT__testramthingy__DOT__ireadSignal))));
     vlSelfRef.video__DOT__iVRAM_en = ((1U & (~ ((IData)(vlSelfRef.video__DOT__settingsRegister) 
                                                 >> 4U))) 
@@ -271,8 +273,10 @@ VL_INLINE_OPT void Vvideo___024root___nba_sequent__TOP__1(Vvideo___024root* vlSe
                                            ? (IData)(vlSelfRef.video__DOT__wbv__DOT__ichip_select)
                                            : ((1U & 
                                                (~ (
-                                                   (~ (IData)(vlSelfRef.video__DOT__isathing__DOT__iFPGA_IO_EN)) 
-                                                   & (~ (IData)(vlSelfRef.video__DOT__isathing__DOT__i_undedicedIsaCycle))))) 
+                                                   (((~ (IData)(vlSelfRef.video__DOT__isathing__DOT__actualBusCycle)) 
+                                                     & (~ (IData)(vlSelfRef.video__DOT__isathing__DOT__i_undedicedIsaCycle))) 
+                                                    & (~ (IData)(vlSelfRef.BALE))) 
+                                                   & (IData)(vlSelfRef.ADS_OE)))) 
                                               || (IData)(vlSelfRef.video__DOT__testramthingy__DOT__ichipEnable))));
     if (vlSelfRef.RESET) {
         if (((IData)(vlSelfRef.video__DOT__wbv__DOT__ififoRead) 
@@ -589,18 +593,35 @@ VL_INLINE_OPT void Vvideo___024root___nba_sequent__TOP__1(Vvideo___024root* vlSe
                     vlSelfRef.video__DOT__testramthingy__DOT__ififoWrite = 1U;
                 }
                 if ((1U > (IData)(vlSelfRef.video__DOT__testramthingy__DOT__delayBeforeWriteAgain))) {
-                    __Vdly__video__DOT__testramthingy__DOT__iNextVramAddress 
-                        = (0xfffffU & ((IData)(2U) 
-                                       + vlSelfRef.video__DOT__testramthingy__DOT__iNextVramAddress));
-                    __Vdly__video__DOT__testramthingy__DOT__waddr 
-                        = (0x3ffU & ((IData)(1U) + (IData)(vlSelfRef.video__DOT__testramthingy__DOT__waddr)));
+                    if ((0U == (IData)(vlSelfRef.video__DOT__testramthingy__DOT__bsCounter))) {
+                        __Vdly__video__DOT__testramthingy__DOT__iNextVramAddress 
+                            = (0xfffffU & ((IData)(2U) 
+                                           + vlSelfRef.video__DOT__testramthingy__DOT__iNextVramAddress));
+                        __Vdly__video__DOT__testramthingy__DOT__waddr 
+                            = (0x3ffU & ((IData)(1U) 
+                                         + (IData)(vlSelfRef.video__DOT__testramthingy__DOT__waddr)));
+                    } else {
+                        vlSelfRef.video__DOT__testramthingy__DOT__bsCounter 
+                            = (7U & ((IData)(vlSelfRef.video__DOT__testramthingy__DOT__bsCounter) 
+                                     - (IData)(1U)));
+                    }
                     __Vdly__video__DOT__testramthingy__DOT__alreadySubtracted = 0U;
+                } else if ((((1U == (IData)(vlSelfRef.video__DOT__testramthingy__DOT__delayBeforeWriteAgain)) 
+                             & (~ (IData)(vlSelfRef.video__DOT__full))) 
+                            & (0U < (IData)(vlSelfRef.video__DOT__testramthingy__DOT__waddr)))) {
+                    __Vdly__video__DOT__testramthingy__DOT__waddr 
+                        = (0x3ffU & ((IData)(vlSelfRef.video__DOT__testramthingy__DOT__waddr) 
+                                     - (IData)(1U)));
+                    __Vdly__video__DOT__testramthingy__DOT__iNextVramAddress 
+                        = (0xfffffU & (vlSelfRef.video__DOT__testramthingy__DOT__iNextVramAddress 
+                                       - (IData)(2U)));
                 }
             } else {
                 vlSelfRef.video__DOT__testramthingy__DOT__ireadSignal = 1U;
                 vlSelfRef.video__DOT__testramthingy__DOT__ichipEnable = 1U;
                 vlSelfRef.video__DOT__testramthingy__DOT__ififoWrite = 0U;
                 __Vdly__video__DOT__testramthingy__DOT__delayBeforeWriteAgain = 4U;
+                vlSelfRef.video__DOT__testramthingy__DOT__bsCounter = 2U;
             }
         } else {
             if ((1U & (~ (IData)(vlSelfRef.video__DOT__testramthingy__DOT__alreadySubtracted)))) {
@@ -623,6 +644,7 @@ VL_INLINE_OPT void Vvideo___024root___nba_sequent__TOP__1(Vvideo___024root* vlSe
             vlSelfRef.video__DOT__wbv__DOT__dataFifo__DOT__iwrite_en = 0U;
         }
     } else {
+        vlSelfRef.video__DOT__testramthingy__DOT__bsCounter = 0U;
         __Vdly__video__DOT__testramthingy__DOT__alreadySubtracted = 1U;
         __Vdly__video__DOT__testramthingy__DOT__delayBeforeWriteAgain = 0U;
         __Vdly__video__DOT__testramthingy__DOT__iNextVramAddress = 0U;
@@ -679,6 +701,7 @@ VL_INLINE_OPT void Vvideo___024root___nba_sequent__TOP__1(Vvideo___024root* vlSe
     vlSelfRef.video__DOT__wbv__DOT__dataFifo__DOT__ifull 
         = ((0xffU & ((IData)(1U) + (IData)(vlSelfRef.video__DOT__wbv__DOT__dataFifo__DOT__w_ptr))) 
            == (IData)(vlSelfRef.video__DOT__wbv__DOT__dataFifo__DOT__r_ptr));
+    vlSelfRef.video__DOT__isathing__DOT__r2_Pulse = vlSelfRef.video__DOT__isathing__DOT__r1_Pulse;
     vlSelfRef.video__DOT____Vcellinp__testramthingy____pinNumber8 
         = (1U & ((IData)(vlSelfRef.video__DOT__isathing__DOT__actualBusCycle) 
                  | ((IData)(vlSelfRef.video__DOT__isathing__DOT__i_undedicedIsaCycle) 
@@ -688,7 +711,6 @@ VL_INLINE_OPT void Vvideo___024root___nba_sequent__TOP__1(Vvideo___024root* vlSe
         = (1U & (~ ((((~ (IData)(vlSelfRef.IOR)) | 
                       (~ (IData)(vlSelfRef.IOW))) & 
                      (~ (IData)(vlSelfRef.BALE))) & (IData)(vlSelfRef.video__DOT__isathing__DOT__actualBusCycle))));
-    vlSelfRef.video__DOT__isathing__DOT__r2_Pulse = vlSelfRef.video__DOT__isathing__DOT__r1_Pulse;
     if (((~ (IData)(vlSelfRef.video__DOT__isathing__DOT__BALE3_Pulse)) 
          & (IData)(vlSelfRef.video__DOT__isathing__DOT__BALE2_Pulse))) {
         vlSelfRef.video__DOT__isathing__DOT__fastBALE = 1U;

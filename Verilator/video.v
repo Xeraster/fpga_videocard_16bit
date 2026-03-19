@@ -494,7 +494,7 @@ always@(posedge pllclk) begin
             data_outi <= writeBufferVramData;
 
             //debugDataOut <= 0;
-        end else if (!FPGA_IO_EN & !undecidedIsaCycle) begin
+        end else if (/*!FPGA_IO_EN & !undecidedIsaCycle*/ ~actualBusCycle & ~undecidedIsaCycle & ~BALE & ADS_OE) begin
             //if there is no relevant isa bus cycle happening, relay the signals to the vram chips for copying stuff into the buffer
             //iVRAM_low_en <= CE;
             //iVRAM_high_en <= CE;

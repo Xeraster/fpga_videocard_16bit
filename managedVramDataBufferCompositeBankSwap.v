@@ -227,6 +227,7 @@ module managedVramDataBufferCompositeBankSwap(
 
     reg alreadySubtracted;
     reg bugFix;
+    reg[2:0] bsCounter;//maybe adding another bullshit counter will fix The Bug
 
     always@(posedge clock)
     begin
@@ -262,6 +263,7 @@ module managedVramDataBufferCompositeBankSwap(
         end*/
 
         if (!RESET) begin
+            bsCounter <= 0;
             bugFix <= 0;
             alreadySubtracted <= 1;
             delayBeforeWriteAgain <= 0;
@@ -318,7 +320,7 @@ module managedVramDataBufferCompositeBankSwap(
             end else if (delayBeforeWriteAgain > 0) begin
                 ireadSignal <= 0;           //DO NOT TOUCH THIS
                 ichipEnable <= 0;           //DO NOT TOUCH THIS
-                ififoWrite <= 0;
+                ififoWrite <= 0;//DEBUGGING INFO: setting this to a 1 here corrupts the pixel BEFORE The Bug Pixel
             end else begin
                 ireadSignal <= 0;           //DO NOT TOUCH THIS
                 ichipEnable <= 0;           //DO NOT TOUCH THIS
@@ -326,13 +328,18 @@ module managedVramDataBufferCompositeBankSwap(
             end
 
             if (delayBeforeWriteAgain < 1) begin
-                iNextVramAddress <= iNextVramAddress + 2;
-                waddr <= waddr + 1;
+                if (bsCounter == 0) begin
+                  iNextVramAddress <= iNextVramAddress + 2;
+                  waddr <= waddr + 1;
+                end else begin
+                  bsCounter <= bsCounter - 1;
+                end
                 alreadySubtracted <= 0;
-            end //else if (delayBeforeWriteAgain == 1 /*& ~full */& waddr > 1) begin
-                //waddr <= waddr - 2;
-                //iNextVramAddress <= iNextVramAddress - 4;
-            //end
+            end else if (delayBeforeWriteAgain == 1 & ~full & waddr > 0) begin
+                //DEBUGGING INFO: bypassing this else-if corrupts the pixel AFTER The Bug Pixel
+                waddr <= waddr - 1;
+                iNextVramAddress <= iNextVramAddress - 2;
+            end
 
             /*if (~bugFix & ~alreadySubtracted & bus_free & ~full) begin
                 bugFix <= 1;
@@ -351,6 +358,7 @@ module managedVramDataBufferCompositeBankSwap(
             ichipEnable <= 1;
             ififoWrite <= 0;
             delayBeforeWriteAgain <= 4;
+            bsCounter <= 2;
 
             /*if (~bugFix & ~alreadySubtracted & bus_free & ~full) begin
                 bugFix <= 1;

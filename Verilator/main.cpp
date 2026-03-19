@@ -26,7 +26,7 @@ void fillPattern(uint16_t *buf, size_t size)
     for (size_t i = 0; i < (1 << 19); i++) 
     {
         //buf[i] = rand() & 0xFFFF;
-        if (soFar < 30000)
+        /*if (soFar < 30000)
         {
             buf[i] = 0x00FF;
         }
@@ -35,7 +35,7 @@ void fillPattern(uint16_t *buf, size_t size)
             buf[i] = 0xFFFF;
         }
         else
-        {
+        {*/
             if ((soFar/8) % 2 == 1)
             {
                 buf[i] = 0xF000;
@@ -44,7 +44,7 @@ void fillPattern(uint16_t *buf, size_t size)
             {
                 buf[i] = 0x0FF0;
             }
-        }
+        //}
         soFar++;
     }
 }
@@ -245,7 +245,7 @@ int main(int argc, char** argv)
             {
                 delay--;
             }
-            else if (writes_done < 10000)
+            else if (writes_done < 10)
             {
                 // pick random address + write
                 uint32_t addr = rand() % (640 * 480 * 2);
@@ -260,7 +260,8 @@ int main(int argc, char** argv)
                 writes_done++;
 
                 // random delay before next write
-                delay = rand() % 50; // tweak this
+                //delay = rand() % 50; // tweak this
+                delay = 10000;
             }
 
             // reset each frame

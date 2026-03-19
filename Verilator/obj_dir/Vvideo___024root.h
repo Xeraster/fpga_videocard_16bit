@@ -129,6 +129,7 @@ class alignas(VL_CACHE_LINE_BYTES) Vvideo___024root final : public VerilatedModu
         CData/*0:0*/ video__DOT__testramthingy__DOT__r2_Pulse;
         CData/*0:0*/ video__DOT__testramthingy__DOT__r3_Pulse;
         CData/*0:0*/ video__DOT__testramthingy__DOT__alreadySubtracted;
+        CData/*2:0*/ video__DOT__testramthingy__DOT__bsCounter;
         CData/*0:0*/ __Vdly__video__DOT__vsyncctr;
         CData/*0:0*/ __VdlySet__video__DOT__testramthingy__DOT__b1__DOT__mem__v0;
         CData/*0:0*/ __VdlySet__video__DOT__testramthingy__DOT__b2__DOT__mem__v0;
@@ -145,9 +146,9 @@ class alignas(VL_CACHE_LINE_BYTES) Vvideo___024root final : public VerilatedModu
         VL_IN16(data_in,15,0);
         SData/*15:0*/ video__DOT__data_outi;
         SData/*15:0*/ video__DOT__nextThingToWrite;
-        SData/*15:0*/ video__DOT__writeBufferVramData;
     };
     struct {
+        SData/*15:0*/ video__DOT__writeBufferVramData;
         SData/*15:0*/ video__DOT__DStxresult;
         SData/*15:0*/ video__DOT__testramthingy__DOT__ipixelOutput;
         SData/*9:0*/ video__DOT__testramthingy__DOT__waddr;

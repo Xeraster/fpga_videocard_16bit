@@ -389,6 +389,7 @@ VL_ATTR_COLD void Vvideo___024root___ctor_var_reset(Vvideo___024root* vlSelf) {
     vlSelf->video__DOT__testramthingy__DOT__r2_Pulse = VL_RAND_RESET_I(1);
     vlSelf->video__DOT__testramthingy__DOT__r3_Pulse = VL_RAND_RESET_I(1);
     vlSelf->video__DOT__testramthingy__DOT__alreadySubtracted = VL_RAND_RESET_I(1);
+    vlSelf->video__DOT__testramthingy__DOT__bsCounter = VL_RAND_RESET_I(3);
     vlSelf->video__DOT__testramthingy__DOT__b1dout = VL_RAND_RESET_I(16);
     vlSelf->video__DOT__testramthingy__DOT__b2dout = VL_RAND_RESET_I(16);
     for (int __Vi0 = 0; __Vi0 < 1024; ++__Vi0) {
