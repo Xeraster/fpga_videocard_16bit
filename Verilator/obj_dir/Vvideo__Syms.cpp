@@ -18,7 +18,7 @@ Vvideo__Syms::Vvideo__Syms(VerilatedContext* contextp, const char* namep, Vvideo
     , TOP{this, namep}
 {
         // Check resources
-        Verilated::stackCheck(147);
+        Verilated::stackCheck(103);
     // Configure time unit / time precision
     _vm_contextp__->timeunit(-12);
     _vm_contextp__->timeprecision(-12);

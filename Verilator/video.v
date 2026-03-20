@@ -484,7 +484,7 @@ always@(posedge pllclk) begin
         iGreen <= Gi;
         iBlue <= Bi;
 
-        /*if (WRITEBUF_IO_EN) begin
+        if (WRITEBUF_IO_EN) begin
             //if there is no more pixel buffer copying to do (and there is no relevant isa bus cycle happening), start processing write buffer data and writing it to the screen
             //iVRAM_low_en <= vbuf_CE;
             //iVRAM_high_en <= vbuf_CE;
@@ -496,9 +496,9 @@ always@(posedge pllclk) begin
             AVi <= writeBufferVramAddress;
             data_outi <= writeBufferVramData;
 
-            //debugDataOut <= 0;*/
+            //debugDataOut <= 0;
         //end else if (/*!FPGA_IO_EN & !undecidedIsaCycle*/~actualBusCycle & ~undecidedIsaCycle & ~BALE & ADS_OE) begin
-        /*end else if (~actualBusCycle & ~undecidedIsaCycle & ~BALE & ADS_OE) begin
+        end else if (~actualBusCycle & ~undecidedIsaCycle & ~BALE & ADS_OE) begin
             //if there is no relevant isa bus cycle happening, relay the signals to the vram chips for copying stuff into the buffer
             //iVRAM_low_en <= CE;
             //iVRAM_high_en <= CE;
@@ -522,13 +522,13 @@ always@(posedge pllclk) begin
             data_outi <= DStxresult;
 
             //debugDataOut <= 1;
-        end*/
+        end
     end
 
 end
 
 
-reg [1:0] vram_owner;
+/*reg [1:0] vram_owner;
 always @(*) begin
     if (WRITEBUF_IO_EN & settingsRegister[4]) begin
         vram_owner = 2'd0;
@@ -553,7 +553,7 @@ always @(*) begin
         AVi = bufferRequestedAddress;
         data_outi = DStxresult;
     end
-end
+end*/
 
 //the other pllclk logic loop. this one is generally for things having to do with the isa bus and isa cycles
 always@(posedge pllclk) begin

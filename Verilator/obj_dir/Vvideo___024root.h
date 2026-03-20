@@ -68,6 +68,9 @@ class alignas(VL_CACHE_LINE_BYTES) Vvideo___024root final : public VerilatedModu
         CData/*0:0*/ video__DOT__doData;
         CData/*0:0*/ video__DOT__full;
         CData/*7:0*/ video__DOT__alreadyWrote;
+        CData/*0:0*/ video__DOT__iread_cmd;
+        CData/*0:0*/ video__DOT__iwrite_cmd;
+        CData/*0:0*/ video__DOT__iVRAM_en;
         CData/*0:0*/ video__DOT__vsyncctr;
         CData/*0:0*/ video__DOT____Vcellinp__testramthingy____pinNumber8;
         CData/*0:0*/ video__DOT__gs__DOT__HSYNC;
@@ -77,11 +80,11 @@ class alignas(VL_CACHE_LINE_BYTES) Vvideo___024root final : public VerilatedModu
         CData/*0:0*/ video__DOT__wbv__DOT__ififoRead;
         CData/*0:0*/ video__DOT__wbv__DOT__iWRITEBUF_IO_EN;
         CData/*0:0*/ video__DOT__wbv__DOT__iwrite_cmd;
+    };
+    struct {
         CData/*0:0*/ video__DOT__wbv__DOT__ichip_select;
         CData/*0:0*/ video__DOT__wbv__DOT__aEmpty;
         CData/*7:0*/ video__DOT__wbv__DOT__dataFifo__DOT__r_ptr;
-    };
-    struct {
         CData/*7:0*/ video__DOT__wbv__DOT__dataFifo__DOT__w_ptr;
         CData/*0:0*/ video__DOT__wbv__DOT__dataFifo__DOT__iwrite_en;
         CData/*0:0*/ video__DOT__wbv__DOT__dataFifo__DOT__ialmostFull;
@@ -126,6 +129,7 @@ class alignas(VL_CACHE_LINE_BYTES) Vvideo___024root final : public VerilatedModu
         VL_OUT16(verticalCount,9,0);
         VL_OUT16(data_out,15,0);
         VL_IN16(data_in,15,0);
+        SData/*15:0*/ video__DOT__data_outi;
         SData/*15:0*/ video__DOT__nextThingToWrite;
         SData/*15:0*/ video__DOT__writeBufferVramData;
         SData/*15:0*/ video__DOT__DStxresult;
@@ -142,12 +146,13 @@ class alignas(VL_CACHE_LINE_BYTES) Vvideo___024root final : public VerilatedModu
         SData/*9:0*/ __VdlyDim0__video__DOT__testramthingy__DOT__b2__DOT__mem__v0;
         VL_OUT(AV,19,0);
         VL_IN(AV_in,19,0);
+    };
+    struct {
         IData/*19:0*/ video__DOT__vramAddress;
+        IData/*19:0*/ video__DOT__AVi;
         IData/*23:0*/ video__DOT__addressComReg;
         IData/*19:0*/ video__DOT__writeBufferVramAddress;
         IData/*19:0*/ video__DOT__lastAdsRequest;
-    };
-    struct {
         IData/*27:0*/ video__DOT__cdd__DOT__counter;
         IData/*19:0*/ video__DOT__isathing__DOT__lastAdsRequest;
         IData/*19:0*/ video__DOT__testramthingy__DOT__iNextVramAddress;

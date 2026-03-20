@@ -132,8 +132,8 @@ void isa_io_write(Vvideo* top, uint16_t port, uint16_t data, bool slowIsaCycle =
     top->BALE = 1;
     top->eval(); step_sram(top);
 
-    top->pllclk ^= 1; top->eval();
-    top->pllclk ^= 1; top->eval();
+    top->pllclk ^= 1; top->eval(); step_sram(top);
+    top->pllclk ^= 1; top->eval(); step_sram(top);
 
     // 2. Release BALE
     top->BALE = 0;
@@ -142,13 +142,13 @@ void isa_io_write(Vvideo* top, uint16_t port, uint16_t data, bool slowIsaCycle =
     top->IOW = 1;
     top->IOR = 0;
     top->pllclk ^= 1;
-    top->eval();
+    top->eval(); step_sram(top);
     top->pllclk ^= 1;
-    top->eval();
+    top->eval(); step_sram(top);
     top->pllclk ^= 1;
-    top->eval();
+    top->eval(); step_sram(top);
     top->pllclk ^= 1;
-    top->eval();
+    top->eval(); step_sram(top);
 
     top->pllclk ^= 1; top->eval(); step_sram(top);
     top->pllclk ^= 1; top->eval(); step_sram(top);
@@ -183,13 +183,13 @@ void isa_io_write(Vvideo* top, uint16_t port, uint16_t data, bool slowIsaCycle =
     top->IOW = 1;
     top->IOR = 1;
     top->pllclk ^= 1;
-    top->eval();
+    top->eval(); step_sram(top);
     top->pllclk ^= 1;
-    top->eval();
+    top->eval(); step_sram(top);
     top->pllclk ^= 1;
-    top->eval();
+    top->eval(); step_sram(top);
     top->pllclk ^= 1;
-    top->eval();
+    top->eval(); 
 }
 
 void set_vram_addr(Vvideo* top, uint32_t addr)
@@ -316,9 +316,19 @@ int main(int argc, char** argv)
                 // set_vram_addr(top, addr);
                 // write_pixel(top, 0xFFFF);
 
+                int x = top->horizontalCount;
+                int y = top->verticalCount;
+                int idx = (y * 640 + x) * 3;
+                if (x < 640 && y < 480)
+                {
+                    //framebuffer[idx + 0] = 0;
+                    //framebuffer[idx + 1] = 0;
+                    //framebuffer[idx + 2] = 0;
+                }
+
                 // simulate keyboard cycles and see if it causes glitch
                 // isa_io_write(top, 0x423, 0x6060);
-                isa_io_write(top, 0x60, 0xFFFF, true);
+                isa_io_write(top, 0x42C, 0xFFFF, false);
 
                 writes_done++;
 
@@ -327,8 +337,7 @@ int main(int argc, char** argv)
                 //delay = 10000;
                 //delay = betterRand(1412415) % 50;
                 delay = 15;
-                int x = top->horizontalCount;
-                int y = top->verticalCount;
+
                 //cout << "h: " << x << " y: " << y << " data_in= " << top->data_in << endl;
                 /*auto matches = find_all(sram, 0xFFFF);
                 for (uint32_t addr : matches)
