@@ -305,15 +305,17 @@ module managedVramDataBufferCompositeBankSwap(
             //ichipEnable <= 0;           //DO NOT TOUCH THIS
             //ififoWrite <= 1;
 
-            /*if (delayBeforeWriteAgain > 0) begin
-                ireadSignal <= 1;           //DO NOT TOUCH THIS
-                ichipEnable <= 1;           //DO NOT TOUCH THIS
-                ififoWrite <= 0;
+            if (delayBeforeWriteAgain > 0) begin
+                ireadSignal <= 0;           //DO NOT TOUCH THIS
+                ichipEnable <= 0;           //DO NOT TOUCH THIS
+                ififoWrite <= 1;
             end else begin
                 ireadSignal <= 0;           //DO NOT TOUCH THIS
                 ichipEnable <= 0;           //DO NOT TOUCH THIS
                 ififoWrite <= 1;
-            end*/
+                iNextVramAddress <= iNextVramAddress + 2;
+                waddr <= waddr + 1;
+            end
 
             //start over just for fun, but uncomment THIS ONE to restore original behavior
            
@@ -369,12 +371,12 @@ module managedVramDataBufferCompositeBankSwap(
                 waddr <= waddr + 1;
                 ififoWrite <= 1;
             end*/
-            newDelay <= 3;
+            /*newDelay <= 3;
             ireadSignal <= 0;
             ichipEnable <= 0;
             iNextVramAddress <= iNextVramAddress + 2;
             waddr <= waddr + 1;
-            ififoWrite <= 1;
+            ififoWrite <= 1;*/
 
             /*if (iNextVramAddress >= maxVramAddress) begin
                 iNextVramAddress <= 0;
@@ -385,13 +387,13 @@ module managedVramDataBufferCompositeBankSwap(
             ififoWrite <= 0;
             delayBeforeWriteAgain <= 1;
             bsCounter <= 0;
-            if (newDelay > 0) begin
+            /*if (newDelay > 0) begin
               newDelay <= newDelay - 1;
             end
             if (newDelay == 1 & waddr > 0 & ~full) begin
               waddr <= waddr - 1;
               iNextVramAddress <= iNextVramAddress - 2;
-            end
+            end*/
             //newDelay <= 3;
             /*if (~bugFix & ~alreadySubtracted & bus_free & ~full) begin
                 bugFix <= 1;

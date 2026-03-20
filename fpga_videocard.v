@@ -773,7 +773,7 @@ module top(
     
                                                                                 //use ADS_OE for bus free? it's either doing an isa transfer for a fpga <=> vram transfer basically
 
-    managedVramDataBufferCompositeBankSwap testramthingy(DS_RX, Ri, Gi, Bi, OE, CE, pllClk/*FASTCLK*/, actualBusCycle | undecidedIsaCycle | ~ADS_OE | BALE, 
+    managedVramDataBufferCompositeBankSwap testramthingy(DS_RX, Ri, Gi, Bi, OE, CE, pllClk/*FASTCLK*/, actualBusCycle | undecidedIsaCycle | ~ADS_OE | syncBale, 
     /*VALID_PIXELS*/ivblank, empty, full, fifovalid, write_en, read_en, bufferRequestedAddress, maxVramAddress, RESET, spixelClock, 
     frameEnd, HSYNC, VSYNC, vsyncctr/*verticalCount[0]*/, alreadyDidHsyncReset, VALID_PIXELS);
 
@@ -809,6 +809,7 @@ module top(
     );
 
     wire pllClk;
+    wire fuckClock;
     //pll experiment. results: solves *almost* every clock domain related bug
     SB_PLL40_CORE #(
         .FEEDBACK_PATH("SIMPLE"),   // Don't use fine delay adjust
@@ -826,7 +827,8 @@ module top(
         .BYPASS(1'b0)               // No bypass, use PLL signal as output
     );
 
-    //clockDivider cd(pllClk, spixelClock);
+    wire spixelClock;
+    clockDivider cd(pllClk, spixelClock);
 
     /*SB_PLL40_2F_CORE #(
                 //.FEEDBACK_PATH("DELAY"),
@@ -976,8 +978,8 @@ module top(
     reg syncBale;
     reg debugDataOut;
 
-    reg pc1_Pulse, pc2_Pulse, pc3_Pulse;
-    reg spixelClock;
+    //reg pc1_Pulse, pc2_Pulse, pc3_Pulse;
+    //reg spixelClock;
 
     reg ior1_Pulse, ior2_Pulse, ior3_Pulse;
     reg iow1_Pulse, iow2_Pulse, iow3_Pulse;
@@ -986,14 +988,14 @@ module top(
     always@(posedge pllClk)
     begin
         //sync the pixel clock to the pll clock once and for all
-        pc1_Pulse <= pixelClock;
+        /*pc1_Pulse <= pixelClock;
         pc2_Pulse <= pc1_Pulse;
         pc3_Pulse <= pc2_Pulse;
         if (~pc3_Pulse & pc2_Pulse) begin
             spixelClock <= 1;
         end else if (pc3_Pulse & ~pc2_Pulse) begin
             spixelClock <= 0;
-        end
+        end*/
 
         //NEW RULE: DON'T USE ANY BALE, IOR or IOW ANYWHERE IN THE CODE EXCEPT FOR THESE ONES
         b1_Pulse <= BALE;
@@ -1098,7 +1100,7 @@ module top(
                 addressBusOut <= writeBufferVramAddress;
                 dataBusOut <= writeBufferVramData;
                 debugDataOut <= 0;
-            end else if (/*!FPGA_IO_EN & !undecidedIsaCycle*/~actualBusCycle & ~undecidedIsaCycle & ~BALE & ADS_OE) begin
+            end else if (/*!FPGA_IO_EN & !undecidedIsaCycle*/~actualBusCycle & ~undecidedIsaCycle & ~syncBale & ADS_OE) begin
                 //if there is no relevant isa bus cycle happening, relay the signals to the vram chips for copying stuff into the buffer
                 iVRAM_low_en <= CE;
                 iVRAM_high_en <= CE;
