@@ -87,8 +87,8 @@ module managedVramDataBufferCompositeBankSwap(
     output[19:0] nextVramAddress,   //the address of whatever the next byte in vram this thing wants to load is
     input[19:0] maxVramAddress,     //the vram address at which to rollover to 0
     input RESET,
+    input RESET_pll,
     input pixelClock,               //use the pixel clock to determine when to go to the next byte
-    output frameEnd,                 //1 if this module thinks its on or beyond the last vram address for the current frame. 0 if this module thinks its in the correct vram address
     input HSYNC,                    //use hsync to swap between blocks. keep it simple stupid. only HSYNC is needed for now. hopefully
     input VSYNC,                     //try using vsync signal to correct timing issues
     input evenOrOdd,               //debugging port because this fucking bullshit is easier to test on hardware than it is on testbench
@@ -135,6 +135,7 @@ module managedVramDataBufferCompositeBankSwap(
     assign Bi[4] = ipixelOutput[4];
     reg iframeEnd;
     reg fastFrameEnd;
+    wire frameEnd;
     assign frameEnd = iframeEnd;
 
     //reg evenOrOdd;//WHEN evenOrOdd IS 1, READ FROM B1 AND WRITE TO B2. WHEN evenOrOdd IS 0, READ FROM B2 AND WRITE TO B1. STAMP THIS COMMENT EVERYWHERE BECAUSE ITS IMPORTANT
@@ -222,13 +223,16 @@ module managedVramDataBufferCompositeBankSwap(
     //reg alreadyDidHsyncReset;
     reg[4:0] delayBeforeWriteAgain;//maybe if I insert a bit of a delay before writing after non-writeable cycles, it will eliminate the wobble
     assign full = waddr >= 639;//it copies 2 bytes per clock cycle but it displays 2 bytes per pixel so it cancels out
-    reg fastEvenOrOdd, fastVblank;
+    reg fastEvenOrOdd;
     reg r1_Pulse, r2_Pulse, r3_Pulse;
 
     reg alreadySubtracted;
     reg bugFix;
     reg[2:0] bsCounter;//maybe adding another bullshit counter will fix The Bug
     reg[2:0] newDelay;
+
+    reg evenOrOdd1_Pulse, evenOrOdd2_Pulse, evenOrOdd3_Pulse;
+    reg frameEnd1_Pulse, frameEnd2_Pulse, frameEnd3_Pulse;
 
     always@(posedge clock)
     begin
@@ -237,15 +241,42 @@ module managedVramDataBufferCompositeBankSwap(
             delayBeforeWriteAgain <= delayBeforeWriteAgain - 1;
         end
 
-        r1_Pulse <= pixelClock;
+        /*r1_Pulse <= pixelClock;
         r2_Pulse <= r1_Pulse;
         r3_Pulse <= r2_Pulse;
         if (~r3_Pulse & r2_Pulse) begin
             fastEvenOrOdd <= evenOrOdd;
-            fastVblank <= vblank;
             fastFrameEnd <= iframeEnd;
         end else if (r3_Pulse & ~r2_Pulse) begin
             //fastEvenOrOdd <= evenOrOdd;
+        end*/
+
+        /*r1_Pulse <= HSYNC & VSYNC;
+        r2_Pulse <= r1_Pulse;
+        r3_Pulse <= r2_Pulse;
+        if (~r3_Pulse & r2_Pulse) begin
+            altVblank <= 1;
+        end else if (r3_Pulse & ~r2_Pulse) begin
+            altVblank <= 0;
+        end*/
+
+        //for some fucking reason, this makes it worse than the above
+        evenOrOdd1_Pulse <= evenOrOdd;
+        evenOrOdd2_Pulse <= evenOrOdd1_Pulse;
+        evenOrOdd3_Pulse <= evenOrOdd2_Pulse;
+        if (~evenOrOdd3_Pulse & evenOrOdd2_Pulse) begin
+            fastEvenOrOdd <= 1;
+        end else if (evenOrOdd3_Pulse & ~evenOrOdd2_Pulse) begin
+            fastEvenOrOdd <= 0;
+        end
+
+        frameEnd1_Pulse <= iframeEnd;
+        frameEnd2_Pulse <= frameEnd1_Pulse;
+        frameEnd3_Pulse <= frameEnd2_Pulse;
+        if (~frameEnd3_Pulse & frameEnd2_Pulse) begin
+            fastFrameEnd <= 1;
+        end else if (frameEnd3_Pulse & ~frameEnd2_Pulse) begin
+            fastFrameEnd <= 0;
         end
         
         //WHEN evenOrOdd IS 1, READ FROM B1 AND WRITE TO B2. WHEN evenOrOdd IS 0, READ FROM B2 AND WRITE TO B1. STAMP THIS COMMENT EVERYWHERE BECAUSE ITS IMPORTANT
@@ -263,7 +294,7 @@ module managedVramDataBufferCompositeBankSwap(
             alreadyDidHsyncReset <= 0;
         end*/
 
-        if (!RESET) begin
+        if (!RESET_pll) begin
             bsCounter <= 0;
             bugFix <= 0;
             alreadySubtracted <= 1;

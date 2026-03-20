@@ -185,7 +185,7 @@ module generateSync(
     //reg [9:0] verticalCount;
     reg VALID_H;                    //1 if in valid horizontal viewing area. 0 if otherwise 
     reg VALID_V;                    //1 if in valid veritcal viewing area. 0 if otherwise
-    always@(posedge clock or negedge RESET)
+    always@(posedge clock/* or negedge RESET*/)
     begin
         if (!RESET)
         begin
@@ -748,8 +748,8 @@ module top(
     reg ivblank;
     assign vblank = ivblank;
 
-    generateSync gs(spixelClock, HSYNC, VSYNC, VramCounter, RESET, VALID_PIXELS, horizontalCount, verticalCount);    //generate the sync signals for use in other stuff
-    advancedTestPattern atp(VramCounter, Rt, Gt, Bt, HSYNC, VSYNC, spixelClock, VALID_PIXELS, horizontalCount, verticalCount);   //generate the values for test pattern (when bit 4 of settings register 0x423 is 0)
+    generateSync gs(sPixelClock, HSYNC, VSYNC, VramCounter, RESET, VALID_PIXELS, horizontalCount, verticalCount);    //generate the sync signals for use in other stuff
+    advancedTestPattern atp(VramCounter, Rt, Gt, Bt, HSYNC, VSYNC, sPixelClock, VALID_PIXELS, horizontalCount, verticalCount);   //generate the values for test pattern (when bit 4 of settings register 0x423 is 0)
     //displayVRAM vrambullshit(VramCounter, Ri, Gi, Bi, HSYNC, VSYNC, pixelClock, VRAM_VALID, horizontalCount, verticalCount, RESET, OE, CE, DS_RX, VALID_PIXELS);
     //managedByteToVramCopy mbtc(inputPixel, DS_TX, WE, CEW, pixelClock, byteToCopy, byteCopied, bus_free);
     //wire init;
@@ -761,7 +761,6 @@ module top(
     wire [19:0] bufferRequestedAddress;
     reg [19:0] lastAdsRequest;
     assign maxVramAddress = 20'h96000;
-    wire frameEnd;
     wire almostFull;
     wire evenOrOdd;
     wire alreadyDidHsyncReset;
@@ -774,8 +773,8 @@ module top(
                                                                                 //use ADS_OE for bus free? it's either doing an isa transfer for a fpga <=> vram transfer basically
 
     managedVramDataBufferCompositeBankSwap testramthingy(DS_RX, Ri, Gi, Bi, OE, CE, pllClk/*FASTCLK*/, actualBusCycle | undecidedIsaCycle | ~ADS_OE | syncBale, 
-    /*VALID_PIXELS*/ivblank, empty, full, fifovalid, write_en, read_en, bufferRequestedAddress, maxVramAddress, RESET, spixelClock, 
-    frameEnd, HSYNC, VSYNC, vsyncctr/*verticalCount[0]*/, alreadyDidHsyncReset, VALID_PIXELS);
+    ivblank, empty, full, fifovalid, write_en, read_en, bufferRequestedAddress, maxVramAddress, RESET, RESET_pll, sPixelClock, 
+    HSYNC, VSYNC, /*vsyncctr*/verticalCount[0], alreadyDidHsyncReset, VALID_PIXELS);
 
     //wire xpixelClock;
     //clockDivider cdd(pllClk, xpixelClock);
@@ -823,12 +822,12 @@ module top(
         .PLLOUTCORE(pllClk),           // Output clock
         //.PLLOUTGLOBAL(globalPixelClock),     //global pixelClock to avoid skew
         .LOCK(),                    // Locked signal
-        .RESETB(1'b1),              // Active low reset
+        .RESETB(RESET_FUCK),              // Active low reset
         .BYPASS(1'b0)               // No bypass, use PLL signal as output
     );
 
-    wire spixelClock;
-    clockDivider cd(pllClk, spixelClock);
+    wire sPixelClock;
+    clockDivider cd(pllClk, sPixelClock);
 
     /*SB_PLL40_2F_CORE #(
                 //.FEEDBACK_PATH("DELAY"),
@@ -891,7 +890,7 @@ module top(
     reg FPGA_IO_EN;//goes high anytime an isa bus cycle is happening that is addressing this card
     isaSlaveBusController isathing(AV_RX, FPGA_IO_EN, SBHE, syncBale, IOCS16, MEMCS16, IOERR, IO_RDY, NOWS, ADS_OE, ADS_LATCH, 
     MEMR, MEMW, SMEMR, SMEMW, syncIOR, syncIOW, ISACLK, ISADONE, 
-    TE0, TE1, TE2, TE3, FPGA_WR, pllClk/*FASTCLK*/, actualBusCycle, RESET, 1'h0, undecidedIsaCycle);
+    TE0, TE1, TE2, TE3, FPGA_WR, pllClk/*FASTCLK*/, actualBusCycle, RESET_pll, 1'h0, undecidedIsaCycle);
 
     //this only controls FPGA_WR with all other controls being linked to dummy signals. THE SNOW BUG GOES AWAY COMPLETELY WHEN ISA IS DISABLED. so I just comment these lines in or out depending on what im testing
     //isaSlaveBusController isathing(AV_RX, dummyFPGAIO, SBHE, BALE, IOCS16, MEMCS16, IOERR, IO_RDY, NOWS, shutUp, dummyADSlatch, 
@@ -956,8 +955,12 @@ module top(
     assign Green = iGreen;
     assign Blue = iBlue;
 
-    reg RESET;
-    manageReset mr(RESET, pixelClock);
+    reg RESET;  //RESET for anything having to do with the pixel clock domain
+    reg RESET_pll;//RESET for anything involving the pll clock domain
+    reg RESET_FUCK;
+    manageReset mr(RESET, sPixelClock);
+    manageReset mrf(RESET_pll, sPixelClock);//for some fucking reason separated reset clock domains causes wobble 100% of the time instead of 99% of the time
+    manageReset mrfuck(RESET_FUCK, pixelClock);
 
     reg iVRAM_low_en, iVRAM_high_en, iwrite_cmd, iread_cmd;
     assign VRAM_low_en = iVRAM_low_en;
@@ -979,11 +982,26 @@ module top(
     reg debugDataOut;
 
     //reg pc1_Pulse, pc2_Pulse, pc3_Pulse;
-    //reg spixelClock;
+    //reg sPixelClock_i;
+    //wire sPixelClock;
+    //assign sPixelClock = sPixelClock_i;
 
     reg ior1_Pulse, ior2_Pulse, ior3_Pulse;
     reg iow1_Pulse, iow2_Pulse, iow3_Pulse;
     reg syncIOR, syncIOW;//maybe this will make there be less issues
+
+    //always@(posedge sPixelClock) begin
+    //    ivblank <= VALID_PIXELS;
+    //end
+    reg syncVSYNC1, syncVSYNC2, syncVSYNC3;
+    reg syncVSYNC_i;
+    wire syncVSYNC;
+    assign syncVSYNC = syncVSYNC_i;
+
+    reg syncHSYNC1, syncHSYNC2, syncHSYNC3;
+    reg syncHSYNC_i;
+    wire syncHSYNC;
+    assign syncHSYNC = syncHSYNC_i;
 
     always@(posedge pllClk)
     begin
@@ -992,9 +1010,10 @@ module top(
         pc2_Pulse <= pc1_Pulse;
         pc3_Pulse <= pc2_Pulse;
         if (~pc3_Pulse & pc2_Pulse) begin
-            spixelClock <= 1;
+            sPixelClock_i <= 1;
+            ivblank <= VALID_PIXELS;
         end else if (pc3_Pulse & ~pc2_Pulse) begin
-            spixelClock <= 0;
+            sPixelClock_i <= 0;
         end*/
 
         //NEW RULE: DON'T USE ANY BALE, IOR or IOW ANYWHERE IN THE CODE EXCEPT FOR THESE ONES
@@ -1025,13 +1044,40 @@ module top(
         end
 
         //maybe doing it this different way will make a difference
-        p1_Pulse <= spixelClock;
+        p1_Pulse <= sPixelClock;
         p2_Pulse <= p1_Pulse;
         p3_Pulse <= p2_Pulse;
         if(~p3_Pulse & p2_Pulse) begin
             //sverticalCount <= verticalCount;
             //shorizontalCount <= horizontalCount;
             ivblank <= VALID_PIXELS;
+        end
+        
+        /*p1_Pulse <= VALID_PIXELS;
+        p2_Pulse <= p1_Pulse;
+        p3_Pulse <= p2_Pulse;
+        if(~p3_Pulse & p2_Pulse) begin
+            ivblank <= 1;
+        end else if (p3_Pulse & ~p2_Pulse) begin
+            ivblank <= 0;
+        end*/
+
+        syncVSYNC1 <= VSYNC;
+        syncVSYNC2 <= syncVSYNC1;
+        syncVSYNC3 <= syncVSYNC2;
+        if (~syncVSYNC3 & syncVSYNC2) begin
+            syncVSYNC_i <= 1;
+        end else if (syncVSYNC3 & ~syncVSYNC2) begin
+            syncVSYNC_i <= 0;
+        end
+
+        syncHSYNC1 <= HSYNC;
+        syncHSYNC2 <= syncHSYNC1;
+        syncHSYNC3 <= syncHSYNC2;
+        if (~syncHSYNC3 & syncHSYNC2) begin
+            syncHSYNC_i <= 1;
+        end else if (syncHSYNC3 & ~syncHSYNC2) begin
+            syncHSYNC_i <= 0;
         end
 
         //don't manage RESET this way anymore because it causes problems
@@ -1192,7 +1238,7 @@ module top(
 
     always@(posedge /*FASTCLK*/pllClk)
     begin
-        if (!RESET) begin
+        if (!RESET_pll) begin
             isahighctr <= 2;
         end
 
@@ -1247,7 +1293,7 @@ module top(
     wire[19:0] writeBufferVramAddress;
     wire vbuf_WE, vbuf_CE, WRITEBUF_IO_EN;
     wire writeBufferFull, writeBufferAlmostFull, writeBufferEmpty;
-    writeBufferVram wbv(nextThingToWrite, addressComReg[19:0], pllClk, doData, writeBufferVramData, writeBufferVramAddress, vbuf_WE, vbuf_CE, full & !FPGA_IO_EN & !undecidedIsaCycle, pllClk, RESET, WRITEBUF_IO_EN, writeBufferFull, writeBufferAlmostFull, writeBufferEmpty);
+    writeBufferVram wbv(nextThingToWrite, addressComReg[19:0], pllClk, doData, writeBufferVramData, writeBufferVramAddress, vbuf_WE, vbuf_CE, full & !FPGA_IO_EN & !undecidedIsaCycle & ~syncBale & ADS_OE, pllClk, RESET_pll, WRITEBUF_IO_EN, writeBufferFull, writeBufferAlmostFull, writeBufferEmpty);
     
     reg numTimesWrittenTo;//workaround hack for a open collector vs totem pole issue. ugh
     reg gtfoonnextclock;
@@ -1265,7 +1311,7 @@ module top(
 
 
         //upon reset, load the registers with default values
-        if (!RESET) begin
+        if (!RESET_pll) begin
             videoDisplayRegister <= 8'h18;//b7-4 = 1 for 640x480. bit 3-2 = 2 for 16 bit color.
             settingsRegister <= 8'h70;//tldr 0x60 is for test pattern, 0x70 is for vram display mode.
             statusRegister <= 8'h0;
