@@ -2,6 +2,9 @@
 #include <verilated.h>
 #include <SDL2/SDL.h>
 #include <cstring>
+#include <vector>
+#include <iostream>
+using namespace std;
 
 //simulate random pixel data upon startup
 void fillRandom(uint8_t *buf, size_t size)
@@ -16,6 +19,15 @@ void fillRandom(uint16_t *buf, size_t size)
     for (size_t i = 0; i < (1 << 19); i++) 
     {
         buf[i] = rand() & 0xFFFF;
+    }
+}
+
+//fill vram directly with a solid color of a known value
+void fillColor(uint16_t *buf, size_t size, uint16_t color)
+{
+    for (size_t i = 0; i < (1 << 19); i++) 
+    {
+        buf[i] = color;
     }
 }
 
@@ -49,6 +61,17 @@ void fillPattern(uint16_t *buf, size_t size)
     }
 }
 
+uint32_t betterRand(uint32_t seed)
+{
+	seed += 0xe120fc15;
+	uint64_t tmp;
+	tmp = (uint64_t)seed * 0x4a39b70d;
+	uint32_t m1 = (tmp >> 32) ^ tmp;
+	tmp = (uint64_t)m1 * 0x12fad5c9;
+	uint32_t m2 = (tmp >> 32) ^ tmp;
+	return m2;
+}
+
 //the simulated sram chips
 uint16_t sram[1 << 19];  // 1M bytes = 512K words (16-bit)
 
@@ -77,17 +100,37 @@ void step_sram(Vvideo* top)
     }
 }
 
-void isa_io_write(Vvideo* top, uint16_t port, uint16_t data)
+std::vector<uint32_t> find_all(uint16_t* sram, uint16_t value)
+{
+    std::vector<uint32_t> results;
+
+    for (uint32_t i = 0; i < (1 << 19); i++)
+    {
+        if (sram[i] == value)
+        {
+            results.push_back(i);
+        }
+    }
+
+    return results;
+}
+
+void isa_io_write(Vvideo* top, uint16_t port, uint16_t data, bool slowIsaCycle = false)
 {
     // Put address on bus (lower 16 bits)
     top->AV_in = port;
 
     // Put data on bus
-    top->data_in = data;
+    if (port >= 0x420 && port <= 0x430)//simulate the behavior of the 74lvc245s
+    //if (top->FPGA_WR && ~top->isa_ctrl_out_en)
+    {
+        top->data_in = data;
+    }
 
     // 1. Latch address
+    step_sram(top);
     top->BALE = 1;
-    top->eval();
+    top->eval(); step_sram(top);
 
     top->pllclk ^= 1; top->eval();
     top->pllclk ^= 1; top->eval();
@@ -96,7 +139,8 @@ void isa_io_write(Vvideo* top, uint16_t port, uint16_t data)
     top->BALE = 0;
 
     // 3. Assert write (active low)
-    top->IOW = 0;
+    top->IOW = 1;
+    top->IOR = 0;
     top->pllclk ^= 1;
     top->eval();
     top->pllclk ^= 1;
@@ -106,20 +150,38 @@ void isa_io_write(Vvideo* top, uint16_t port, uint16_t data)
     top->pllclk ^= 1;
     top->eval();
 
-    top->pllclk ^= 1; top->eval();
-    top->pllclk ^= 1; top->eval();
-    top->pllclk ^= 1; top->eval();
-    top->pllclk ^= 1; top->eval();
-    top->pllclk ^= 1; top->eval();
-    top->pllclk ^= 1; top->eval();
-    top->pllclk ^= 1; top->eval();
-    top->pllclk ^= 1; top->eval();
-    top->pllclk ^= 1; top->eval();
-    top->pllclk ^= 1; top->eval();
-    top->pllclk ^= 1; top->eval();
+    top->pllclk ^= 1; top->eval(); step_sram(top);
+    top->pllclk ^= 1; top->eval(); step_sram(top);
+    top->pllclk ^= 1; top->eval();step_sram(top);
+    top->pllclk ^= 1; top->eval();step_sram(top);
+    top->pllclk ^= 1; top->eval();step_sram(top);
+    top->pllclk ^= 1; top->eval();step_sram(top);
+    top->pllclk ^= 1; top->eval();step_sram(top);
+    top->pllclk ^= 1; top->eval();step_sram(top);
+    top->pllclk ^= 1; top->eval();step_sram(top);
+    top->pllclk ^= 1; top->eval();step_sram(top);
+    top->pllclk ^= 1; top->eval();step_sram(top);
+
+    //simulate slow isa cycles with lots of wait states to make sure slow non-video card cycles don't halt buffering operation
+    if (slowIsaCycle)
+    {
+        top->pllclk ^= 1; top->eval();step_sram(top);
+        top->pllclk ^= 1; top->eval();step_sram(top);
+        top->pllclk ^= 1; top->eval();step_sram(top);
+        top->pllclk ^= 1; top->eval();step_sram(top);
+        top->pllclk ^= 1; top->eval();step_sram(top);
+        top->pllclk ^= 1; top->eval();step_sram(top);
+        top->pllclk ^= 1; top->eval();step_sram(top);
+        top->pllclk ^= 1; top->eval();step_sram(top);
+        top->pllclk ^= 1; top->eval();step_sram(top);
+        top->pllclk ^= 1; top->eval();step_sram(top);
+        top->pllclk ^= 1; top->eval();step_sram(top);
+    }
+
 
     // 4. Deassert write
     top->IOW = 1;
+    top->IOR = 1;
     top->pllclk ^= 1;
     top->eval();
     top->pllclk ^= 1;
@@ -170,6 +232,7 @@ int main(int argc, char** argv)
     memset(sram, 0, sizeof(sram));
     //fillRandom(sram, sizeof(sram));
     fillPattern(sram, sizeof(sram));
+    //fillColor(sram, sizeof(sram), 0xFFFF);
 
     SDL_Event event;
 
@@ -250,18 +313,28 @@ int main(int argc, char** argv)
                 // pick random address + write
                 uint32_t addr = rand() % (640 * 480 * 2);
 
-                //set_vram_addr(top, addr);
-                //write_pixel(top, 0xFFFF);
+                // set_vram_addr(top, addr);
+                // write_pixel(top, 0xFFFF);
 
-                //simulate keyboard cycles and see if it causes glitch
-                //isa_io_write(top, 0x423, 0x6060);
-                isa_io_write(top, 0x60, 0x6060);
+                // simulate keyboard cycles and see if it causes glitch
+                // isa_io_write(top, 0x423, 0x6060);
+                isa_io_write(top, 0x60, 0xFFFF, true);
 
                 writes_done++;
 
                 // random delay before next write
-                delay = rand() % 50; // tweak this
+                //delay = rand() % 50; // tweak this
                 //delay = 10000;
+                //delay = betterRand(1412415) % 50;
+                delay = 15;
+                int x = top->horizontalCount;
+                int y = top->verticalCount;
+                //cout << "h: " << x << " y: " << y << " data_in= " << top->data_in << endl;
+                /*auto matches = find_all(sram, 0xFFFF);
+                for (uint32_t addr : matches)
+                {
+                    printf("Found at %u\n", addr);
+                }*/
             }
 
             // reset each frame

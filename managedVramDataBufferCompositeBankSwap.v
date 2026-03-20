@@ -228,6 +228,7 @@ module managedVramDataBufferCompositeBankSwap(
     reg alreadySubtracted;
     reg bugFix;
     reg[2:0] bsCounter;//maybe adding another bullshit counter will fix The Bug
+    reg[2:0] newDelay;
 
     always@(posedge clock)
     begin
@@ -267,6 +268,7 @@ module managedVramDataBufferCompositeBankSwap(
             bugFix <= 0;
             alreadySubtracted <= 1;
             delayBeforeWriteAgain <= 0;
+            newDelay <= 0;
             iNextVramAddress <= 20'h0;//this is how to ensure the first valid cycle is starts the vram address at 0 and not 1
             //actually for testing purposes start it at 0
 
@@ -313,11 +315,13 @@ module managedVramDataBufferCompositeBankSwap(
                 ififoWrite <= 1;
             end*/
 
-            if (delayBeforeWriteAgain > 1) begin
-                ireadSignal <= 1;           //DO NOT TOUCH THIS
-                ichipEnable <= 1;           //DO NOT TOUCH THIS
+            //start over just for fun, but uncomment THIS ONE to restore original behavior
+           
+           /*if (delayBeforeWriteAgain > 2) begin
+                ireadSignal <= 0;           //DO NOT TOUCH THIS
+                ichipEnable <= 0;           //DO NOT TOUCH THIS
                 ififoWrite <= 0;
-            end else if (delayBeforeWriteAgain > 0) begin
+            end else if (delayBeforeWriteAgain > 1) begin
                 ireadSignal <= 0;           //DO NOT TOUCH THIS
                 ichipEnable <= 0;           //DO NOT TOUCH THIS
                 ififoWrite <= 0;//DEBUGGING INFO: setting this to a 1 here corrupts the pixel BEFORE The Bug Pixel
@@ -339,7 +343,7 @@ module managedVramDataBufferCompositeBankSwap(
                 //DEBUGGING INFO: bypassing this else-if corrupts the pixel AFTER The Bug Pixel
                 waddr <= waddr - 1;
                 iNextVramAddress <= iNextVramAddress - 2;
-            end
+            end*/
 
             /*if (~bugFix & ~alreadySubtracted & bus_free & ~full) begin
                 bugFix <= 1;
@@ -350,6 +354,28 @@ module managedVramDataBufferCompositeBankSwap(
                 end
             end*/
 
+            alreadySubtracted <= 0;
+            /*if (newDelay > 1) begin
+                newDelay <= newDelay - 1;
+                ireadSignal <= 1;
+                ichipEnable <= 1;
+            end else if (newDelay > 0) begin
+                newDelay <= newDelay - 1;
+                ireadSignal <= 0;
+                ichipEnable <= 0;
+                ififoWrite <= 1;
+            end else begin
+                iNextVramAddress <= iNextVramAddress + 2;
+                waddr <= waddr + 1;
+                ififoWrite <= 1;
+            end*/
+            newDelay <= 3;
+            ireadSignal <= 0;
+            ichipEnable <= 0;
+            iNextVramAddress <= iNextVramAddress + 2;
+            waddr <= waddr + 1;
+            ififoWrite <= 1;
+
             /*if (iNextVramAddress >= maxVramAddress) begin
                 iNextVramAddress <= 0;
             end*/
@@ -357,9 +383,16 @@ module managedVramDataBufferCompositeBankSwap(
             ireadSignal <= 1;
             ichipEnable <= 1;
             ififoWrite <= 0;
-            delayBeforeWriteAgain <= 4;
-            bsCounter <= 2;
-
+            delayBeforeWriteAgain <= 1;
+            bsCounter <= 0;
+            if (newDelay > 0) begin
+              newDelay <= newDelay - 1;
+            end
+            if (newDelay == 1 & waddr > 0 & ~full) begin
+              waddr <= waddr - 1;
+              iNextVramAddress <= iNextVramAddress - 2;
+            end
+            //newDelay <= 3;
             /*if (~bugFix & ~alreadySubtracted & bus_free & ~full) begin
                 bugFix <= 1;
                 if (waddr > 1 & ~full) begin    //don't bother with the stupid bugfix if it will result in waddr rolling over

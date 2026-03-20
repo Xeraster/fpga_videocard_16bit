@@ -42,6 +42,8 @@ Vvideo::Vvideo(VerilatedContext* _vcontextp__, const char* _vcname__)
     , VRAM_en{vlSymsp->TOP.VRAM_en}
     , write_cmd{vlSymsp->TOP.write_cmd}
     , read_cmd{vlSymsp->TOP.read_cmd}
+    , FPGA_IO_EN{vlSymsp->TOP.FPGA_IO_EN}
+    , isa_ctrl_out_en{vlSymsp->TOP.isa_ctrl_out_en}
     , horizontalCount{vlSymsp->TOP.horizontalCount}
     , verticalCount{vlSymsp->TOP.verticalCount}
     , data_out{vlSymsp->TOP.data_out}

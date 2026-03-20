@@ -61,6 +61,8 @@ class alignas(VL_CACHE_LINE_BYTES) Vvideo VL_NOT_FINAL : public VerilatedModel {
     VL_OUT8(&VRAM_en,0,0);
     VL_OUT8(&write_cmd,0,0);
     VL_OUT8(&read_cmd,0,0);
+    VL_OUT8(&FPGA_IO_EN,0,0);
+    VL_OUT8(&isa_ctrl_out_en,0,0);
     VL_OUT16(&horizontalCount,10,0);
     VL_OUT16(&verticalCount,9,0);
     VL_OUT16(&data_out,15,0);

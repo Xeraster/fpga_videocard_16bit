@@ -260,6 +260,30 @@ always@(posedge clock) begin
 
 end
 
+//doesn't solve anything
+/*always@(*) begin
+  if (!RESET) begin
+        //initialize all the reset values
+        //ialmostFull <= 0;
+        //readCtr <= 0;
+    end
+
+    if (free & ~empty) begin
+        ififoRead = 1;
+        iWRITEBUF_IO_EN = 1;
+        iwrite_cmd = 0;
+        ichip_select = 0;
+        //readCtr <= readCtr + 1;
+
+    end else begin
+        ififoRead = 0;
+        iWRITEBUF_IO_EN = 0;
+        iwrite_cmd = 1;
+        ichip_select = 1;
+        //internal_read_r1 <=0;
+    end
+end*/
+
 wire dFull, dEmpty, dValid;
 wire aFull, aEmpty, aValid, aAlmostFull;
 

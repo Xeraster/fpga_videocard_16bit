@@ -54,14 +54,11 @@ module isaSlaveBusController(
 
     //BALE just happens to be the exact signal that latches the address just the right way
     assign ADS_LATCH = BALE;
-    assign FPGA_WR = (~absIOR/* | ~absMEMR | ~absSMEMR*/);
+    assign FPGA_WR = (~IOR/* | ~absMEMR | ~absSMEMR*/);
 
     //synchronize the stupid fucking isa clock and don't even bother to use it directly BECAUSE CLOCK DOMAIN CROSSINGS FUCKING SUCK
     reg r1_Pulse, r2_Pulse, r3_Pulse;
 
-    reg fastIOR, fastIOW, fastSMEMR, fastSMEMW, fastMEMR, fastMEMW;
-    reg absIOR, absIOW, absSMEMR, absSMEMW, absMEMR, absMEMW;       //absX are masked as long as BALE is high - this avoids the device having to decode those pesky DRAM refresh cycles, saving precious bandwidth
-    reg fastBALE;
     reg fastSBHE;
     reg mio;//same as 486 M/IO pin. memory cycle = 1. I/O cycle = 0
     reg wr;//same as 486 W/R pin. read = 0. write = 1.
@@ -116,18 +113,9 @@ module isaSlaveBusController(
 
     reg[1:0] baleassertctr;
     reg[2:0] isacyclessincebale;
+    reg[2:0] ADS_OE_Delay;
 
     reg ISACLKSTATE;//yet another experiment with the isa clock that probably wont make a difference but im running out of ideas
-    //maybe each important signal should have this done individually
-    reg IOW1_Pulse, IOW2_Pulse, IOW3_Pulse;
-    reg IOR1_Pulse, IOR2_Pulse, IOR3_Pulse;
-    reg BALE1_Pulse, BALE2_Pulse, BALE3_Pulse;
-
-    //worth a fuckin' try
-    reg MEMW1_Pulse, MEMW2_Pulse, MEMW3_Pulse;
-    reg MEMR1_Pulse, MEMR2_Pulse, MEMR3_Pulse;
-    reg SMEMW1_Pulse, SMEMW2_Pulse, SMEMW3_Pulse;
-    reg SMEMR1_Pulse, SMEMR2_Pulse, SMEMR3_Pulse;
 
     //im starting all the way the fuck over. fuck this shit
     always@(posedge FPGACLK) begin
@@ -149,48 +137,17 @@ module isaSlaveBusController(
             isalowwaitctr <= 3;
 
             lastAdsRequest <= 20'h0;
+            ADS_OE_Delay <= 0;
 
             //baleassertctr <= 3;
             baleassertctr <= 0; //changed to start from 0 and not 3
 
             isacyclessincebale <= 0;
-
-            absIOR <= 1;
-            absIOW <= 1;
-            fastBALE <= 0;
         end
 
         r1_Pulse <= ISA_CLK;
         r2_Pulse <= r1_Pulse;
         r3_Pulse <= r2_Pulse;
-
-        IOW1_Pulse <= IOW;
-        IOW2_Pulse <= IOW1_Pulse;
-        IOW3_Pulse <= IOW2_Pulse;
-
-        IOR1_Pulse <= IOR;
-        IOR2_Pulse <= IOR1_Pulse;
-        IOR3_Pulse <= IOR2_Pulse;
-
-        BALE1_Pulse <= BALE;
-        BALE2_Pulse <= BALE1_Pulse;
-        BALE3_Pulse <= BALE2_Pulse;
-
-        SMEMW1_Pulse <= SMEMW;
-        SMEMW2_Pulse <= SMEMW1_Pulse;
-        SMEMW3_Pulse <= SMEMW2_Pulse;
-
-        SMEMR1_Pulse <= SMEMR;
-        SMEMR2_Pulse <= SMEMR1_Pulse;
-        SMEMR3_Pulse <= SMEMR2_Pulse;
-
-        MEMW1_Pulse <= MEMW;
-        MEMW2_Pulse <= MEMW1_Pulse;
-        MEMW3_Pulse <= MEMW2_Pulse;
-
-        MEMR1_Pulse <= MEMR;
-        MEMR2_Pulse <= MEMR1_Pulse;
-        MEMR3_Pulse <= MEMR2_Pulse;
 
         //fastBALE <= BALE;
         //absIOR <= IOR;
@@ -199,50 +156,6 @@ module isaSlaveBusController(
             ISACLKSTATE <= 1;
         end else if (r3_Pulse & ~r2_Pulse) begin
             ISACLKSTATE <= 0;
-        end
-
-        if (~IOW3_Pulse & IOW2_Pulse) begin 
-            absIOW <= 1;
-        end else if (IOW3_Pulse & ~IOW2_Pulse) begin
-            absIOW <= 0;
-        end
-
-        //io cycle sync. still not 100% sure if this is the way to go
-        if (~IOR3_Pulse & IOR2_Pulse) begin 
-            absIOR <= 1;
-        end else if (IOR3_Pulse & ~IOR2_Pulse) begin
-            absIOR <= 0;
-        end
-
-        if (~BALE3_Pulse & BALE2_Pulse) begin 
-            fastBALE <= 1;
-        end else if (BALE3_Pulse & ~BALE2_Pulse) begin
-            fastBALE <= 0;
-        end
-
-        //memory cycle signal sync. i dont know if this will help anything
-        if (~MEMW3_Pulse & MEMW2_Pulse) begin 
-            absMEMW <= 1;
-        end else if (MEMW3_Pulse & ~MEMW2_Pulse) begin
-            absMEMW <= 0;
-        end
-
-        if (~MEMR3_Pulse & MEMR2_Pulse) begin 
-            absMEMR <= 1;
-        end else if (MEMR3_Pulse & ~MEMR2_Pulse) begin
-            absMEMR <= 0;
-        end
-
-        if (~SMEMW3_Pulse & SMEMW2_Pulse) begin 
-            absSMEMW <= 1;
-        end else if (SMEMW3_Pulse & ~SMEMW2_Pulse) begin
-            absSMEMW <= 0;
-        end
-
-        if (~SMEMR3_Pulse & SMEMR2_Pulse) begin 
-            absSMEMR <= 1;
-        end else if (SMEMR3_Pulse & ~SMEMR2_Pulse) begin
-            absSMEMR <= 0;
         end
 
         if (isahighctr < 1 & ISACLKSTATE)
@@ -274,17 +187,24 @@ module isaSlaveBusController(
             iADS_OE <= 1;
             baleassertctr <= 0;
         end*/
-        if (fastBALE) begin
+        if (BALE) begin
             iADS_OE <= 0;
             lastAdsRequest <= addressBus;
-        end else begin
-            iADS_OE <= 1;
+            i_undedicedIsaCycle <= 1;
+            ADS_OE_Delay <= 5;
+        end
+        
+        if (ADS_OE_Delay == 0) begin
+            iADS_OE <= 1;   //keep it asserted a little bit longer each time this happens
+        end else if (ADS_OE_Delay > 0) begin
+            lastAdsRequest <= addressBus;
+            ADS_OE_Delay <= ADS_OE_Delay - 1;
         end
 
         //if (lastAdsRequest >= 20'h420 & lastAdsRequest <= 20'h430 /*& ~mio*/ & ((~IOR | ~IOW) | (MEMR & MEMW & SMEMR & SMEMW & isacyclessincebale < 2)) & ~BALE) begin
         //if (lastAdsRequest >= 20'h420 & lastAdsRequest <= 20'h430 /*& ~mio*/ & ((~absIOR | ~absIOW) | (absMEMR & absMEMW & absSMEMR & absSMEMW & isacyclessincebale < 2)) & ~fastBALE) begin
         //if its not an IO cycle it doesn't fuckin matter right now
-        if (lastAdsRequest >= 20'h420 & lastAdsRequest <= 20'h430 /*& ~mio*/ & ((~absIOR | ~absIOW)) & ~fastBALE) begin
+        if (lastAdsRequest >= 20'h420 & lastAdsRequest <= 20'h430 /*& ~mio*/ & ((~IOR | ~IOW)) & ~BALE) begin
             actualBusCycle <= 1;
             //if (FPGA_IO_WAITCTR < 1) begin
                 iFPGA_IO_EN <= 1;
@@ -296,27 +216,27 @@ module isaSlaveBusController(
             iFPGA_IO_EN <= 0;
             actualBusCycle <= 0;
             FPGA_IO_WAITCTR <= 3;
-
+            i_undedicedIsaCycle <= 0;
             //has the potential to be fucky due to clock domain
             //if (~BALE & r3_Pulse & ~r2_Pulse) begin//if bale is low and isa clock is doing a high-to-low transition
             //    i_undedicedIsaCycle <= 0;
             //end
             //if (~ISA_CLK & isacyclessincebale > 1) begin
-            if (~ISACLKSTATE & isacyclessincebale > 1) begin
-                i_undedicedIsaCycle <= 0;
-            end
+            //if (~ISACLKSTATE & isacyclessincebale > 1) begin
+            //    i_undedicedIsaCycle <= 0;
+            //end
         end
 
-        if (fastBALE) begin
+        if (BALE) begin
             isacyclessincebale <= 0;
         end
-        else if (!fastBALE & ((~r3_Pulse & r2_Pulse) | (r3_Pulse & ~r2_Pulse)) & isacyclessincebale < 6) begin
+        else if (!BALE & ((~r3_Pulse & r2_Pulse) | (r3_Pulse & ~r2_Pulse)) & isacyclessincebale < 6) begin
             isacyclessincebale <= isacyclessincebale + 1;
         end
 
 
         //if (/*(~absIOR & ~fastBALE) | (~absIOW & ~fastBALE)*/ (~absIOR & ~fastBALE) | (~absIOW & ~fastBALE))//not sure which is better, it generally behaves the same way with both methods
-        if ((~fastBALE & ~IOR) | (~fastBALE & ~IOW))
+        if ((~BALE & ~IOR) | (~BALE & ~IOW))
         begin
 
             //figure out wtf to do about TE0-TE3 signals

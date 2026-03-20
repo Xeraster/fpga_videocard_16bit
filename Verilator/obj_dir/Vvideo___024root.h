@@ -49,6 +49,8 @@ class alignas(VL_CACHE_LINE_BYTES) Vvideo___024root final : public VerilatedModu
         VL_OUT8(VRAM_en,0,0);
         VL_OUT8(write_cmd,0,0);
         VL_OUT8(read_cmd,0,0);
+        VL_OUT8(FPGA_IO_EN,0,0);
+        VL_OUT8(isa_ctrl_out_en,0,0);
         CData/*4:0*/ video__DOT__Rt;
         CData/*5:0*/ video__DOT__Gt;
         CData/*4:0*/ video__DOT__Bt;
@@ -66,9 +68,6 @@ class alignas(VL_CACHE_LINE_BYTES) Vvideo___024root final : public VerilatedModu
         CData/*0:0*/ video__DOT__doData;
         CData/*0:0*/ video__DOT__full;
         CData/*7:0*/ video__DOT__alreadyWrote;
-        CData/*0:0*/ video__DOT__iread_cmd;
-        CData/*0:0*/ video__DOT__iwrite_cmd;
-        CData/*0:0*/ video__DOT__iVRAM_en;
         CData/*0:0*/ video__DOT__vsyncctr;
         CData/*0:0*/ video__DOT____Vcellinp__testramthingy____pinNumber8;
         CData/*0:0*/ video__DOT__gs__DOT__HSYNC;
@@ -80,9 +79,9 @@ class alignas(VL_CACHE_LINE_BYTES) Vvideo___024root final : public VerilatedModu
         CData/*0:0*/ video__DOT__wbv__DOT__iwrite_cmd;
         CData/*0:0*/ video__DOT__wbv__DOT__ichip_select;
         CData/*0:0*/ video__DOT__wbv__DOT__aEmpty;
+        CData/*7:0*/ video__DOT__wbv__DOT__dataFifo__DOT__r_ptr;
     };
     struct {
-        CData/*7:0*/ video__DOT__wbv__DOT__dataFifo__DOT__r_ptr;
         CData/*7:0*/ video__DOT__wbv__DOT__dataFifo__DOT__w_ptr;
         CData/*0:0*/ video__DOT__wbv__DOT__dataFifo__DOT__iwrite_en;
         CData/*0:0*/ video__DOT__wbv__DOT__dataFifo__DOT__ialmostFull;
@@ -92,12 +91,6 @@ class alignas(VL_CACHE_LINE_BYTES) Vvideo___024root final : public VerilatedModu
         CData/*0:0*/ video__DOT__wbv__DOT__addressFifo__DOT__iwrite_en;
         CData/*0:0*/ video__DOT__wbv__DOT__addressFifo__DOT__ifull;
         CData/*0:0*/ video__DOT__isathing__DOT__i_undedicedIsaCycle;
-        CData/*0:0*/ video__DOT__isathing__DOT__r1_Pulse;
-        CData/*0:0*/ video__DOT__isathing__DOT__r2_Pulse;
-        CData/*0:0*/ video__DOT__isathing__DOT__r3_Pulse;
-        CData/*0:0*/ video__DOT__isathing__DOT__absIOR;
-        CData/*0:0*/ video__DOT__isathing__DOT__absIOW;
-        CData/*0:0*/ video__DOT__isathing__DOT__fastBALE;
         CData/*0:0*/ video__DOT__isathing__DOT__iADS_OE;
         CData/*0:0*/ video__DOT__isathing__DOT__iFPGA_IO_EN;
         CData/*0:0*/ video__DOT__isathing__DOT__actualBusCycle;
@@ -105,18 +98,7 @@ class alignas(VL_CACHE_LINE_BYTES) Vvideo___024root final : public VerilatedModu
         CData/*0:0*/ video__DOT__isathing__DOT__TE1i;
         CData/*0:0*/ video__DOT__isathing__DOT__TE2i;
         CData/*0:0*/ video__DOT__isathing__DOT__TE3i;
-        CData/*2:0*/ video__DOT__isathing__DOT__isahighctr;
-        CData/*2:0*/ video__DOT__isathing__DOT__isacyclessincebale;
-        CData/*0:0*/ video__DOT__isathing__DOT__ISACLKSTATE;
-        CData/*0:0*/ video__DOT__isathing__DOT__IOW1_Pulse;
-        CData/*0:0*/ video__DOT__isathing__DOT__IOW2_Pulse;
-        CData/*0:0*/ video__DOT__isathing__DOT__IOW3_Pulse;
-        CData/*0:0*/ video__DOT__isathing__DOT__IOR1_Pulse;
-        CData/*0:0*/ video__DOT__isathing__DOT__IOR2_Pulse;
-        CData/*0:0*/ video__DOT__isathing__DOT__IOR3_Pulse;
-        CData/*0:0*/ video__DOT__isathing__DOT__BALE1_Pulse;
-        CData/*0:0*/ video__DOT__isathing__DOT__BALE2_Pulse;
-        CData/*0:0*/ video__DOT__isathing__DOT__BALE3_Pulse;
+        CData/*2:0*/ video__DOT__isathing__DOT__ADS_OE_Delay;
         CData/*0:0*/ video__DOT__testramthingy__DOT__ireadSignal;
         CData/*0:0*/ video__DOT__testramthingy__DOT__ichipEnable;
         CData/*0:0*/ video__DOT__testramthingy__DOT__ififoWrite;
@@ -129,7 +111,7 @@ class alignas(VL_CACHE_LINE_BYTES) Vvideo___024root final : public VerilatedModu
         CData/*0:0*/ video__DOT__testramthingy__DOT__r2_Pulse;
         CData/*0:0*/ video__DOT__testramthingy__DOT__r3_Pulse;
         CData/*0:0*/ video__DOT__testramthingy__DOT__alreadySubtracted;
-        CData/*2:0*/ video__DOT__testramthingy__DOT__bsCounter;
+        CData/*2:0*/ video__DOT__testramthingy__DOT__newDelay;
         CData/*0:0*/ __Vdly__video__DOT__vsyncctr;
         CData/*0:0*/ __VdlySet__video__DOT__testramthingy__DOT__b1__DOT__mem__v0;
         CData/*0:0*/ __VdlySet__video__DOT__testramthingy__DOT__b2__DOT__mem__v0;
@@ -144,10 +126,7 @@ class alignas(VL_CACHE_LINE_BYTES) Vvideo___024root final : public VerilatedModu
         VL_OUT16(verticalCount,9,0);
         VL_OUT16(data_out,15,0);
         VL_IN16(data_in,15,0);
-        SData/*15:0*/ video__DOT__data_outi;
         SData/*15:0*/ video__DOT__nextThingToWrite;
-    };
-    struct {
         SData/*15:0*/ video__DOT__writeBufferVramData;
         SData/*15:0*/ video__DOT__DStxresult;
         SData/*15:0*/ video__DOT__testramthingy__DOT__ipixelOutput;
@@ -164,10 +143,11 @@ class alignas(VL_CACHE_LINE_BYTES) Vvideo___024root final : public VerilatedModu
         VL_OUT(AV,19,0);
         VL_IN(AV_in,19,0);
         IData/*19:0*/ video__DOT__vramAddress;
-        IData/*19:0*/ video__DOT__AVi;
         IData/*23:0*/ video__DOT__addressComReg;
         IData/*19:0*/ video__DOT__writeBufferVramAddress;
         IData/*19:0*/ video__DOT__lastAdsRequest;
+    };
+    struct {
         IData/*27:0*/ video__DOT__cdd__DOT__counter;
         IData/*19:0*/ video__DOT__isathing__DOT__lastAdsRequest;
         IData/*19:0*/ video__DOT__testramthingy__DOT__iNextVramAddress;

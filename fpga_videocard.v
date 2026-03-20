@@ -791,7 +791,7 @@ module top(
     //assign isa_ctrl_out_en = ~(~ADS_OE & AV_RX >= 20'h420 & AV_RX <= 20'h430 & (~IOR | ~IOW));
 
     //control the ISA output 74lvc245 tranciever
-    assign isa_ctrl_out_en = ~(/*(FPGA_IO_EN | undecidedIsaCycle)*/lastAdsRequest >= 20'h420 & lastAdsRequest <= 20'h430 & (~IOR | ~IOW | FPGA_IO_EN) & ~BALE);//isa_slave_controller_new needs this instead
+    assign isa_ctrl_out_en = ~(/*(FPGA_IO_EN | undecidedIsaCycle)*/lastAdsRequest >= 20'h420 & lastAdsRequest <= 20'h430 & (~IOR | ~IOW | FPGA_IO_EN) & ~syncBale);//isa_slave_controller_new needs this instead
     //assign isa_ctrl_out_en = ~(/*FPGA_IO_EN & */AV_RX >= 20'h420 & AV_RX <= 20'h430 & (~IOR | ~IOW) & ~BALE);
     //assign isa_ctrl_out_en = 1;//disable
     //assign AV = ~FPGA_IO_EN ? 20'bZ : av_relay;
@@ -826,13 +826,6 @@ module top(
         .BYPASS(1'b0)               // No bypass, use PLL signal as output
     );
 
-    assign spixelClock = ispixelClock;
-    reg ispixelClock;
-    always@(pllClk) begin
-        ispixelClock <= pixelClock;
-    end
-
-    wire spixelClock;
     //clockDivider cd(pllClk, spixelClock);
 
     /*SB_PLL40_2F_CORE #(
@@ -894,8 +887,8 @@ module top(
     wire sTE0, sTE1, sTE2, sTE3, dummyFPGAIO, dummyactualbuscycle, dummyADSlatch;
     wire ISADONE, actualBusCycle, undecidedIsaCycle;
     reg FPGA_IO_EN;//goes high anytime an isa bus cycle is happening that is addressing this card
-    isaSlaveBusController isathing(AV_RX, FPGA_IO_EN, SBHE, BALE, IOCS16, MEMCS16, IOERR, IO_RDY, NOWS, ADS_OE, ADS_LATCH, 
-    MEMR, MEMW, SMEMR, SMEMW, IOR, IOW, ISACLK, ISADONE, 
+    isaSlaveBusController isathing(AV_RX, FPGA_IO_EN, SBHE, syncBale, IOCS16, MEMCS16, IOERR, IO_RDY, NOWS, ADS_OE, ADS_LATCH, 
+    MEMR, MEMW, SMEMR, SMEMW, syncIOR, syncIOW, ISACLK, ISADONE, 
     TE0, TE1, TE2, TE3, FPGA_WR, pllClk/*FASTCLK*/, actualBusCycle, RESET, 1'h0, undecidedIsaCycle);
 
     //this only controls FPGA_WR with all other controls being linked to dummy signals. THE SNOW BUG GOES AWAY COMPLETELY WHEN ISA IS DISABLED. so I just comment these lines in or out depending on what im testing
@@ -983,8 +976,61 @@ module top(
     reg syncBale;
     reg debugDataOut;
 
+    reg pc1_Pulse, pc2_Pulse, pc3_Pulse;
+    reg spixelClock;
+
+    reg ior1_Pulse, ior2_Pulse, ior3_Pulse;
+    reg iow1_Pulse, iow2_Pulse, iow3_Pulse;
+    reg syncIOR, syncIOW;//maybe this will make there be less issues
+
     always@(posedge pllClk)
     begin
+        //sync the pixel clock to the pll clock once and for all
+        pc1_Pulse <= pixelClock;
+        pc2_Pulse <= pc1_Pulse;
+        pc3_Pulse <= pc2_Pulse;
+        if (~pc3_Pulse & pc2_Pulse) begin
+            spixelClock <= 1;
+        end else if (pc3_Pulse & ~pc2_Pulse) begin
+            spixelClock <= 0;
+        end
+
+        //NEW RULE: DON'T USE ANY BALE, IOR or IOW ANYWHERE IN THE CODE EXCEPT FOR THESE ONES
+        b1_Pulse <= BALE;
+        b2_Pulse <= b1_Pulse;
+        b3_Pulse <= b2_Pulse;
+        if (~b3_Pulse & b2_Pulse) begin
+            syncBale <= 1;
+        end else if (b3_Pulse & ~b2_Pulse) begin
+            syncBale <= 0;
+        end
+        
+        ior1_Pulse <= IOR;
+        ior2_Pulse <= ior1_Pulse;
+        ior3_Pulse <= ior2_Pulse;
+        if (~ior3_Pulse & ior2_Pulse) begin
+            syncIOR <= 1;
+        end else if (ior3_Pulse & ~ior2_Pulse) begin
+            syncIOR <= 0;
+        end
+        iow1_Pulse <= IOW;
+        iow2_Pulse <= iow1_Pulse;
+        iow3_Pulse <= iow2_Pulse;
+        if (~iow3_Pulse & iow2_Pulse) begin
+            syncIOW <= 1;
+        end else if (iow3_Pulse & ~iow2_Pulse) begin
+            syncIOW <= 0;
+        end
+
+        //maybe doing it this different way will make a difference
+        p1_Pulse <= spixelClock;
+        p2_Pulse <= p1_Pulse;
+        p3_Pulse <= p2_Pulse;
+        if(~p3_Pulse & p2_Pulse) begin
+            //sverticalCount <= verticalCount;
+            //shorizontalCount <= horizontalCount;
+            ivblank <= VALID_PIXELS;
+        end
 
         //don't manage RESET this way anymore because it causes problems
         //RESET <= ~HOST_RESET;       //isa reset is inverted from what I assumed it to be, so do this to fix it
@@ -1011,26 +1057,6 @@ module top(
         //Red = Rt;
         //Green = Gt;
         //Blue = Bt;
-
-        b1_Pulse <= BALE;
-        b2_Pulse <= b1_Pulse;
-        b3_Pulse <= b2_Pulse;
-
-        if (~b3_Pulse & b2_Pulse) begin
-            syncBale <= 1;
-        end else if (b3_Pulse & ~b2_Pulse) begin
-            syncBale <= 0;
-        end
-
-        //maybe doing it this different way will make a difference
-        p1_Pulse <= spixelClock;
-        p2_Pulse <= p1_Pulse;
-        p3_Pulse <= p2_Pulse;
-        if(~p3_Pulse & p2_Pulse) begin
-            //sverticalCount <= verticalCount;
-            //shorizontalCount <= horizontalCount;
-            ivblank <= VALID_PIXELS;
-        end
         //sverticalCount <= verticalCount;
         //shorizontalCount <= horizontalCount;
 
@@ -1158,9 +1184,7 @@ module top(
     end
 
     //an attempt at syncing isa clock to get around clock domain bugs. it doesn't seem to have changed anything.
-    reg syncIOR, syncIOW;//maybe this will make there be less issues
-    reg r1_Pulse, r2_Pulse, r3_Pulse;
-    reg[15:0] synchronizedDataInput;//for isa
+    //reg r1_Pulse, r2_Pulse, r3_Pulse;
 
     reg [2:0] isahighctr;
 
@@ -1174,7 +1198,7 @@ module top(
             lastAdsRequest <= AV_RX;
         end
 
-        r1_Pulse <= ISACLK;    //the ONLY TIME ISA_CLK EVER GETS REFERENCED
+        /*r1_Pulse <= ISACLK;    //the ONLY TIME ISA_CLK EVER GETS REFERENCED
         r2_Pulse <= r1_Pulse;
         r3_Pulse <= r2_Pulse;
         if ((~r3_Pulse & r2_Pulse)) begin
@@ -1184,10 +1208,9 @@ module top(
         end
 
         if (syncedISACLK) begin
-            synchronizedDataInput <= DS_RX;
             syncIOR <= IOR | syncBale;
             syncIOW <= IOW | syncBale;
-        end
+        end*/
 
         /*if ((~r3_Pulse & r2_Pulse)) begin
             syncedISACLK <= 1;
@@ -1251,7 +1274,8 @@ module top(
             doData <= 0;
             alreadyWrote <= 4'h0;
         //end else if (/*(~IOR | ~IOW)*/(~syncIOR | ~syncIOW) & actualBusCycle) begin//only io cycles for now
-        end else if ((~IOR | ~IOW) & actualBusCycle & alreadyWrote < 20) begin//only io cycles for now. doesnt make a difference? THATS FUCKING IMPOSSIBLE
+        end else if ((~syncIOR | ~syncIOW) & actualBusCycle & alreadyWrote < 20 & ~syncBale) begin
+        //end else if ((~IOR | ~IOW) & actualBusCycle & alreadyWrote < 20) begin//only io cycles for now. doesnt make a difference? THATS FUCKING IMPOSSIBLE
             //if (AV_RX == 20'h423) begin
             if (lastAdsRequest == 20'h422) begin
                 if (FPGA_WR) begin

@@ -337,10 +337,13 @@ module video(
     output[19:0] AV,   //video card address bus
     input[19:0] AV_in,  //whenever the host accesses the video card, use this one for address bus input
     output[15:0] data_out,
-    input[15:0] data_in
+    input[15:0] data_in,
+    output FPGA_IO_EN,
+    output isa_ctrl_out_en
     );
 
 clockDividerX3 cdd(pllclk, pixelClock);
+assign isa_ctrl_out_en = ~(lastAdsRequest >= 20'h420 & lastAdsRequest <= 20'h430 & (~IOR | ~IOW | FPGA_IO_EN) & ~BALE);//isa_slave_controller_new needs this instead
 //assign c = a & b;
 //assign Ri = 4'hF;
 //assign Gi = 5'h1F;
@@ -406,7 +409,7 @@ assign read_cmd = iread_cmd;
 assign write_cmd = iwrite_cmd;
 reg CE, OE;    //vram signal outputs
 
-reg FPGA_IO_EN;//goes high anytime an isa bus cycle is happening that is addressing this card
+//reg FPGA_IO_EN;//goes high anytime an isa bus cycle is happening that is addressing this card
 wire ISADONE, actualBusCycle, undecidedIsaCycle;
 isaSlaveBusController isathing(AV_in, FPGA_IO_EN, SBHE, BALE, IOCS16, MEMCS16, IOERR, IO_RDY, NOWS, ADS_OE, ADS_LATCH, 
     MEMR, MEMW, SMEMR, SMEMW, IOR, IOW, ISACLK, ISADONE, 
@@ -435,7 +438,7 @@ end
 //    /*VALID_PIXELS*/ivblank, empty, full, fifovalid, write_en, read_en, bufferRequestedAddress, maxVramAddress, RESET, pixelClock, 
 //    frameEnd, HSYNC, VSYNC, vsyncctr/*verticalCount[0]*/, alreadyDidHsyncReset, VALID_PIXELS);
 
-managedVramDataBufferCompositeBankSwap testramthingy(data_in, Ri, Gi, Bi, OE, CE, pllclk/*FASTCLK*/, actualBusCycle | undecidedIsaCycle | ~ADS_OE, 
+managedVramDataBufferCompositeBankSwap testramthingy(data_in, Ri, Gi, Bi, OE, CE, pllclk/*FASTCLK*/, actualBusCycle | undecidedIsaCycle | ~ADS_OE | BALE, 
     /*VALID_PIXELS*/ivblank, empty, full, fifovalid, write_en, read_en, bufferRequestedAddress, maxVramAddress, RESET, pixelClock, 
     frameEnd, HSYNC, VSYNC, vsyncctr/*verticalCount[0]*/, alreadyDidHsyncReset, VALID_PIXELS);
 
@@ -463,10 +466,10 @@ always@(posedge pllclk) begin
         //iVRAM_low_en <= 1;
         //iVRAM_high_en <= 1;
 
-        iVRAM_en <= 1;
-        iread_cmd <= 1;
-        iwrite_cmd <= 1;
-        data_outi <= DStxresult;//fix a bug where data outputs dont work if the test pattern is enabled.        
+        //iVRAM_en <= 1;
+        //iread_cmd <= 1;
+        //iwrite_cmd <= 1;
+        //data_outi <= DStxresult;//fix a bug where data outputs dont work if the test pattern is enabled.        
         
 
         iRed <= Rt;
@@ -481,7 +484,7 @@ always@(posedge pllclk) begin
         iGreen <= Gi;
         iBlue <= Bi;
 
-        if (WRITEBUF_IO_EN) begin
+        /*if (WRITEBUF_IO_EN) begin
             //if there is no more pixel buffer copying to do (and there is no relevant isa bus cycle happening), start processing write buffer data and writing it to the screen
             //iVRAM_low_en <= vbuf_CE;
             //iVRAM_high_en <= vbuf_CE;
@@ -493,8 +496,9 @@ always@(posedge pllclk) begin
             AVi <= writeBufferVramAddress;
             data_outi <= writeBufferVramData;
 
-            //debugDataOut <= 0;
-        end else if (!FPGA_IO_EN & !undecidedIsaCycle/*~actualBusCycle & ~undecidedIsaCycle & ~BALE & ADS_OE*/) begin
+            //debugDataOut <= 0;*/
+        //end else if (/*!FPGA_IO_EN & !undecidedIsaCycle*/~actualBusCycle & ~undecidedIsaCycle & ~BALE & ADS_OE) begin
+        /*end else if (~actualBusCycle & ~undecidedIsaCycle & ~BALE & ADS_OE) begin
             //if there is no relevant isa bus cycle happening, relay the signals to the vram chips for copying stuff into the buffer
             //iVRAM_low_en <= CE;
             //iVRAM_high_en <= CE;
@@ -518,13 +522,13 @@ always@(posedge pllclk) begin
             data_outi <= DStxresult;
 
             //debugDataOut <= 1;
-        end
+        end*/
     end
 
 end
 
 
-/*reg [1:0] vram_owner;
+reg [1:0] vram_owner;
 always @(*) begin
     if (WRITEBUF_IO_EN & settingsRegister[4]) begin
         vram_owner = 2'd0;
@@ -532,9 +536,9 @@ always @(*) begin
         iwrite_cmd = vbuf_WE;
         iread_cmd = 1;
 
-        AVi <= writeBufferVramAddress;
-        data_outi <= writeBufferVramData;
-    end else if (!FPGA_IO_EN & !undecidedIsaCycle & settingsRegister[4]) begin
+        AVi = writeBufferVramAddress;
+        data_outi = writeBufferVramData;
+    end else if (~actualBusCycle & ~undecidedIsaCycle & ~BALE & ADS_OE & settingsRegister[4]) begin
         vram_owner = 2'd1;
         iVRAM_en = CE;
         iread_cmd = OE;
@@ -549,7 +553,7 @@ always @(*) begin
         AVi = bufferRequestedAddress;
         data_outi = DStxresult;
     end
-end*/
+end
 
 //the other pllclk logic loop. this one is generally for things having to do with the isa bus and isa cycles
 always@(posedge pllclk) begin
@@ -568,7 +572,7 @@ always@(posedge pllclk) begin
         gtfoonnextclock <= 0;
         doData <= 0;
         alreadyWrote <= 4'h0;
-    end else if ((~IOR | ~IOW) & actualBusCycle & alreadyWrote < 20) begin//only io cycles for now. doesnt make a difference? THATS FUCKING IMPOSSIBLE
+    end else if ((~IOR | ~IOW) & actualBusCycle & alreadyWrote < 20 & ~BALE) begin//only io cycles for now. doesnt make a difference? THATS FUCKING IMPOSSIBLE
         //if (AV_RX == 20'h423) begin
         if (lastAdsRequest == 20'h422) begin
             if (FPGA_WR) begin

@@ -119,6 +119,16 @@ VL_ATTR_COLD void Vvideo___024root___stl_sequent__TOP__0(Vvideo___024root* vlSel
     Vvideo__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Init
+    IData/*19:0*/ video__DOT__AVi;
+    video__DOT__AVi = 0;
+    SData/*15:0*/ video__DOT__data_outi;
+    video__DOT__data_outi = 0;
+    CData/*0:0*/ video__DOT__iread_cmd;
+    video__DOT__iread_cmd = 0;
+    CData/*0:0*/ video__DOT__iwrite_cmd;
+    video__DOT__iwrite_cmd = 0;
+    CData/*0:0*/ video__DOT__iVRAM_en;
+    video__DOT__iVRAM_en = 0;
     CData/*0:0*/ video__DOT__isathing__DOT____VdfgRegularize_h12aca4bb_0_1;
     video__DOT__isathing__DOT____VdfgRegularize_h12aca4bb_0_1 = 0;
     // Body
@@ -127,34 +137,75 @@ VL_ATTR_COLD void Vvideo___024root___stl_sequent__TOP__0(Vvideo___024root* vlSel
     vlSelfRef.Red = vlSelfRef.video__DOT__iRed;
     vlSelfRef.Green = vlSelfRef.video__DOT__iGreen;
     vlSelfRef.Blue = vlSelfRef.video__DOT__iBlue;
-    vlSelfRef.ADS_OE = vlSelfRef.video__DOT__isathing__DOT__iADS_OE;
     vlSelfRef.ADS_LATCH = vlSelfRef.BALE;
+    vlSelfRef.FPGA_IO_EN = vlSelfRef.video__DOT__isathing__DOT__iFPGA_IO_EN;
     vlSelfRef.video__DOT__full = (0x27fU <= (IData)(vlSelfRef.video__DOT__testramthingy__DOT__waddr));
     vlSelfRef.IOCS16 = vlSelfRef.SBHE;
-    vlSelfRef.FPGA_WR = (1U & (~ (IData)(vlSelfRef.video__DOT__isathing__DOT__absIOR)));
-    vlSelfRef.VRAM_en = vlSelfRef.video__DOT__iVRAM_en;
-    vlSelfRef.write_cmd = vlSelfRef.video__DOT__iwrite_cmd;
-    vlSelfRef.read_cmd = vlSelfRef.video__DOT__iread_cmd;
-    vlSelfRef.AV = vlSelfRef.video__DOT__AVi;
-    vlSelfRef.data_out = vlSelfRef.video__DOT__data_outi;
     vlSelfRef.video__DOT____Vcellinp__wbv____pinNumber9 
         = ((~ ((IData)(vlSelfRef.video__DOT__isathing__DOT__iFPGA_IO_EN) 
                | (IData)(vlSelfRef.video__DOT__isathing__DOT__i_undedicedIsaCycle))) 
            & (0x27fU <= (IData)(vlSelfRef.video__DOT__testramthingy__DOT__waddr)));
-    vlSelfRef.video__DOT____Vcellinp__testramthingy____pinNumber8 
-        = (1U & ((IData)(vlSelfRef.video__DOT__isathing__DOT__actualBusCycle) 
-                 | ((~ (IData)(vlSelfRef.video__DOT__isathing__DOT__iADS_OE)) 
-                    | (IData)(vlSelfRef.video__DOT__isathing__DOT__i_undedicedIsaCycle))));
     vlSelfRef.video__DOT__writeBufferEmpty = ((~ (IData)(vlSelfRef.video__DOT__wbv__DOT__dataFifo__DOT__ifull)) 
                                               & ((IData)(vlSelfRef.video__DOT__wbv__DOT__dataFifo__DOT__r_ptr) 
                                                  == (IData)(vlSelfRef.video__DOT__wbv__DOT__dataFifo__DOT__w_ptr)));
     vlSelfRef.video__DOT__wbv__DOT__aEmpty = ((~ (IData)(vlSelfRef.video__DOT__wbv__DOT__addressFifo__DOT__ifull)) 
                                               & ((IData)(vlSelfRef.video__DOT__wbv__DOT__addressFifo__DOT__r_ptr) 
                                                  == (IData)(vlSelfRef.video__DOT__wbv__DOT__addressFifo__DOT__w_ptr)));
+    vlSelfRef.video__DOT____Vcellinp__testramthingy____pinNumber8 
+        = (1U & ((IData)(vlSelfRef.video__DOT__isathing__DOT__actualBusCycle) 
+                 | ((IData)(vlSelfRef.video__DOT__isathing__DOT__i_undedicedIsaCycle) 
+                    | ((~ (IData)(vlSelfRef.video__DOT__isathing__DOT__iADS_OE)) 
+                       | (IData)(vlSelfRef.BALE)))));
+    video__DOT__iwrite_cmd = ((1U & (~ ((IData)(vlSelfRef.video__DOT__wbv__DOT__iWRITEBUF_IO_EN) 
+                                        & ((IData)(vlSelfRef.video__DOT__settingsRegister) 
+                                           >> 4U)))) 
+                              || (IData)(vlSelfRef.video__DOT__wbv__DOT__iwrite_cmd));
+    vlSelfRef.ADS_OE = vlSelfRef.video__DOT__isathing__DOT__iADS_OE;
+    if (((IData)(vlSelfRef.video__DOT__wbv__DOT__iWRITEBUF_IO_EN) 
+         & ((IData)(vlSelfRef.video__DOT__settingsRegister) 
+            >> 4U))) {
+        video__DOT__AVi = vlSelfRef.video__DOT__writeBufferVramAddress;
+        video__DOT__data_outi = vlSelfRef.video__DOT__writeBufferVramData;
+        video__DOT__iVRAM_en = vlSelfRef.video__DOT__wbv__DOT__ichip_select;
+    } else {
+        video__DOT__AVi = vlSelfRef.video__DOT__testramthingy__DOT__iNextVramAddress;
+        video__DOT__data_outi = vlSelfRef.video__DOT__DStxresult;
+        video__DOT__iVRAM_en = ((1U & (~ (((((~ (IData)(vlSelfRef.video__DOT__isathing__DOT__actualBusCycle)) 
+                                             & (~ (IData)(vlSelfRef.video__DOT__isathing__DOT__i_undedicedIsaCycle))) 
+                                            & (~ (IData)(vlSelfRef.BALE))) 
+                                           & (IData)(vlSelfRef.ADS_OE)) 
+                                          & ((IData)(vlSelfRef.video__DOT__settingsRegister) 
+                                             >> 4U)))) 
+                                || (IData)(vlSelfRef.video__DOT__testramthingy__DOT__ichipEnable));
+    }
+    vlSelfRef.FPGA_WR = (1U & (~ (IData)(vlSelfRef.IOR)));
+    vlSelfRef.write_cmd = video__DOT__iwrite_cmd;
+    vlSelfRef.AV = video__DOT__AVi;
+    vlSelfRef.data_out = video__DOT__data_outi;
+    video__DOT__iread_cmd = (((IData)(vlSelfRef.video__DOT__wbv__DOT__iWRITEBUF_IO_EN) 
+                              & ((IData)(vlSelfRef.video__DOT__settingsRegister) 
+                                 >> 4U)) || ((1U & 
+                                              (~ ((
+                                                   (((~ (IData)(vlSelfRef.video__DOT__isathing__DOT__actualBusCycle)) 
+                                                     & (~ (IData)(vlSelfRef.video__DOT__isathing__DOT__i_undedicedIsaCycle))) 
+                                                    & (~ (IData)(vlSelfRef.BALE))) 
+                                                   & (IData)(vlSelfRef.ADS_OE)) 
+                                                  & ((IData)(vlSelfRef.video__DOT__settingsRegister) 
+                                                     >> 4U)))) 
+                                             || (IData)(vlSelfRef.video__DOT__testramthingy__DOT__ireadSignal)));
+    vlSelfRef.isa_ctrl_out_en = (1U & (~ ((0x420U <= vlSelfRef.video__DOT__lastAdsRequest) 
+                                          & ((0x430U 
+                                              >= vlSelfRef.video__DOT__lastAdsRequest) 
+                                             & ((~ (IData)(vlSelfRef.BALE)) 
+                                                & ((IData)(vlSelfRef.FPGA_WR) 
+                                                   | ((~ (IData)(vlSelfRef.IOW)) 
+                                                      | (IData)(vlSelfRef.video__DOT__isathing__DOT__iFPGA_IO_EN))))))));
     video__DOT__isathing__DOT____VdfgRegularize_h12aca4bb_0_1 
-        = (1U & (~ ((((~ (IData)(vlSelfRef.IOR)) | 
+        = (1U & (~ ((((IData)(vlSelfRef.FPGA_WR) | 
                       (~ (IData)(vlSelfRef.IOW))) & 
                      (~ (IData)(vlSelfRef.BALE))) & (IData)(vlSelfRef.video__DOT__isathing__DOT__actualBusCycle))));
+    vlSelfRef.read_cmd = video__DOT__iread_cmd;
+    vlSelfRef.VRAM_en = video__DOT__iVRAM_en;
     vlSelfRef.TE0 = ((IData)(video__DOT__isathing__DOT____VdfgRegularize_h12aca4bb_0_1) 
                      | (IData)(vlSelfRef.video__DOT__isathing__DOT__TE0i));
     vlSelfRef.TE1 = ((IData)(video__DOT__isathing__DOT____VdfgRegularize_h12aca4bb_0_1) 
@@ -289,6 +340,8 @@ VL_ATTR_COLD void Vvideo___024root___ctor_var_reset(Vvideo___024root* vlSelf) {
     vlSelf->AV_in = VL_RAND_RESET_I(20);
     vlSelf->data_out = VL_RAND_RESET_I(16);
     vlSelf->data_in = VL_RAND_RESET_I(16);
+    vlSelf->FPGA_IO_EN = VL_RAND_RESET_I(1);
+    vlSelf->isa_ctrl_out_en = VL_RAND_RESET_I(1);
     vlSelf->video__DOT__vramAddress = VL_RAND_RESET_I(20);
     vlSelf->video__DOT__Rt = VL_RAND_RESET_I(5);
     vlSelf->video__DOT__Gt = VL_RAND_RESET_I(6);
@@ -296,8 +349,6 @@ VL_ATTR_COLD void Vvideo___024root___ctor_var_reset(Vvideo___024root* vlSelf) {
     vlSelf->video__DOT__iRed = VL_RAND_RESET_I(5);
     vlSelf->video__DOT__iGreen = VL_RAND_RESET_I(6);
     vlSelf->video__DOT__iBlue = VL_RAND_RESET_I(5);
-    vlSelf->video__DOT__AVi = VL_RAND_RESET_I(20);
-    vlSelf->video__DOT__data_outi = VL_RAND_RESET_I(16);
     vlSelf->video__DOT__ivblank = VL_RAND_RESET_I(1);
     vlSelf->video__DOT__videoDisplayRegister = VL_RAND_RESET_I(8);
     vlSelf->video__DOT__settingsRegister = VL_RAND_RESET_I(8);
@@ -313,9 +364,6 @@ VL_ATTR_COLD void Vvideo___024root___ctor_var_reset(Vvideo___024root* vlSelf) {
     vlSelf->video__DOT__doData = VL_RAND_RESET_I(1);
     vlSelf->video__DOT__full = VL_RAND_RESET_I(1);
     vlSelf->video__DOT__alreadyWrote = VL_RAND_RESET_I(8);
-    vlSelf->video__DOT__iread_cmd = VL_RAND_RESET_I(1);
-    vlSelf->video__DOT__iwrite_cmd = VL_RAND_RESET_I(1);
-    vlSelf->video__DOT__iVRAM_en = VL_RAND_RESET_I(1);
     vlSelf->video__DOT__DStxresult = VL_RAND_RESET_I(16);
     vlSelf->video__DOT__lastAdsRequest = VL_RAND_RESET_I(20);
     vlSelf->video__DOT__vsyncctr = VL_RAND_RESET_I(1);
@@ -346,12 +394,6 @@ VL_ATTR_COLD void Vvideo___024root___ctor_var_reset(Vvideo___024root* vlSelf) {
         vlSelf->video__DOT__wbv__DOT__addressFifo__DOT__theBlock__DOT__mem[__Vi0] = VL_RAND_RESET_I(20);
     }
     vlSelf->video__DOT__isathing__DOT__i_undedicedIsaCycle = VL_RAND_RESET_I(1);
-    vlSelf->video__DOT__isathing__DOT__r1_Pulse = VL_RAND_RESET_I(1);
-    vlSelf->video__DOT__isathing__DOT__r2_Pulse = VL_RAND_RESET_I(1);
-    vlSelf->video__DOT__isathing__DOT__r3_Pulse = VL_RAND_RESET_I(1);
-    vlSelf->video__DOT__isathing__DOT__absIOR = VL_RAND_RESET_I(1);
-    vlSelf->video__DOT__isathing__DOT__absIOW = VL_RAND_RESET_I(1);
-    vlSelf->video__DOT__isathing__DOT__fastBALE = VL_RAND_RESET_I(1);
     vlSelf->video__DOT__isathing__DOT__iADS_OE = VL_RAND_RESET_I(1);
     vlSelf->video__DOT__isathing__DOT__iFPGA_IO_EN = VL_RAND_RESET_I(1);
     vlSelf->video__DOT__isathing__DOT__lastAdsRequest = VL_RAND_RESET_I(20);
@@ -360,18 +402,7 @@ VL_ATTR_COLD void Vvideo___024root___ctor_var_reset(Vvideo___024root* vlSelf) {
     vlSelf->video__DOT__isathing__DOT__TE1i = VL_RAND_RESET_I(1);
     vlSelf->video__DOT__isathing__DOT__TE2i = VL_RAND_RESET_I(1);
     vlSelf->video__DOT__isathing__DOT__TE3i = VL_RAND_RESET_I(1);
-    vlSelf->video__DOT__isathing__DOT__isahighctr = VL_RAND_RESET_I(3);
-    vlSelf->video__DOT__isathing__DOT__isacyclessincebale = VL_RAND_RESET_I(3);
-    vlSelf->video__DOT__isathing__DOT__ISACLKSTATE = VL_RAND_RESET_I(1);
-    vlSelf->video__DOT__isathing__DOT__IOW1_Pulse = VL_RAND_RESET_I(1);
-    vlSelf->video__DOT__isathing__DOT__IOW2_Pulse = VL_RAND_RESET_I(1);
-    vlSelf->video__DOT__isathing__DOT__IOW3_Pulse = VL_RAND_RESET_I(1);
-    vlSelf->video__DOT__isathing__DOT__IOR1_Pulse = VL_RAND_RESET_I(1);
-    vlSelf->video__DOT__isathing__DOT__IOR2_Pulse = VL_RAND_RESET_I(1);
-    vlSelf->video__DOT__isathing__DOT__IOR3_Pulse = VL_RAND_RESET_I(1);
-    vlSelf->video__DOT__isathing__DOT__BALE1_Pulse = VL_RAND_RESET_I(1);
-    vlSelf->video__DOT__isathing__DOT__BALE2_Pulse = VL_RAND_RESET_I(1);
-    vlSelf->video__DOT__isathing__DOT__BALE3_Pulse = VL_RAND_RESET_I(1);
+    vlSelf->video__DOT__isathing__DOT__ADS_OE_Delay = VL_RAND_RESET_I(3);
     vlSelf->video__DOT__testramthingy__DOT__ireadSignal = VL_RAND_RESET_I(1);
     vlSelf->video__DOT__testramthingy__DOT__ichipEnable = VL_RAND_RESET_I(1);
     vlSelf->video__DOT__testramthingy__DOT__ififoWrite = VL_RAND_RESET_I(1);
@@ -388,7 +419,7 @@ VL_ATTR_COLD void Vvideo___024root___ctor_var_reset(Vvideo___024root* vlSelf) {
     vlSelf->video__DOT__testramthingy__DOT__r2_Pulse = VL_RAND_RESET_I(1);
     vlSelf->video__DOT__testramthingy__DOT__r3_Pulse = VL_RAND_RESET_I(1);
     vlSelf->video__DOT__testramthingy__DOT__alreadySubtracted = VL_RAND_RESET_I(1);
-    vlSelf->video__DOT__testramthingy__DOT__bsCounter = VL_RAND_RESET_I(3);
+    vlSelf->video__DOT__testramthingy__DOT__newDelay = VL_RAND_RESET_I(3);
     vlSelf->video__DOT__testramthingy__DOT__b1dout = VL_RAND_RESET_I(16);
     vlSelf->video__DOT__testramthingy__DOT__b2dout = VL_RAND_RESET_I(16);
     for (int __Vi0 = 0; __Vi0 < 1024; ++__Vi0) {
