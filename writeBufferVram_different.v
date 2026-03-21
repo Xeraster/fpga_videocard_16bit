@@ -211,6 +211,20 @@ reg ififoRead;
 reg iWRITEBUF_IO_EN;
 reg iwrite_cmd, ichip_select;
 reg ialmostFull, ialmostEmpty;
+
+//there isn't a way to go back on a fifo but isa cycles still interrupt it, so put a copy of each data overwrite command here
+reg[15:0] dataBackupByte;
+reg[19:0] addressBackupByte;
+//reg[15:0] dataBackupByte2;//store the last 2 and not just the last 1
+//reg[19:0] addressBackupByte2;
+
+//i hope this doesn't cause a 1 clock lag because that would cause as many or more issues than it solves..
+assign dataOut = (~doBackupByte) ? fifoDataOut : dataBackupByte;
+assign addressToWrite = (~doBackupByte) ? fifoAddressOut : addressBackupByte;
+wire[15:0] fifoDataOut;
+wire[19:0] fifoAddressOut;
+reg doBackupByte;
+reg[2:0] bufWaitState;//maybe adding buffer wait states for correctional cycles will remove the glitch
 //assign almostFull = ialmostFull;
 //assign empty = ialmostEmpty;
 //assign full = dFull;
@@ -235,15 +249,34 @@ always@(posedge clock) begin
         //initialize all the reset values
         //ialmostFull <= 0;
         //readCtr <= 0;
+        doBackupByte <= 0;
+        bufWaitState <= 0;
     end
 
     if (free & ~empty) begin
-        ififoRead <= 1;
         iWRITEBUF_IO_EN <= 1;
         iwrite_cmd <= 0;
         ichip_select <= 0;
-        //readCtr <= readCtr + 1;
 
+        if (doBackupByte & bufWaitState > 0) begin
+            doBackupByte <= 0;
+            ififoRead <= 0;
+            bufWaitState <= bufWaitState - 1;
+        end else begin
+            dataBackupByte <= fifoDataOut;
+            addressBackupByte <= fifoAddressOut; 
+            ififoRead <= 1;
+        end
+        //readCtr <= readCtr + 1;
+    end else if (~free & ~empty) begin
+        //if the bus becomes no longer free while the write buffer is not empty, that means it got interrupted by something
+        //go back and make sure the byte that was being copied while this was happening gets resent. (somehow)
+        ififoRead <= 0;
+        iWRITEBUF_IO_EN <= 0;
+        iwrite_cmd <= 1;
+        ichip_select <= 1;
+        bufWaitState <= 1;
+        doBackupByte <= 1;
     end else begin
         ififoRead <= 0;
         iWRITEBUF_IO_EN <= 0;
@@ -287,8 +320,8 @@ end*/
 wire dFull, dEmpty, dValid;
 wire aFull, aEmpty, aValid, aAlmostFull;
 
-psuedofiforam dataFifo(dataFromIsa, write_en, ififoRead, writeClk, clock, dataOut, RESET, full, empty, dValid, almostFull);
-psuedofiforam20 addressFifo(addressFromIsa, write_en, ififoRead, writeClk, clock, addressToWrite, RESET, aFull, aEmpty, aValid, aAlmostFull);
+psuedofiforam dataFifo(dataFromIsa, write_en, ififoRead, writeClk, clock, /*dataOut*/fifoDataOut, RESET, full, empty, dValid, almostFull);
+psuedofiforam20 addressFifo(addressFromIsa, write_en, ififoRead, writeClk, clock, /*addressToWrite*/fifoAddressOut, RESET, aFull, aEmpty, aValid, aAlmostFull);
 
 //async_fifo1 dataFifo(/*ififoWrite*/1'b1, newData, RESET, ififoRead, clock, RESET, dataFromIsa, dataOut, full, dEmpty);
 //async_fifo20 addressFifo(/*ififoWrite*/1'b1, newData, RESET, ififoRead, clock, RESET, addressFromIsa, addressToWrite, aFull, aEmpty);
