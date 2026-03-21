@@ -339,7 +339,7 @@ module managedVramDataBufferCompositeBankSwap(
             if (delayBeforeWriteAgain > 0) begin
                 ireadSignal <= 0;           //DO NOT TOUCH THIS
                 ichipEnable <= 0;           //DO NOT TOUCH THIS
-                ififoWrite <= 1;
+                ififoWrite <= 0;
             end else begin
                 ireadSignal <= 0;           //DO NOT TOUCH THIS
                 ichipEnable <= 0;           //DO NOT TOUCH THIS
@@ -418,6 +418,11 @@ module managedVramDataBufferCompositeBankSwap(
             ififoWrite <= 0;
             delayBeforeWriteAgain <= 1;
             bsCounter <= 0;
+            /*if (!bugFix & waddr > 0 & waddr < 639) begin
+                waddr <= waddr - 1;
+                iNextVramAddress <= iNextVramAddress - 2;
+                bugFix <= 1;
+            end*/
             /*if (newDelay > 0) begin
               newDelay <= newDelay - 1;
             end

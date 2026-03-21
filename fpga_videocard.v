@@ -748,8 +748,8 @@ module top(
     reg ivblank;
     assign vblank = ivblank;
 
-    generateSync gs(sPixelClock, HSYNC, VSYNC, VramCounter, RESET, VALID_PIXELS, horizontalCount, verticalCount);    //generate the sync signals for use in other stuff
-    advancedTestPattern atp(VramCounter, Rt, Gt, Bt, HSYNC, VSYNC, sPixelClock, VALID_PIXELS, horizontalCount, verticalCount);   //generate the values for test pattern (when bit 4 of settings register 0x423 is 0)
+    generateSync gs(pixelClock, HSYNC, VSYNC, VramCounter, RESET, VALID_PIXELS, horizontalCount, verticalCount);    //generate the sync signals for use in other stuff
+    advancedTestPattern atp(VramCounter, Rt, Gt, Bt, HSYNC, VSYNC, pixelClock, VALID_PIXELS, horizontalCount, verticalCount);   //generate the values for test pattern (when bit 4 of settings register 0x423 is 0)
     //displayVRAM vrambullshit(VramCounter, Ri, Gi, Bi, HSYNC, VSYNC, pixelClock, VRAM_VALID, horizontalCount, verticalCount, RESET, OE, CE, DS_RX, VALID_PIXELS);
     //managedByteToVramCopy mbtc(inputPixel, DS_TX, WE, CEW, pixelClock, byteToCopy, byteCopied, bus_free);
     //wire init;
@@ -773,7 +773,7 @@ module top(
                                                                                 //use ADS_OE for bus free? it's either doing an isa transfer for a fpga <=> vram transfer basically
 
     managedVramDataBufferCompositeBankSwap testramthingy(DS_RX, Ri, Gi, Bi, OE, CE, pllClk/*FASTCLK*/, actualBusCycle | undecidedIsaCycle | ~ADS_OE | syncBale, 
-    ivblank, empty, full, fifovalid, write_en, read_en, bufferRequestedAddress, maxVramAddress, RESET, RESET_pll, sPixelClock, 
+    ivblank, empty, full, fifovalid, write_en, read_en, bufferRequestedAddress, maxVramAddress, RESET, RESET_pll, pixelClock, 
     HSYNC, VSYNC, /*vsyncctr*/verticalCount[0], alreadyDidHsyncReset, VALID_PIXELS);
 
     //wire xpixelClock;
@@ -958,8 +958,8 @@ module top(
     reg RESET;  //RESET for anything having to do with the pixel clock domain
     reg RESET_pll;//RESET for anything involving the pll clock domain
     reg RESET_FUCK;
-    manageReset mr(RESET, sPixelClock);
-    manageReset mrf(RESET_pll, sPixelClock);//for some fucking reason separated reset clock domains causes wobble 100% of the time instead of 99% of the time
+    manageReset mr(RESET, pixelClock);
+    manageReset mrf(RESET_pll, pllClk);//for some fucking reason separated reset clock domains causes wobble 100% of the time instead of 99% of the time
     manageReset mrfuck(RESET_FUCK, pixelClock);
 
     reg iVRAM_low_en, iVRAM_high_en, iwrite_cmd, iread_cmd;
@@ -1044,7 +1044,7 @@ module top(
         end
 
         //maybe doing it this different way will make a difference
-        p1_Pulse <= sPixelClock;
+        p1_Pulse <= pixelClock;
         p2_Pulse <= p1_Pulse;
         p3_Pulse <= p2_Pulse;
         if(~p3_Pulse & p2_Pulse) begin

@@ -114,6 +114,7 @@ module isaSlaveBusController(
     reg[1:0] baleassertctr;
     reg[2:0] isacyclessincebale;
     reg[2:0] ADS_OE_Delay;
+    reg[19:0] addressBus_1, addressBus_2;
 
     reg ISACLKSTATE;//yet another experiment with the isa clock that probably wont make a difference but im running out of ideas
 
@@ -122,6 +123,8 @@ module isaSlaveBusController(
         /*if (FPGA_IO_WAITCTR > 0) begin
             FPGA_IO_WAITCTR <= FPGA_IO_WAITCTR - 1;
         end*/
+        addressBus_1 <= addressBus;
+        addressBus_2 <= addressBus_1;
 
         if (!RESET) begin
             needToDecode <= 0;
@@ -189,7 +192,7 @@ module isaSlaveBusController(
         end*/
         if (BALE) begin
             iADS_OE <= 0;
-            lastAdsRequest <= addressBus;
+            lastAdsRequest <= addressBus_2;
             i_undedicedIsaCycle <= 1;
             ADS_OE_Delay <= 5;
         end
@@ -197,7 +200,7 @@ module isaSlaveBusController(
         if (ADS_OE_Delay == 0) begin
             iADS_OE <= 1;   //keep it asserted a little bit longer each time this happens
         end else if (ADS_OE_Delay > 0) begin
-            lastAdsRequest <= addressBus;
+            lastAdsRequest <= addressBus_2;
             ADS_OE_Delay <= ADS_OE_Delay - 1;
         end
 
