@@ -1003,6 +1003,19 @@ module top(
     wire syncHSYNC;
     assign syncHSYNC = syncHSYNC_i;
 
+    //made missed pixels worse, did not improve the wobble that happens with a lot of stuff on the screen
+    /*always@(*) begin
+            if (!settingsRegister[4]) begin
+                iRed = Rt;
+                iGreen = Gt;
+                iBlue = Bt;
+            end else begin
+                iRed = Ri;
+                iGreen = Gi;
+                iBlue = Bi;
+            end 
+        end*/
+
     always@(posedge pllClk)
     begin
         //sync the pixel clock to the pll clock once and for all
