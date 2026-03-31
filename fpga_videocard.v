@@ -177,7 +177,7 @@ module generateSync(
     output reg VSYNC,
     output reg [19:0] vramAddress,
     input RESET,                 //gotta tell those counters when to reset to zero
-    output reg VALID_PIXELS,             //its a 1 if there is allowed to be data on R,G,B
+    output VALID_PIXELS,             //its a 1 if there is allowed to be data on R,G,B
     output reg[10:0] horizontalCount,
     output reg[9:0] verticalCount 
 );
@@ -185,6 +185,9 @@ module generateSync(
     //reg [9:0] verticalCount;
     reg VALID_H;                    //1 if in valid horizontal viewing area. 0 if otherwise 
     reg VALID_V;                    //1 if in valid veritcal viewing area. 0 if otherwise
+    //assign VALID_PIXELS = VALID_H & VALID_V;
+    assign VALID_PIXELS = verticalCount < 480 & horizontalCount < 640;
+
     always@(posedge clock/* or negedge RESET*/)
     begin
         if (!RESET)
@@ -193,7 +196,7 @@ module generateSync(
             verticalCount <= 0;
             vramAddress <= 0;
         end
-        else begin
+        else if (clock) begin
         //increment h counter
         horizontalCount <= horizontalCount + 1;
 
@@ -201,20 +204,20 @@ module generateSync(
         if (horizontalCount >= 640 & horizontalCount < 656)
             begin
                 //front porch
-                VALID_H <= 0;
+                //VALID_H <= 0;
                 HSYNC <= 1;
             end
         else if (horizontalCount >= 656 & horizontalCount < 752)
             begin
                 //when hsync happens
-                VALID_H <= 0;
+                //VALID_H <= 0;
                 HSYNC <= 0;
             end
         else if (horizontalCount >= 752 & horizontalCount < 799)
             begin
                 //back porch
                 HSYNC <= 1;
-                VALID_H <= 0;
+                //VALID_H <= 0;
             end
         else if (horizontalCount >= 799)
             begin
@@ -222,38 +225,38 @@ module generateSync(
                 verticalCount <= verticalCount + 1;
                 horizontalCount <= 0;
                 HSYNC <= 1;
-                VALID_H <= 0;//was 1 for some reason
+                //VALID_H <= 0;//was 1 for some reason
             end
         else
             begin
                 //this should only be happening if within visible screen area
                 HSYNC <= 1;
-                VALID_H <= 1;
+                //VALID_H <= 1;
                 vramAddress <= vramAddress + 2;
             end
 
         if (verticalCount >= 480 & verticalCount < 490)
             begin
                 //front porch
-                VALID_V <= 0;
+                //VALID_V <= 0;
                 VSYNC <= 1;
             end
         else if (verticalCount >= 490 & verticalCount < 492)
             begin
                 //vsync signal
-                VALID_V <= 0;
+                //VALID_V <= 0;
                 VSYNC <= 0;
             end
         else if (verticalCount >= 492 & verticalCount < 525)
             begin
                 //back porch
-                VALID_V <= 0;
+                //VALID_V <= 0;
                 VSYNC <= 1;
             end
         else if (verticalCount >= 525)
             begin
                 //the reset pixel
-                VALID_V <= 0;
+                //VALID_V <= 0;
                 VSYNC <= 1;
                 verticalCount <= 0;
                 vramAddress <= 0;
@@ -261,12 +264,12 @@ module generateSync(
         else
             begin
                 //this should only be happening if within visible screen area
-                VALID_V <= 1;
+                //VALID_V <= 1;
                 VSYNC <= 1;
             end
 
         //set the value of the valid pixel signal. only draw pixels if h and v are within a valid range
-        VALID_PIXELS <= VALID_H & VALID_V;
+        //VALID_PIXELS <= VALID_H & VALID_V;
         end
 
     end
@@ -748,8 +751,8 @@ module top(
     reg ivblank;
     assign vblank = ivblank;
 
-    generateSync gs(pixelClock, HSYNC, VSYNC, VramCounter, RESET, VALID_PIXELS, horizontalCount, verticalCount);    //generate the sync signals for use in other stuff
-    advancedTestPattern atp(VramCounter, Rt, Gt, Bt, HSYNC, VSYNC, pixelClock, VALID_PIXELS, horizontalCount, verticalCount);   //generate the values for test pattern (when bit 4 of settings register 0x423 is 0)
+    generateSync gs(sPixelClock, HSYNC, VSYNC, VramCounter, RESET, VALID_PIXELS, horizontalCount, verticalCount);    //generate the sync signals for use in other stuff
+    advancedTestPattern atp(VramCounter, Rt, Gt, Bt, HSYNC, VSYNC, sPixelClock, VALID_PIXELS, horizontalCount, verticalCount);   //generate the values for test pattern (when bit 4 of settings register 0x423 is 0)
     //displayVRAM vrambullshit(VramCounter, Ri, Gi, Bi, HSYNC, VSYNC, pixelClock, VRAM_VALID, horizontalCount, verticalCount, RESET, OE, CE, DS_RX, VALID_PIXELS);
     //managedByteToVramCopy mbtc(inputPixel, DS_TX, WE, CEW, pixelClock, byteToCopy, byteCopied, bus_free);
     //wire init;
@@ -773,7 +776,7 @@ module top(
                                                                                 //use ADS_OE for bus free? it's either doing an isa transfer for a fpga <=> vram transfer basically
 
     managedVramDataBufferCompositeBankSwap testramthingy(DS_RX, Ri, Gi, Bi, OE, CE, pllClk/*FASTCLK*/, actualBusCycle | undecidedIsaCycle | ~ADS_OE | syncBale, 
-    ivblank, empty, full, fifovalid, write_en, read_en, bufferRequestedAddress, maxVramAddress, RESET, RESET_pll, pixelClock, 
+    ivblank, empty, full, fifovalid, write_en, read_en, bufferRequestedAddress, maxVramAddress, RESET, RESET_pll, sPixelClock, 
     HSYNC, VSYNC, /*vsyncctr*/verticalCount[0], alreadyDidHsyncReset, VALID_PIXELS);
 
     //wire xpixelClock;
@@ -1056,15 +1059,24 @@ module top(
             syncIOW <= 0;
         end
 
+        //p1_Pulse <= VALID_PIXELS;
+        //ivblank <= p1_Pulse;
         //maybe doing it this different way will make a difference
-        p1_Pulse <= pixelClock;
+        /*p1_Pulse <= sPixelClock;
         p2_Pulse <= p1_Pulse;
         p3_Pulse <= p2_Pulse;
         if(~p3_Pulse & p2_Pulse) begin
             //sverticalCount <= verticalCount;
             //shorizontalCount <= horizontalCount;
             ivblank <= VALID_PIXELS;
-        end
+        end*/
+        /*p1_Pulse <= sPixelClock;
+        p2_Pulse <= p1_Pulse;
+        p3_Pulse <= p2_Pulse;
+        if (~p3_Pulse & p2_Pulse) begin
+           ivblank <= VALID_PIXELS; 
+        end*/
+        ivblank <= VALID_PIXELS; 
         
         /*p1_Pulse <= VALID_PIXELS;
         p2_Pulse <= p1_Pulse;

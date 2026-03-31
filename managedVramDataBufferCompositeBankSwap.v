@@ -142,7 +142,6 @@ module managedVramDataBufferCompositeBankSwap(
     reg[9:0] waddr;//2^10 = 1024
     reg[9:0] raddr;//2^10 = 1024
 
-
     //on every rising edge of the pixel clock, get the next byte
     always@(posedge pixelClock)
     begin
@@ -221,231 +220,178 @@ module managedVramDataBufferCompositeBankSwap(
     end*/
 
     //reg alreadyDidHsyncReset;
+    reg alreadyDid;
+    reg alreadySubtracted;
     reg[4:0] delayBeforeWriteAgain;//maybe if I insert a bit of a delay before writing after non-writeable cycles, it will eliminate the wobble
     assign full = waddr >= 639;//it copies 2 bytes per clock cycle but it displays 2 bytes per pixel so it cancels out
-    reg fastEvenOrOdd;
-    reg r1_Pulse, r2_Pulse, r3_Pulse;
 
-    reg alreadySubtracted;
-    reg bugFix;
-    reg[2:0] bsCounter;//maybe adding another bullshit counter will fix The Bug
-    reg[2:0] newDelay;
-
-    reg evenOrOdd1_Pulse, evenOrOdd2_Pulse, evenOrOdd3_Pulse;
-    reg frameEnd1_Pulse, frameEnd2_Pulse, frameEnd3_Pulse;
+    reg pchist_1, pchist_2, pchist_3;
+    reg[2:0] fuckState;
+    reg[2:0] stateAtSwitch;
+    reg alreadyDidStateCalculation;
+    reg subtract;
+    reg alreadytriedfix, alreadytried2ndfix;
+    reg firstnewcycle;
+    reg cycleType;
 
     always@(posedge clock)
     begin
-        //using this results in fewer undefined pixels in software testbench
-        if (delayBeforeWriteAgain > 0 & ~bus_free) begin
-            delayBeforeWriteAgain <= delayBeforeWriteAgain - 1;
-        end
-
-        /*r1_Pulse <= pixelClock;
-        r2_Pulse <= r1_Pulse;
-        r3_Pulse <= r2_Pulse;
-        if (~r3_Pulse & r2_Pulse) begin
-            fastEvenOrOdd <= evenOrOdd;
-            fastFrameEnd <= iframeEnd;
-        end else if (r3_Pulse & ~r2_Pulse) begin
-            //fastEvenOrOdd <= evenOrOdd;
-        end*/
-
-        /*r1_Pulse <= HSYNC & VSYNC;
-        r2_Pulse <= r1_Pulse;
-        r3_Pulse <= r2_Pulse;
-        if (~r3_Pulse & r2_Pulse) begin
-            altVblank <= 1;
-        end else if (r3_Pulse & ~r2_Pulse) begin
-            altVblank <= 0;
-        end*/
-
-        //for some fucking reason, this makes it worse than the above
-        evenOrOdd1_Pulse <= evenOrOdd;
-        evenOrOdd2_Pulse <= evenOrOdd1_Pulse;
-        evenOrOdd3_Pulse <= evenOrOdd2_Pulse;
-        if (~evenOrOdd3_Pulse & evenOrOdd2_Pulse) begin
-            fastEvenOrOdd <= 1;
-        end else if (evenOrOdd3_Pulse & ~evenOrOdd2_Pulse) begin
-            fastEvenOrOdd <= 0;
-        end
-
-        frameEnd1_Pulse <= iframeEnd;
-        frameEnd2_Pulse <= frameEnd1_Pulse;
-        frameEnd3_Pulse <= frameEnd2_Pulse;
-        if (~frameEnd3_Pulse & frameEnd2_Pulse) begin
-            fastFrameEnd <= 1;
-        end else if (frameEnd3_Pulse & ~frameEnd2_Pulse) begin
-            fastFrameEnd <= 0;
-        end
+        pchist_1 <= pixelClock;
+        pchist_2 <= pchist_1;
+        pchist_3 <= pchist_2;
+        fuckState[0] <= pchist_1;
+        fuckState[1] <= pchist_2;
+        fuckState[2] <= pchist_3;
         
-        //WHEN evenOrOdd IS 1, READ FROM B1 AND WRITE TO B2. WHEN evenOrOdd IS 0, READ FROM B2 AND WRITE TO B1. STAMP THIS COMMENT EVERYWHERE BECAUSE ITS IMPORTANT
-        /*if (!RESET) begin
-            alreadyDidHsyncReset <= 0;
-            evenOrOdd <= 0;
-        end else if (~HSYNC & ~alreadyDidHsyncReset) begin
-            alreadyDidHsyncReset <= 1;
-            if (iframeEnd) begin
-                evenOrOdd <= 0;
-            end else begin
-                evenOrOdd <= ~evenOrOdd;
-            end
-        end else if (HSYNC) begin
-            alreadyDidHsyncReset <= 0;
-        end*/
 
         if (!RESET_pll) begin
-            bsCounter <= 0;
-            bugFix <= 0;
             alreadySubtracted <= 1;
             delayBeforeWriteAgain <= 0;
-            newDelay <= 0;
             iNextVramAddress <= 20'h0;//this is how to ensure the first valid cycle is starts the vram address at 0 and not 1
-            //actually for testing purposes start it at 0
-
             ireadSignal <= 1;           //DO NOT TOUCH THIS
             ichipEnable <= 1;           //DO NOT TOUCH THIS
-            ififoWrite <= 1;
+            ififoWrite <= 0;
             waddr <= 0;
-        end else if (fastFrameEnd) begin //if the buffer is not completely full, try to make it full
-            bugFix <= 0;
+            alreadyDid <= 0;
+            alreadyDidStateCalculation <= 0;
+            subtract <= 0;
+            alreadytriedfix <= 0;
+            alreadytried2ndfix <= 0;
+            firstnewcycle <= 0;
+            cycleType <= 0;
+        end else if (iframeEnd/* & ~alreadyDid*/) begin //if the buffer is not completely full, try to make it full
             ireadSignal <= 1;           //DO NOT TOUCH THIS
             ichipEnable <= 1;           //DO NOT TOUCH THIS
-            ififoWrite <= 1;
+            ififoWrite <= 0;
             iNextVramAddress <= 20'h0;
             waddr <= 0;
-            delayBeforeWriteAgain <= 10;//fastclk cycles will probably do the trick
+            delayBeforeWriteAgain <= 6;//was 10//fastclk cycles will probably do the trick
             alreadySubtracted <= 1;
-        end else if (~vblank) begin //if vblank is zero and therefore not supposed to have stuff on the screen, reset the waddr pointer but not the vram address
-            bugFix <= 0;
+            alreadyDid <= 1;
+        end else if (~vblank_pixelDomian/* & ~alreadyDid*/) begin //if vblank is zero and therefore not supposed to have stuff on the screen, reset the waddr pointer but not the vram address
             ireadSignal <= 1;           //DO NOT TOUCH THIS
             ichipEnable <= 1;           //DO NOT TOUCH THIS
-            ififoWrite <= 1;
+            ififoWrite <= 0;
             waddr <= 0;
-            delayBeforeWriteAgain <= 10;
-            //iNextVramAddress <= 20'h0;
+            alreadyDid <= 1;
+            delayBeforeWriteAgain <= 6;
             if (~alreadySubtracted) begin
                 alreadySubtracted <= 1;
                 iNextVramAddress <= iNextVramAddress + 2;
             end
         end else if (~full & ~bus_free)  //bus free is active low. 0 = bus not being used
         begin
-            bugFix <= 0;
-            //get the byte from vram
-            //ireadSignal <= 0;           //DO NOT TOUCH THIS
-            //ichipEnable <= 0;           //DO NOT TOUCH THIS
-            //ififoWrite <= 1;
-
+            alreadyDidStateCalculation <= 1;
             if (delayBeforeWriteAgain > 0) begin
                 ireadSignal <= 0;           //DO NOT TOUCH THIS
                 ichipEnable <= 0;           //DO NOT TOUCH THIS
-                ififoWrite <= 0;
+                ififoWrite <= 1;
+                delayBeforeWriteAgain <= delayBeforeWriteAgain - 1;
+                alreadytriedfix <= 0;
+                alreadytried2ndfix <= 0;
+                cycleType <= 0;             //if it gets interrupted here, redo it
             end else begin
                 ireadSignal <= 0;           //DO NOT TOUCH THIS
                 ichipEnable <= 0;           //DO NOT TOUCH THIS
                 ififoWrite <= 1;
-                iNextVramAddress <= iNextVramAddress + 2;
+                cycleType <= 1;
                 waddr <= waddr + 1;
-            end
-
-            //start over just for fun, but uncomment THIS ONE to restore original behavior
-           
-           /*if (delayBeforeWriteAgain > 2) begin
-                ireadSignal <= 0;           //DO NOT TOUCH THIS
-                ichipEnable <= 0;           //DO NOT TOUCH THIS
-                ififoWrite <= 0;
-            end else if (delayBeforeWriteAgain > 1) begin
-                ireadSignal <= 0;           //DO NOT TOUCH THIS
-                ichipEnable <= 0;           //DO NOT TOUCH THIS
-                ififoWrite <= 0;//DEBUGGING INFO: setting this to a 1 here corrupts the pixel BEFORE The Bug Pixel
-            end else begin
-                ireadSignal <= 0;           //DO NOT TOUCH THIS
-                ichipEnable <= 0;           //DO NOT TOUCH THIS
-                ififoWrite <= 1;
-            end
-
-            if (delayBeforeWriteAgain < 1) begin
-                if (bsCounter == 0) begin
-                  iNextVramAddress <= iNextVramAddress + 2;
-                  waddr <= waddr + 1;
+                iNextVramAddress <= iNextVramAddress + 2;
+                /*if (~firstnewcycle) begin
+                    waddr <= waddr + 1;
+                    iNextVramAddress <= iNextVramAddress + 2;
                 end else begin
-                  bsCounter <= bsCounter - 1;
-                end
-                alreadySubtracted <= 0;
-            end else if (delayBeforeWriteAgain == 1 & ~full & waddr > 0) begin
-                //DEBUGGING INFO: bypassing this else-if corrupts the pixel AFTER The Bug Pixel
-                waddr <= waddr - 1;
-                iNextVramAddress <= iNextVramAddress - 2;
-            end*/
+                    firstnewcycle <= 0;
+                end*/
+            end
 
-            /*if (~bugFix & ~alreadySubtracted & bus_free & ~full) begin
-                bugFix <= 1;
-                if (waddr > 1 & ~full) begin    //don't bother with the stupid bugfix if it will result in waddr rolling over
-                    waddr <= waddr - 1;
-                    iNextVramAddress <= iNextVramAddress - 2;
-                    alreadySubtracted <= 1;
-                end
-            end*/
+            if (vblank_pixelDomian) begin
+                alreadyDid <= 0;
+            end
 
             alreadySubtracted <= 0;
-            /*if (newDelay > 1) begin
-                newDelay <= newDelay - 1;
-                ireadSignal <= 1;
-                ichipEnable <= 1;
-            end else if (newDelay > 0) begin
-                newDelay <= newDelay - 1;
-                ireadSignal <= 0;
-                ichipEnable <= 0;
-                ififoWrite <= 1;
-            end else begin
-                iNextVramAddress <= iNextVramAddress + 2;
-                waddr <= waddr + 1;
-                ififoWrite <= 1;
-            end*/
-            /*newDelay <= 3;
-            ireadSignal <= 0;
-            ichipEnable <= 0;
-            iNextVramAddress <= iNextVramAddress + 2;
-            waddr <= waddr + 1;
-            ififoWrite <= 1;*/
-
-            /*if (iNextVramAddress >= maxVramAddress) begin
-                iNextVramAddress <= 0;
-            end*/
         end else begin
             ireadSignal <= 1;
             ichipEnable <= 1;
             ififoWrite <= 0;
+            alreadySubtracted <= 0;
+            alreadyDidStateCalculation <= 0;
             delayBeforeWriteAgain <= 1;
-            bsCounter <= 0;
-            /*if (!bugFix & waddr > 0 & waddr < 639) begin
-                waddr <= waddr - 1;
-                iNextVramAddress <= iNextVramAddress - 2;
-                bugFix <= 1;
-            end*/
-            /*if (newDelay > 0) begin
-              newDelay <= newDelay - 1;
-            end
-            if (newDelay == 1 & waddr > 0 & ~full) begin
-              waddr <= waddr - 1;
-              iNextVramAddress <= iNextVramAddress - 2;
-            end*/
-            //newDelay <= 3;
-            /*if (~bugFix & ~alreadySubtracted & bus_free & ~full) begin
-                bugFix <= 1;
-                if (waddr > 1 & ~full) begin    //don't bother with the stupid bugfix if it will result in waddr rolling over
+            if (~cycleType & ~full & bus_free) begin
+                cycleType <= 1;
+                if (waddr > 0 & waddr < 639) begin
                     waddr <= waddr - 1;
                     iNextVramAddress <= iNextVramAddress - 2;
-                    alreadySubtracted <= 1;
+                end
+            end
+            /*if (~full & bus_free & ~alreadytried2ndfix & waddr > 0) begin
+                alreadytriedfix <= 1;
+                if (alreadytriedfix) begin
+                    if (~cycleType) begin
+                        waddr <= waddr - 1;
+                        iNextVramAddress <= iNextVramAddress - 2;
+                        cycleType <= 1;
+                    end
+                    alreadytried2ndfix <= 1;
+                    delayBeforeWriteAgain <= 1;
+                    firstnewcycle <= 1;
                 end
             end*/
 
-            //if this is happening, it's probably because of a ADS_OE cycle so backpedel on the counter and write address a little
+            /*if (fuckState == 0) begin
+                delayBeforeWriteAgain <= 0;         //was 1. also works with 0. if theres a difference its a small one MAYBE 0 cuases more wobble
+                stateAtSwitch <= fuckState;
+                subtract <= 0;
+            end else if (fuckState == 1) begin
+                delayBeforeWriteAgain <= 1;         //was 2. CANNOT BE 2. 0 causes wobble and discoloration
+                stateAtSwitch <= fuckState;
+                subtract <= 0;
+            end else if (fuckState == 2) begin
+                delayBeforeWriteAgain <= 2;         //setting to 0 makes screen not turn on. was 1. 2 MIGHT offer slight improvement. check 1 vs 2 for final adjustment
+                stateAtSwitch <= fuckState;
+                subtract <= 0;
+            end else if (fuckState == 3) begin
+                delayBeforeWriteAgain <= 2;         //wobble if set to 1, discoloration if set to 2. screen doesnt turn on if set to 0
+                subtract <= 1;
+                stateAtSwitch <= fuckState;
+            end else if (fuckState == 4) begin
+                delayBeforeWriteAgain <= 1;         //0 causes wobble. 2 causes slight discoloration and major wobble
+                stateAtSwitch <= fuckState;
+                subtract <= 0;
+            end else if (fuckState == 5) begin
+                delayBeforeWriteAgain <= 1;         //was 2. CANNOT BE 2
+                stateAtSwitch <= fuckState;
+                subtract <= 0;
+            end else if (fuckState == 6) begin
+                delayBeforeWriteAgain <= 1;
+                stateAtSwitch <= fuckState;
+                subtract <= 0;
+            end else if (fuckState == 7) begin
+                delayBeforeWriteAgain <= 1;
+                stateAtSwitch <= fuckState;
+                subtract <= 0;
+            end*/
 
-            /*if (~full & ~alreadySubtracted) begin
-                alreadySubtracted <= 1;
-                iNextVramAddress <= iNextVramAddress - 2;
-                waddr <= waddr - 1;
+            //if (/*~alreadyDidStateCalculation & */~vblank_pixelDomian) begin
+                //alreadyDidStateCalculation <= 1;
+                /*if (state1) begin
+                    delayBeforeWriteAgain <= 0; 
+                end else if (state2) begin
+                    delayBeforeWriteAgain <= 2;
+                end else if (state3) begin
+                    delayBeforeWriteAgain <= 1;
+                end*/
+            //end
+
+            /*if (vblank_pixelDomian) begin
+                alreadyDid <= 0;
+                if (state1) begin
+                    delayBeforeWriteAgain <= 1;
+                end else if (state2) begin
+                    delayBeforeWriteAgain <= 2;
+                end else if (state3) begin
+                    delayBeforeWriteAgain <= 2;
+                end
             end*/
         end
     end
@@ -459,9 +405,9 @@ module managedVramDataBufferCompositeBankSwap(
     //assign testInputFuck1 = 16'hFFFF;
     //assign testInputFuck2 = 16'h1F;
     //block 1. write on even horizontal line numbers. read on odd horizontal line numbers
-    bram_1024x16 b1(dataInputBus, ififoWrite & ~fastEvenOrOdd, waddr, clock/*writes happen on falling edge of the fast clock*/, raddr, pixelClock, b1dout, ififoRead);
+    bram_1024x16 b1(dataInputBus, ififoWrite & ~evenOrOdd, waddr, clock/*writes happen on falling edge of the fast clock*/, raddr, pixelClock, b1dout, ififoRead);
 
     //block 2. write on odd horizontal line numbers. read on even horizontal line numbers
-    bram_1024x16 b2(dataInputBus, ififoWrite & fastEvenOrOdd, waddr, clock, raddr, pixelClock, b2dout, ififoRead);
+    bram_1024x16 b2(dataInputBus, ififoWrite & evenOrOdd, waddr, clock, raddr, pixelClock, b2dout, ififoRead);
 
 endmodule
